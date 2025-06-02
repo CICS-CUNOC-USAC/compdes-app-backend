@@ -40,7 +40,6 @@ public class ActivityController {
         return activityMapper.toActivityDTOList(activityService.getAllActivities());
     }
 
-
     @Operation(summary = "Crear nueva actividad", responses = {
         @ApiResponse(responseCode = "201", description = "Actividad creada exitosamente"),
         @ApiResponse(responseCode = "403", description = "Acceso denegado: requiere rol ADMIN"),
