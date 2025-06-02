@@ -12,9 +12,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder.BCryptVersion;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import com.compdes.auth.jwt.filter.JwtAuthenticationFilter;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,6 +35,8 @@ public class SecurityConfig {
 
         private final AppProperties appProperties;
 
+        private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
         @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
                 http.csrf(csrf -> csrf.disable())
@@ -39,13 +44,16 @@ public class SecurityConfig {
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers("/api/v1/login").permitAll()
                                                 .requestMatchers(HttpMethod.POST, "/api/v1/participants").permitAll()
+                                                .requestMatchers(HttpMethod.POST, "/api/v1/participants/author")
+                                                .permitAll()
                                                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                                                 // vamos a resguardar las rutas con los permisos necesarios
                                                 .anyRequest().authenticated() // Protege el resto de rutas
                                 )
                                 // sin sesiones
                                 .sessionManagement(session -> session
-                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
                 return http.getOrBuild();
         }
@@ -60,7 +68,7 @@ public class SecurityConfig {
                 configuration.setAllowedOrigins(List.of(appProperties.getFrontendHost()));
 
                 // decimos que operaciones http estan permitidos
-                configuration.setAllowedMethods(List.of("GET", "POST", "PATCH", "DELETE", "OPTIONS"));
+                configuration.setAllowedMethods(List.of("GET", "POST", "PATCH", "DELETE"));
 
                 // decimos que headers estan permitidos
                 configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));

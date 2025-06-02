@@ -18,7 +18,11 @@ public enum IncompleteDataErrorEnum {
 
     REGISTRATION_STATUS_INCOMPLETE(
             new IncompleteDataException(ErrorCodeMessageEnum.REGISTRATION_STATUS_INCOMPLETE.getCode(),
-                    ErrorCodeMessageEnum.REGISTRATION_STATUS_INCOMPLETE.getMessage()));
+                    ErrorCodeMessageEnum.REGISTRATION_STATUS_INCOMPLETE.getMessage())),
+
+    NO_AUTHOR_REGISTRATION_STATUS_INCOMPLETE(
+            new IncompleteDataException(ErrorCodeMessageEnum.NO_AUTHOR_REGISTRATION_STATUS_INCOMPLETE.getCode(),
+                    ErrorCodeMessageEnum.NO_AUTHOR_REGISTRATION_STATUS_INCOMPLETE.getMessage()));
 
     private final IncompleteDataException incompleteDataException;
 }

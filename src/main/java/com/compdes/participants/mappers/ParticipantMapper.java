@@ -1,7 +1,8 @@
 package com.compdes.participants.mappers;
 
+import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 
 import com.compdes.participants.models.dto.request.CreateParticipantDTO;
 import com.compdes.participants.models.entities.Participant;
@@ -13,7 +14,7 @@ import com.compdes.participants.models.entities.Participant;
  * @version 1.0
  * @since 2025-05-30
  */
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", collectionMappingStrategy = CollectionMappingStrategy.SETTER_PREFERRED, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ParticipantMapper {
 
     /**
@@ -43,10 +44,6 @@ public interface ParticipantMapper {
      * @param createParticipantDTO DTO con la información base del participante
      * @return instancia de `Participant` parcialmente mapeada
      */
-    @Mapping(target = "isAuthor", ignore = true)
-    @Mapping(target = "qrCode", ignore = true)
-    @Mapping(target = "registrationStatus", ignore = true)
-    @Mapping(target = "paymentProof", ignore = true)
     public Participant createParticipantDtoToParticipant(CreateParticipantDTO createParticipantDTO);
 
 }

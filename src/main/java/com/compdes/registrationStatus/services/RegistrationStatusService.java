@@ -48,8 +48,12 @@ public class RegistrationStatusService {
     public RegistrationStatus createRegistrationStatus(RegistrationStatus registrationStatus, Participant participant)
             throws DuplicateResourceException, IncompleteDataException {
 
-        if (registrationStatus.getIsApproved() == null || registrationStatus.getIsCashPayment() == null) {
+        if (registrationStatus.getIsApproved() == null) {
             throw IncompleteDataErrorEnum.REGISTRATION_STATUS_INCOMPLETE.getIncompleteDataException();
+        }
+
+        if (registrationStatus.getIsCashPayment() == null && !participant.getIsAuthor()) {
+            throw IncompleteDataErrorEnum.NO_AUTHOR_REGISTRATION_STATUS_INCOMPLETE.getIncompleteDataException();
         }
 
         // verificar que no exista otro registro con el mismo participante

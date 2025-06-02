@@ -1,0 +1,102 @@
+package com.compdes.auth.users.controllers;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.compdes.auth.users.mappers.CompdesUserMapper;
+import com.compdes.auth.users.models.dto.request.CreateCompdesUserDTO;
+import com.compdes.auth.users.models.dto.response.CompdesUserDTO;
+import com.compdes.auth.users.models.entities.CompdesUser;
+import com.compdes.auth.users.services.CompdesUserService;
+import com.compdes.common.exceptions.NotFoundException;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+
+/**
+ *
+ *
+ * @author Luis Monterroso
+ * @version 1.0
+ * @since 2025-06-01
+ */
+@RestController
+@RequestMapping("/api/v1/users")
+@RequiredArgsConstructor
+public class CompdesUserController {
+
+    private final CompdesUserMapper compdesUserMapper;
+    private final CompdesUserService compdesUserService;
+
+    /**
+     * Crea un nuevo usuario del sistema. Solo accesible por usuarios con rol ADMIN.
+     *
+     * @param createCompdesUserDTO datos del usuario a registrar
+     * @return datos básicos del usuario creado
+     */
+    @Operation(summary = "Crear nuevo usuario", responses = {
+            @ApiResponse(responseCode = "201", description = "Usuario creado exitosamente"),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos o incompletos"),
+            @ApiResponse(responseCode = "409", description = "Nombre de usuario ya registrado"),
+            @ApiResponse(responseCode = "403", description = "Acceso denegado al recurso (requiere rol ADMIN)")
+    })
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public CompdesUserDTO createUser(@RequestBody @Valid CreateCompdesUserDTO createCompdesUserDTO) {
+        CompdesUser compdesUser = compdesUserService.createUser(createCompdesUserDTO);
+        return compdesUserMapper.compdesUserToCompdesUserDTO(compdesUser);
+    }
+
+    /**
+     * Obtiene un usuario por su ID.
+     *
+     * @param userId ID único del usuario a buscar
+     * @return DTO del usuario encontrado
+     * @throws NotFoundException si no se encuentra un usuario con el ID dado
+     */
+    @Operation(summary = "Buscar usuario por ID", responses = {
+            @ApiResponse(responseCode = "200", description = "Usuario encontrado correctamente"),
+            @ApiResponse(responseCode = "403", description = "Acceso denegado: requiere rol ADMIN"),
+            @ApiResponse(responseCode = "404", description = "Usuario no encontrado"),
+            @ApiResponse(responseCode = "403", description = "Acceso denegado al recurso (requiere rol ADMIN)")
+    })
+    @GetMapping("/{userId}")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public CompdesUserDTO findUserById(@PathVariable String userId) throws NotFoundException {
+        CompdesUser compdesUser = compdesUserService.findUserById(userId);
+        return compdesUserMapper.compdesUserToCompdesUserDTO(compdesUser);
+    }
+
+    /**
+     * Obtiene un usuario por su nombre de usuario.
+     *
+     * @param username nombre de usuario a buscar
+     * @return DTO del usuario encontrado
+     * @throws NotFoundException si no se encuentra un usuario con el nombre
+     *                           proporcionado
+     */
+    @Operation(summary = "Buscar usuario por nombre de usuario", responses = {
+            @ApiResponse(responseCode = "200", description = "Usuario encontrado correctamente"),
+            @ApiResponse(responseCode = "403", description = "Acceso denegado: requiere rol ADMIN"),
+            @ApiResponse(responseCode = "404", description = "Usuario no encontrado con el nombre indicado"),
+            @ApiResponse(responseCode = "403", description = "Acceso denegado al recurso (requiere rol ADMIN)")
+    })
+    @GetMapping("/byUsername/{username}")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public CompdesUserDTO createNonAuthorParticipant(@PathVariable String username) throws NotFoundException {
+        CompdesUser compdesUser = compdesUserService.findUserByUsername(username);
+        return compdesUserMapper.compdesUserToCompdesUserDTO(compdesUser);
+    }
+}
