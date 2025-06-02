@@ -15,7 +15,8 @@ public class ActivityService {
     private final ActivityRepository activityRepository;
     private final ActivityMapper activityMapper;
 
-    private Activity createActivity(CreateActivityDTO createActivityDTO){
+    public Activity createActivity(CreateActivityDTO createActivityDTO) {
         Activity activity = activityMapper.toActivity(createActivityDTO);
+        return activityRepository.save(activity);
     }
 }
