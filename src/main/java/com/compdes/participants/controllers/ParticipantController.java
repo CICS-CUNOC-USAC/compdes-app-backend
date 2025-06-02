@@ -7,7 +7,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.compdes.participants.models.dto.request.CreateParticipantDTO;
+import com.compdes.participants.models.dto.request.CreateAuthorParticipantDTO;
+import com.compdes.participants.models.dto.request.CreateNonAuthorParticipantDTO;
 import com.compdes.participants.services.ParticipantService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -47,7 +48,23 @@ public class ParticipantController {
     })
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void createNonAuthorParticipant(@RequestBody @Valid CreateParticipantDTO createParticipantDTO) {
+    public void createNonAuthorParticipant(@RequestBody @Valid CreateNonAuthorParticipantDTO createParticipantDTO) {
         participantService.createNonAuthorParticipant(createParticipantDTO);
+    }
+
+    /**
+     * Registra un nuevo participante autor.
+     *
+     * @param createParticipantDTO los datos del participante autor a registrar
+     */
+    @Operation(summary = "Registrar participante autor", responses = {
+            @ApiResponse(responseCode = "201", description = "Participante autor creado exitosamente"),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos o incompletos"),
+            @ApiResponse(responseCode = "409", description = "Participante ya registrado con el mismo correo o documento")
+    })
+    @PostMapping("/author")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void createAuthorParticipant(@RequestBody @Valid CreateAuthorParticipantDTO createParticipantDTO) {
+        participantService.createAuthorParticipant(createParticipantDTO);
     }
 }

@@ -1,7 +1,7 @@
 package com.compdes.paymentProofs.mappers;
 
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 
 import com.compdes.paymentProofs.models.dto.request.CreatePaymentProofDTO;
 import com.compdes.paymentProofs.models.entities.PaymentProof;
@@ -13,7 +13,7 @@ import com.compdes.paymentProofs.models.entities.PaymentProof;
  * @version 1.0
  * @since 2025-05-30
  */
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface PaymentProofMapper {
 
     /**
@@ -41,7 +41,6 @@ public interface PaymentProofMapper {
      * @return una instancia parcial de `PaymentProof` con los datos mapeados desde
      *         el DTO
      */
-    @Mapping(target = "participant", ignore = true)
     public PaymentProof createPaymentProofToPaymentProof(CreatePaymentProofDTO createPaymentProof);
 
 }

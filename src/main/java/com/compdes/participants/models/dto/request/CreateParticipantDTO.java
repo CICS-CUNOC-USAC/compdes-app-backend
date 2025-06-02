@@ -1,53 +1,50 @@
 package com.compdes.participants.models.dto.request;
 
-import com.compdes.paymentProofs.models.dto.request.CreatePaymentProofDTO;
-
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 /**
- *
+ * DTO utilizado para recibir los datos necesarios para la creación de un
+ * participante.
+ * 
+ * Esta clase es utilizada en peticiones HTTP para validar y transportar
+ * la información básica de un nuevo participante del sistema, incluyendo
+ * datos personales, de contacto y de identificación.
  *
  * @author Luis Monterroso
  * @version 1.0
- * @since 2025-05-30
+ * @since 2025-06-01
  */
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 public class CreateParticipantDTO {
 
     @NotBlank(message = "Debe ingresar el nombre del participante")
     @Size(max = 50, message = "El nombre no puede exceder los 50 caracteres")
-    String firstName;
+    private String firstName;
 
     @NotBlank(message = "Debe ingresar el apellido del participante")
     @Size(max = 50, message = "El apellido no puede exceder los 50 caracteres")
-    String lastName;
+    private String lastName;
 
     @NotBlank(message = "Debe proporcionar un correo electrónico")
     @Email(message = "El correo electrónico no tiene un formato válido")
     @Size(max = 100, message = "El correo electrónico no puede exceder los 100 caracteres")
-    String email;
+    private String email;
 
     @NotBlank(message = "Debe ingresar un número de teléfono")
     @Size(max = 20, message = "El número de teléfono no puede exceder los 20 caracteres")
-    String phone;
+    private String phone;
 
     @NotBlank(message = "Debe indicar la organización a la que pertenece")
     @Size(max = 100, message = "El nombre de la organización no puede exceder los 100 caracteres")
-    String organisation;
+    private String organisation;
 
     @NotBlank(message = "Debe ingresar el número del documento de identificación")
     @Size(max = 30, message = "El documento de identificación no puede exceder los 30 caracteres")
-    String identificationDocument;
-
-    @Valid
-    CreatePaymentProofDTO paymentProof;
+    private String identificationDocument;
 
 }

@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 import com.compdes.participants.models.entities.Participant;
 
 /**
- * Repositorio para la gestión de entidades {@link Participant}.
+ * Repositorio para operaciones CRUD sobre la entidad {@link Participant}.
  *
  * @author Luis Monterroso
  * @version 1.0
