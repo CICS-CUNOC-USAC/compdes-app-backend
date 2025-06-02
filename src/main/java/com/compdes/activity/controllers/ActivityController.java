@@ -64,10 +64,12 @@ public class ActivityController {
 
     @Operation(summary = "Actualiza una actividad por medio de su ID", responses = {
         @ApiResponse(responseCode = "200", description = "Actividad actualizada exitosamente"),
+        @ApiResponse(responseCode = "403", description = "Acceso denegado: requiere rol ADMIN"),
         @ApiResponse(responseCode = "404", description = "Actividad no encontrada"),
     })
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ActivityDTO updateActivity(@PathVariable String id,
             @RequestBody @Valid UpdateActivityDTO updateActivityDTO) throws NotFoundException {
         return activityMapper.toActivityDTO(activityService.updateActivity(id, updateActivityDTO));
@@ -75,10 +77,12 @@ public class ActivityController {
 
     @Operation(summary = "Elimina una actividad por medio de su ID", responses = {
         @ApiResponse(responseCode = "204", description = "Actividad eliminada exitosamente"),
+        @ApiResponse(responseCode = "403", description = "Acceso denegado: requiere rol ADMIN"),
         @ApiResponse(responseCode = "404", description = "Actividad no encontrada"),
     })
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAuthority('ADMIN')")
     public void deleteActivity(@PathVariable String id) throws NotFoundException {
         activityService.deleteActivity(id);
     }
