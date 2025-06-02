@@ -9,6 +9,7 @@ import com.compdes.activity.models.dto.request.CreateActivityDTO;
 import com.compdes.activity.models.dto.request.UpdateActivityDTO;
 import com.compdes.activity.models.dto.response.ActivityDTO;
 import com.compdes.activity.services.ActivityService;
+import com.compdes.common.exceptions.NotFoundException;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -43,14 +44,14 @@ public class ActivityController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ActivityDTO getActivityById(@PathVariable String id) {
+    public ActivityDTO getActivityById(@PathVariable String id) throws NotFoundException {
         return activityMapper.toActivityDTO(activityService.getActivityById(id));
     }
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ActivityDTO updateActivity(@PathVariable String id,
-            @RequestBody @Valid UpdateActivityDTO updateActivityDTO) {
+            @RequestBody @Valid UpdateActivityDTO updateActivityDTO) throws NotFoundException {
         return activityMapper.toActivityDTO(activityService.updateActivity(id, updateActivityDTO));
     }
 
