@@ -20,6 +20,9 @@ import lombok.NoArgsConstructor;
  * y el método de pago utilizado (efectivo u otro). Permite llevar control
  * sobre la validación del registro y el tipo de transacción asociada.
  * 
+ * Nota: La bandera {@code isCashPayment} puede ser nula si se trata de un autor
+ * ya que los autores no pagan la inscripcion.
+ * 
  * Hereda de {@link Auditor} para incluir trazabilidad de creación y
  * modificación.
  * 
@@ -42,7 +45,7 @@ public class RegistrationStatus extends Auditor {
     @Column(nullable = false)
     private Boolean isApproved;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Boolean isCashPayment;
 
     /**
