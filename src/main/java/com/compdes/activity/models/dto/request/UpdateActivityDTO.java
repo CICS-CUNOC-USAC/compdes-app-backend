@@ -13,7 +13,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class CreateActivityDTO {
+public class UpdateActivityDTO {
     @NotBlank(message = "Se debe de proporcionar un nombre para la actividad")
     @Size(max = 100, message = "El nombre no puede exceder los 100 caracteres")
     private String name;

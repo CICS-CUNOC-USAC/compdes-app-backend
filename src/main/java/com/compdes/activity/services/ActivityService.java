@@ -2,10 +2,16 @@ package com.compdes.activity.services;
 
 import com.compdes.activity.mappers.ActivityMapper;
 import com.compdes.activity.models.dto.request.CreateActivityDTO;
+import com.compdes.activity.models.dto.request.UpdateActivityDTO;
 import com.compdes.activity.models.entities.Activity;
 import com.compdes.activity.repositories.ActivityRepository;
+import com.compdes.common.exceptions.NotFoundException;
+
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,8 +21,35 @@ public class ActivityService {
     private final ActivityRepository activityRepository;
     private final ActivityMapper activityMapper;
 
+    public List<Activity> getAllActivities() {
+        return (List<Activity>) activityRepository.findAll();
+    }
+
     public Activity createActivity(CreateActivityDTO createActivityDTO) {
         Activity activity = activityMapper.toActivity(createActivityDTO);
         return activityRepository.save(activity);
+    }
+
+    public Activity updateActivity(String id, UpdateActivityDTO updateActivityDTO) {
+        Activity existingActivity = activityRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Activity not found with id: " + id));
+
+        existingActivity.setName(updateActivityDTO.getName());
+        existingActivity.setDescription(updateActivityDTO.getDescription());
+        existingActivity.setType(updateActivityDTO.getType());
+        existingActivity.setScheduledDate(updateActivityDTO.getScheduledDate());
+
+        return activityRepository.save(existingActivity);
+    }
+
+    public void deleteActivity(String id) {
+        Activity existingActivity = activityRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Activity not found with id: " + id));
+        activityRepository.delete(existingActivity);
+    }
+
+    public Activity getActivityById(String id) {
+        return activityRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Activity not found with id: " + id));
     }
 }
