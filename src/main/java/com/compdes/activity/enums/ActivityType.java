@@ -6,7 +6,7 @@ import lombok.Getter;
 public enum ActivityType {
     MEETING("Meeting"),
     WORKSHOP("Taller"),
-    PRESENTATION("Presentación");
+    PRESENTATION("Ponencia");
     private final String displayName;
     ActivityType(String displayName) {
         this.displayName = displayName;
