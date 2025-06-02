@@ -11,12 +11,16 @@ import com.compdes.activity.models.dto.response.ActivityDTO;
 import com.compdes.activity.services.ActivityService;
 import com.compdes.common.exceptions.NotFoundException;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,23 +40,47 @@ public class ActivityController {
         return activityMapper.toActivityDTOList(activityService.getAllActivities());
     }
 
+
+    @Operation(summary = "Crear nueva actividad", responses = {
+        @ApiResponse(responseCode = "201", description = "Actividad creada exitosamente"),
+        @ApiResponse(responseCode = "403", description = "Acceso denegado: requiere rol ADMIN"),
+    })
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority('ADMIN')")
     public void createActivity(@RequestBody @Valid CreateActivityDTO createActivityDTO) {
         activityService.createActivity(createActivityDTO);
     }
 
+    @Operation(summary = "Obtiene una actividad por medio de su ID", responses = {
+        @ApiResponse(responseCode = "204", description = "Actividad eliminada exitosamente"),
+        @ApiResponse(responseCode = "404", description = "Actividad no encontrada"),
+    })
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ActivityDTO getActivityById(@PathVariable String id) throws NotFoundException {
         return activityMapper.toActivityDTO(activityService.getActivityById(id));
     }
 
+    @Operation(summary = "Actualiza una actividad por medio de su ID", responses = {
+        @ApiResponse(responseCode = "200", description = "Actividad actualizada exitosamente"),
+        @ApiResponse(responseCode = "404", description = "Actividad no encontrada"),
+    })
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ActivityDTO updateActivity(@PathVariable String id,
             @RequestBody @Valid UpdateActivityDTO updateActivityDTO) throws NotFoundException {
         return activityMapper.toActivityDTO(activityService.updateActivity(id, updateActivityDTO));
+    }
+
+    @Operation(summary = "Elimina una actividad por medio de su ID", responses = {
+        @ApiResponse(responseCode = "204", description = "Actividad eliminada exitosamente"),
+        @ApiResponse(responseCode = "404", description = "Actividad no encontrada"),
+    })
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteActivity(@PathVariable String id) throws NotFoundException {
+        activityService.deleteActivity(id);
     }
 
 }

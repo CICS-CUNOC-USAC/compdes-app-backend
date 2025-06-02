@@ -32,7 +32,7 @@ public class ActivityService {
 
     public Activity updateActivity(String id, UpdateActivityDTO updateActivityDTO) throws NotFoundException {
         Activity existingActivity = activityRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Activity not found with id: " + id));
+                .orElseThrow(() -> new NotFoundException("Actividad no encontrada por medio del ID: " + id));
 
         existingActivity.setName(updateActivityDTO.getName());
         existingActivity.setDescription(updateActivityDTO.getDescription());
@@ -44,12 +44,12 @@ public class ActivityService {
 
     public void deleteActivity(String id) throws NotFoundException {
         Activity existingActivity = activityRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Activity not found with id: " + id));
+                .orElseThrow(() -> new NotFoundException("Actividad no encontrada por medio del ID: " + id));
         activityRepository.delete(existingActivity);
     }
 
     public Activity getActivityById(String id) throws NotFoundException {
         return activityRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Activity not found with id: " + id));
+                .orElseThrow(() -> new NotFoundException("Actividad no encontrada por medio del ID: " + id));
     }
 }
