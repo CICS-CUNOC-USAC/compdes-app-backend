@@ -6,8 +6,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- *
- *
+ * Enum que encapsula errores relacionados con datos incompletos en procesos críticos del sistema.
+ * 
+ * Cada constante representa una condición específica en la cual la información proporcionada 
+ * es insuficiente para completar correctamente una operación o flujo de negocio.
+ * 
  * @author Luis Monterroso
  * @version 1.0
  * @since 2025-05-31

@@ -42,18 +42,23 @@ public class CompdesUserController {
      *
      * @param createCompdesUserDTO datos del usuario a registrar
      * @return datos básicos del usuario creado
+     * @throws NotFoundException si no se encuentra ningún rol con la
+     *                           etiqueta
+     *                           proporcionada
      */
     @Operation(summary = "Crear nuevo usuario", responses = {
             @ApiResponse(responseCode = "201", description = "Usuario creado exitosamente"),
             @ApiResponse(responseCode = "400", description = "Datos inválidos o incompletos"),
             @ApiResponse(responseCode = "409", description = "Nombre de usuario ya registrado"),
+            @ApiResponse(responseCode = "404", description = "Rol no encontrado"),
             @ApiResponse(responseCode = "403", description = "Acceso denegado al recurso (requiere rol ADMIN)")
     })
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAuthority('ADMIN')")
-    public CompdesUserDTO createUser(@RequestBody @Valid CreateCompdesUserDTO createCompdesUserDTO) {
-        CompdesUser compdesUser = compdesUserService.createUser(createCompdesUserDTO);
+    public CompdesUserDTO createNonParticipantUser(@RequestBody @Valid CreateCompdesUserDTO createCompdesUserDTO)
+            throws NotFoundException {
+        CompdesUser compdesUser = compdesUserService.createNonParticipantUser(createCompdesUserDTO);
         return compdesUserMapper.compdesUserToCompdesUserDTO(compdesUser);
     }
 
@@ -72,7 +77,7 @@ public class CompdesUserController {
     })
     @GetMapping("/{userId}")
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public CompdesUserDTO findUserById(@PathVariable String userId) throws NotFoundException {
         CompdesUser compdesUser = compdesUserService.findUserById(userId);
         return compdesUserMapper.compdesUserToCompdesUserDTO(compdesUser);
@@ -94,7 +99,7 @@ public class CompdesUserController {
     })
     @GetMapping("/byUsername/{username}")
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public CompdesUserDTO createNonAuthorParticipant(@PathVariable String username) throws NotFoundException {
         CompdesUser compdesUser = compdesUserService.findUserByUsername(username);
         return compdesUserMapper.compdesUserToCompdesUserDTO(compdesUser);

@@ -4,7 +4,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 
 /**
  * DTO utilizado para recibir los datos necesarios para la creación de un
@@ -18,7 +18,7 @@ import lombok.Data;
  * @version 1.0
  * @since 2025-06-01
  */
-@Data
+@Getter
 @AllArgsConstructor
 public class CreateParticipantDTO {
 

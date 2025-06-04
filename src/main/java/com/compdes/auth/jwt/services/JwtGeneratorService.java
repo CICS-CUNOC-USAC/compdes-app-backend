@@ -3,7 +3,6 @@ package com.compdes.auth.jwt.services;
 import java.time.Duration;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
@@ -64,7 +63,7 @@ public class JwtGeneratorService {
         Map<String, Object> claims = new HashMap<>();
 
         // Agregar el rol del usuario en las autorities
-        claims.put(CLAIM_NAME_USER_TYPE, List.of(ROLE_KEY + compdesUser.getRole().getRoleName()));
+        claims.put(CLAIM_NAME_USER_TYPE, ROLE_KEY + compdesUser.getRole().name());
 
         // Generar el token
         return createToken(claims, compdesUser.getUsername());

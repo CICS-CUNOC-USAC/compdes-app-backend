@@ -1,12 +1,14 @@
 package com.compdes.participants.services;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.compdes.common.exceptions.DuplicateResourceException;
 import com.compdes.participants.mappers.ParticipantMapper;
+import com.compdes.participants.models.dto.internal.CreateNonAuthorParticipantInternalDTO;
 import com.compdes.participants.models.dto.request.CreateAuthorParticipantDTO;
-import com.compdes.participants.models.dto.request.CreateNonAuthorParticipantDTO;
 import com.compdes.participants.models.dto.request.CreateParticipantDTO;
 import com.compdes.participants.models.entities.Participant;
 import com.compdes.participants.repositories.ParticipantRepository;
@@ -14,6 +16,8 @@ import com.compdes.paymentProofs.models.entities.PaymentProof;
 import com.compdes.paymentProofs.services.PaymentProofService;
 import com.compdes.registrationStatus.models.entities.RegistrationStatus;
 import com.compdes.registrationStatus.services.RegistrationStatusService;
+import com.compdes.storedFiles.models.entities.StoredFile;
+import com.compdes.storedFiles.services.StoredFileService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -46,23 +50,45 @@ public class ParticipantService {
     private final ParticipantRepository participantRepository;
     private final PaymentProofService paymentProofService;
     private final RegistrationStatusService registrationStatusService;
+    private final StoredFileService storedFileService;
 
-    public Participant createNonAuthorParticipant(CreateNonAuthorParticipantDTO createParticipantDTO) {
+    public List<Participant> getAllParticipants() {
+        return (List<Participant>) participantRepository.findAll();
+    }
+
+    public Participant createNonAuthorParticipant(CreateNonAuthorParticipantInternalDTO createParticipantDTO) {
 
         // mandar a guardar al participante
         Participant savedParticipant = saveGenericParticipantOlineMethod(createParticipantDTO, false, false);
 
-        // mandamos a crear la prueba de pago y lo asignamos
-        PaymentProof paymentProof = paymentProofService.createPaymentProof(createParticipantDTO.getPaymentProof(),
-                savedParticipant);
+        // decidimos si guardar el comprobante de pago como link o como imagen
+        // dependiendo que objeto venga nulo en el DTO
+        if (createParticipantDTO.getPaymentProof() != null) {
 
-        savedParticipant.setPaymentProof(paymentProof);
+            // mandamos a crear la prueba de pago y lo asignamos
+            PaymentProof paymentProof = paymentProofService.createPaymentProof(createParticipantDTO.getPaymentProof(),
+                    savedParticipant);
 
-        // le gurardamos al participante su pruba de pago y guardamos los cambios
-        savedParticipant.setPaymentProof(paymentProof);
+            // le gurardamosF al participante su pruba de pago y guardamos los cambios
+            savedParticipant.setPaymentProof(paymentProof);
+
+        } else if (createParticipantDTO.getPaymentProofImageMultipartFile() != null
+                && !createParticipantDTO.getPaymentProofImageMultipartFile().isEmpty()) {
+
+            // si viene una imagen de prueba de pago, la guardamos como imagen
+            StoredFile storedFile = storedFileService
+                    .saveFile(createParticipantDTO.getPaymentProofImageMultipartFile());
+
+            // se adjuntamos el archivo guardado a nuestro participante
+            savedParticipant.setPaymentProofImage(storedFile);
+        } else {
+            throw new IllegalArgumentException(
+                    "No se proporcionó ninguna prueba de pago: debe enviarse un formulario o una imagen.");
+        }
+
         savedParticipant = participantRepository.save(savedParticipant);
-
         return savedParticipant;
+
     }
 
     public Participant createAuthorParticipant(CreateAuthorParticipantDTO createParticipantDTO) {

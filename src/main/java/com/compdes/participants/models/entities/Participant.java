@@ -6,6 +6,7 @@ import com.compdes.common.models.entities.Auditor;
 import com.compdes.paymentProofs.models.entities.PaymentProof;
 import com.compdes.qrCodes.models.entities.QrCode;
 import com.compdes.registrationStatus.models.entities.RegistrationStatus;
+import com.compdes.storedFiles.models.entities.StoredFile;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -69,6 +70,10 @@ public class Participant extends Auditor {
     @OneToOne
     private RegistrationStatus registrationStatus;
 
+    @OneToOne
+    @JoinColumn(nullable = true)
+    private StoredFile paymentProofImage;
+
     /**
      * Constructor utilizado para crear y persistir un nuevo participante por
      * primera vez.
@@ -87,7 +92,7 @@ public class Participant extends Auditor {
      */
     public Participant(String firstName, String lastName, String email, String phone, String organisation,
             String identificationDocument, Boolean isAuthor, PaymentProof paymentProof, QrCode qrCode,
-            RegistrationStatus registrationStatus) {
+            RegistrationStatus registrationStatus, StoredFile paymentProofImage) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -98,6 +103,6 @@ public class Participant extends Auditor {
         this.paymentProof = paymentProof;
         this.qrCode = qrCode;
         this.registrationStatus = registrationStatus;
+        this.paymentProofImage = paymentProofImage;
     }
-
 }

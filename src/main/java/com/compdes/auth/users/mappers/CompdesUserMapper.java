@@ -38,6 +38,8 @@ public interface CompdesUserMapper {
      * {@link Auditor} vía auditoría</li>
      * <li><code>deletedAt</code>, <code>desactivatedAt</code> – manejados por
      * lógica de eliminación o inactivación</li>
+     * 
+     * <li><code>role</code> – debe asignarse en la logica del servicio</li>
      * </ul>
      * 
      * Estos campos deben establecerse fuera del mapper, usualmente desde el
