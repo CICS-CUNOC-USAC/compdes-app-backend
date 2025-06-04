@@ -48,6 +48,9 @@ public class RegistrationStatus extends Auditor {
     @Column(nullable = true)
     private Boolean isCashPayment;
 
+    @Column(nullable = true, length = 10)
+    private String voucherNumber;
+
     /**
      * Constructor utilizado para crear y persistir un nuevo estado de registro
      * asociado a un participante.
@@ -56,10 +59,12 @@ public class RegistrationStatus extends Auditor {
      * @param isApproved    indica si el registro fue aprobado
      * @param isCashPayment indica si el pago fue realizado en efectivo
      */
-    public RegistrationStatus(Participant participant, Boolean isApproved, Boolean isCashPayment) {
+    public RegistrationStatus(Participant participant, Boolean isApproved, Boolean isCashPayment,
+            String voucherNumber) {
         this.participant = participant;
         this.isApproved = isApproved;
         this.isCashPayment = isCashPayment;
+        this.voucherNumber = voucherNumber;
     }
 
 }

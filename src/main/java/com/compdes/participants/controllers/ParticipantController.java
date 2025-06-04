@@ -20,6 +20,7 @@ import com.compdes.participants.mappers.ParticipantMapper;
 import com.compdes.participants.models.dto.internal.CreateNonAuthorParticipantInternalDTO;
 import com.compdes.participants.models.dto.request.CreateAuthorParticipantDTO;
 import com.compdes.participants.models.dto.request.CreateNonAuthorParticipantDTO;
+import com.compdes.participants.models.dto.request.CreateParticipantByAdminDTO;
 import com.compdes.participants.models.dto.response.ParticipantDTO;
 import com.compdes.participants.models.entities.Participant;
 import com.compdes.participants.services.ParticipantService;
@@ -85,7 +86,8 @@ public class ParticipantController {
         })
         @PostMapping
         @ResponseStatus(HttpStatus.CREATED)
-        public void createNonAuthorParticipant(@ModelAttribute  @Valid CreateNonAuthorParticipantDTO createParticipantDTO,
+        public void createNonAuthorParticipant(
+                        @ModelAttribute @Valid CreateNonAuthorParticipantDTO createParticipantDTO,
                         @RequestParam(name = "file", required = false) MultipartFile file) {
 
                 // mapear el DtO externo al interno
@@ -94,6 +96,30 @@ public class ParticipantController {
                                                 createParticipantDTO);
                 authorParticipantInternalDTO.setPaymentProofImage(file);
                 participantService.createNonAuthorParticipant(authorParticipantInternalDTO);
+        }
+
+        /**
+         * Registra un nuevo participante (autor o no autor) desde el panel de
+         * administración.
+         *
+         * Si el participante no es autor, se debe incluir un número de comprobante
+         * válido.
+         * Los participantes autores no requieren comprobante de pago.
+         * 
+         * @param createParticipantByAdminDTO
+         */
+        @Operation(summary = "Registrar participante (por administrador)", description = "Permite registrar un participante como autor o no autor. Si el participante no es autor, debe proporcionar un comprobante de pago. Solo accesible para usuarios con rol ADMIN.", responses = {
+                        @ApiResponse(responseCode = "201", description = "Participante creado exitosamente"),
+                        @ApiResponse(responseCode = "400", description = "Datos inválidos, faltantes o comprobante de pago no válido"),
+                        @ApiResponse(responseCode = "409", description = "Participante ya registrado con el mismo correo o documento"),
+                        @ApiResponse(responseCode = "500", description = "Error interno del servidor al procesar la solicitud o guardar archivos")
+        })
+        @PostMapping("/byAdmin")
+        @PreAuthorize("hasRole('ADMIN')")
+        @ResponseStatus(HttpStatus.CREATED)
+        public void createParticipantByAdmin(
+                        @RequestBody @Valid CreateParticipantByAdminDTO createParticipantByAdminDTO) {
+                participantService.createParticipantByAdmin(createParticipantByAdminDTO);
         }
 
         /**

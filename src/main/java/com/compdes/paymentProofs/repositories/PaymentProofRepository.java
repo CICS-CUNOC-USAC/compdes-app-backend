@@ -1,6 +1,6 @@
 package com.compdes.paymentProofs.repositories;
 
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.compdes.paymentProofs.models.entities.PaymentProof;
@@ -13,6 +13,6 @@ import com.compdes.paymentProofs.models.entities.PaymentProof;
  * @since 2025-05-30
  */
 @Repository
-public interface PaymentProofRepository extends CrudRepository<PaymentProof, String> {
+public interface PaymentProofRepository extends JpaRepository<PaymentProof, String> {
 
 }

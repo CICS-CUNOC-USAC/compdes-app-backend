@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -27,6 +25,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
@@ -37,9 +36,8 @@ import lombok.RequiredArgsConstructor;
  */
 @RequiredArgsConstructor
 @Component
+@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-
-    private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
     private final JwtTokenInspector jwtTokenInspector;
 
@@ -79,7 +77,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
 
             } catch (InvalidTokenException ex) {
-
+                log.warn(ex.getMessage());
                 response.setStatus(HttpStatus.UNAUTHORIZED.value());
                 response.setContentType("application/json");
                 response.getWriter().write(new ObjectMapper().writeValueAsString(
@@ -100,7 +98,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      */
     private boolean isPublicEndpoint(String path) {
         for (PublicEndpointsEnum endpoint : PublicEndpointsEnum.values()) {
-            if (path.startsWith(endpoint.getPath())) {
+            if (path.equals(endpoint.getPath())) {
                 return true;
             }
         }
@@ -143,11 +141,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         User user = new User(username, "", List.of(new SimpleGrantedAuthority(userType)));
 
         if (jwtTokenInspector.isTokenValid(jwt)) {
-            logger.info("Usuario autenticado exitosamente: {}", username);
+            log.info("Usuario autenticado exitosamente: {}", username);
             return Optional.of(user);
         }
 
-        logger.warn("Token JWT inválido para el usuario: {}", username);
+        log.warn("Token JWT inválido para el usuario: {}", username);
         return Optional.empty();
 
     }

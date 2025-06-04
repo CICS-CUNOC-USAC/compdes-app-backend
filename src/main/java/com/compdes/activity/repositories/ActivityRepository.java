@@ -1,9 +1,10 @@
 package com.compdes.activity.repositories;
 
-import com.compdes.activity.models.entities.Activity;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import com.compdes.activity.models.entities.Activity;
+
 @Repository
-public interface ActivityRepository extends CrudRepository<Activity,String> {
+public interface ActivityRepository extends JpaRepository<Activity,String> {
 }
