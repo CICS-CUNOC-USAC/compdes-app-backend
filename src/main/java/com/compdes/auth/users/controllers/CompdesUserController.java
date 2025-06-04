@@ -2,6 +2,8 @@ package com.compdes.auth.users.controllers;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +21,7 @@ import com.compdes.common.exceptions.NotFoundException;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -55,7 +58,7 @@ public class CompdesUserController {
     })
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public CompdesUserDTO createNonParticipantUser(@RequestBody @Valid CreateCompdesUserDTO createCompdesUserDTO)
             throws NotFoundException {
         CompdesUser compdesUser = compdesUserService.createNonParticipantUser(createCompdesUserDTO);
@@ -102,6 +105,26 @@ public class CompdesUserController {
     @PreAuthorize("hasRole('ADMIN')")
     public CompdesUserDTO createNonAuthorParticipant(@PathVariable String username) throws NotFoundException {
         CompdesUser compdesUser = compdesUserService.findUserByUsername(username);
+        return compdesUserMapper.compdesUserToCompdesUserDTO(compdesUser);
+    }
+
+    /**
+     * Devuelve la información del usuario actualmente autenticado.
+     *
+     * @param userDetails información del usuario extraída del contexto de seguridad
+     * @return DTO con información básica del usuario autenticado
+     * @throws NotFoundException
+     */
+    @Operation(summary = "Obtener usuario autenticado", description = "Devuelve la información del usuario autenticado basado en el token JWT proporcionado.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Usuario autenticado encontrado"),
+            @ApiResponse(responseCode = "404", description = "Usuario no encontrado"),
+            @ApiResponse(responseCode = "401", description = "Token inválido o no proporcionado")
+    })
+    @GetMapping("/me")
+    public CompdesUserDTO getAuthenticatedUser(@AuthenticationPrincipal UserDetails userDetails)
+            throws NotFoundException {
+        CompdesUser compdesUser = compdesUserService.findUserByUsername(userDetails.getUsername());
         return compdesUserMapper.compdesUserToCompdesUserDTO(compdesUser);
     }
 }

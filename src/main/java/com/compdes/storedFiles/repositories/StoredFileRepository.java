@@ -1,6 +1,6 @@
 package com.compdes.storedFiles.repositories;
 
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.compdes.storedFiles.models.entities.StoredFile;
@@ -13,6 +13,6 @@ import com.compdes.storedFiles.models.entities.StoredFile;
  * @since 2025-06-02
  */
 @Repository
-public interface StoredFileRepository extends CrudRepository<StoredFile, String> {
+public interface StoredFileRepository extends JpaRepository<StoredFile, String> {
 
 }

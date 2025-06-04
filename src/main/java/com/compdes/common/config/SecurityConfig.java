@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -18,6 +17,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.compdes.auth.jwt.filter.JwtAuthenticationFilter;
+import com.compdes.common.enums.PublicEndpointsEnum;
 
 import lombok.RequiredArgsConstructor;
 
@@ -41,15 +41,17 @@ public class SecurityConfig {
         public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
                 http.csrf(csrf -> csrf.disable())
                                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Activa CORS
-                                .authorizeHttpRequests(auth -> auth
-                                                .requestMatchers("/api/v1/login").permitAll()
-                                                .requestMatchers(HttpMethod.POST, "/api/v1/participants").permitAll()
-                                                .requestMatchers(HttpMethod.POST, "/api/v1/participants/author")
-                                                .permitAll()
-                                                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                                                // vamos a resguardar las rutas con los permisos necesarios
-                                                .anyRequest().authenticated() // Protege el resto de rutas
-                                )
+                                .authorizeHttpRequests(auth -> {
+                                        for (PublicEndpointsEnum route : PublicEndpointsEnum.values()) {
+                                                if (route.getMethod() == null) {
+                                                        auth.requestMatchers(route.getPath()).permitAll();
+                                                } else {
+                                                        auth.requestMatchers(route.getMethod(), route.getPath())
+                                                                        .permitAll();
+                                                }
+                                        }
+                                        auth.anyRequest().authenticated(); // Resto de rutas protegidas
+                                })
                                 // sin sesiones
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))

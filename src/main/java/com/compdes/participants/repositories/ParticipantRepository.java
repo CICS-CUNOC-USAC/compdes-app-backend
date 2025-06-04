@@ -1,6 +1,6 @@
 package com.compdes.participants.repositories;
 
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.compdes.participants.models.entities.Participant;
@@ -13,7 +13,7 @@ import com.compdes.participants.models.entities.Participant;
  * @since 2025-05-30
  */
 @Repository
-public interface ParticipantRepository extends CrudRepository<Participant, String> {
+public interface ParticipantRepository extends JpaRepository<Participant, String> {
 
     /**
      * Verifica si existe un participante con el correo electrónico especificado.
