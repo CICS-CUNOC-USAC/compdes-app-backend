@@ -4,8 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * Enum que contiene los códigos y mensajes de error para operaciones de la
- * aplicacion.
+ * Enum que encapsula errores específicos relacionados con la validación y
+ * decodificación de tokens JWT.
+ * 
+ * Cada valor representa un tipo particular de error que puede surgir durante el
+ * procesamiento del token,
+ * como ausencia de campos requeridos, firma inválida, expiración, formato
+ * malformado, entre otros.
  * 
  * @author Luis Monterroso
  * @version 1.0
@@ -28,7 +33,23 @@ public enum ErrorCodeMessageEnum {
         JWT_EXPIRED("JWT-011", "El token JWT ha expirado"),
         JWT_ILLEGAL_ARGUMENT("JWT-012", "El token JWT está vacío o contiene solo espacios"),
 
-        // errores en registro
+        // -- Errores de archivos
+        FILE_ALREADY_EXISTS("FILE-001", "El archivo ya existe y no puede ser reemplazado"),
+        DIRECTORY_NOT_EMPTY("FILE-002", "El destino de la operacion es un directorio no vacío"),
+        UNSUPPORTED_FILE_OPERATION("FILE-003",
+                        "La operación de copia no es soportada por el sistema de archivos actual"),
+        FILE_SECURITY_EXCEPTION("FILE-004", "Permiso denegado al intentar manipular el archivo"),
+        FILE_IO_EXCEPTION("FILE-005", "Error de entrada/salida al manipular el archivo"),
+        FILE_EXTENSION_NULL_OR_INVALID("FILE-006", "El archivo no tiene una extensión ausente"),
+        FILE_INVALID_PATH("FILE-008",
+                        "El nombre del archivo contiene caracteres inválidos o genera una ruta incorrecta"),
+
+        FILE_NOT_FOUND_FOR_DELETE("FILE-09", "El archivo a eliminar no existe en el sistema"),
+        FILE_READ_OUT_OF_MEMORY("FILE-010", "El archivo es demasiado grande para ser leído completamente en memoria."),
+        FILE_INPUT_STREAM_ERROR("FILE-011",
+                        "No se pudo obtener el flujo de entrada del archivo cargado (posible fallo en el almacenamiento temporal del archivo)"),
+
+        // ------------------------------------------------------ errores en registro
         REGISTRATION_STATUS_INCOMPLETE("REG-001",
                         "El 'isApproved' no puede ser nulo al crear un estado de registro."),
 

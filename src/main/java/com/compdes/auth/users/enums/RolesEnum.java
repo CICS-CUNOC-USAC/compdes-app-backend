@@ -19,12 +19,9 @@ import lombok.Getter;
 @Getter
 public enum RolesEnum {
 
-    ADMIN("ADMIN", "Administrador");
+    ADMIN("Administrador"),
+    PARTICIPANT("Participante");
 
-    /**
-     * Nombre técnico del rol, utilizado internamente para control de acceso.
-     */
-    private final String roleName;
     /**
      * Nombre descriptivo del rol para mostrar en interfaces de usuario.
      */

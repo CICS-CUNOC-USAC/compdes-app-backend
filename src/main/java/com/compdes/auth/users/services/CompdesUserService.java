@@ -4,6 +4,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.compdes.auth.roles.services.RoleService;
+import com.compdes.auth.users.enums.RolesEnum;
 import com.compdes.auth.users.mappers.CompdesUserMapper;
 import com.compdes.auth.users.models.dto.request.CreateCompdesUserDTO;
 import com.compdes.auth.users.models.entities.CompdesUser;
@@ -40,6 +42,7 @@ import lombok.AllArgsConstructor;
 public class CompdesUserService {
 
     private final CompdesUserRepository compdesUserRepository;
+    private final RoleService roleService;
     private final CompdesUserMapper compdesUserMapper;
     private final PasswordEncoder passwordEncoder;
 
@@ -51,11 +54,25 @@ public class CompdesUserService {
      * 
      * @param createCompdesUserDTO datos del usuario a registrar
      * @return el usuario creado y guardado
+     * @throws NotFoundException          si no se encuentra ningún rol con la
+     *                                    etiqueta
+     *                                    proporcionada
      * @throws DuplicateResourceException si el username ya está en uso
+     * @throws IllegalArgumentException   si se trata de asignar el role
+     *                                    {@code RolesEnum#PARTICIPANT}
      */
-    public CompdesUser createUser(CreateCompdesUserDTO createCompdesUserDTO) {
-        // mapeamos
+    public CompdesUser createNonParticipantUser(CreateCompdesUserDTO createCompdesUserDTO) throws NotFoundException {
+
+        // mandamos a traer el rol por su label
+        RolesEnum role = roleService.findRoleByLabel(createCompdesUserDTO.getRoleLabel());
+
+        if (role == RolesEnum.PARTICIPANT) {
+            throw new IllegalArgumentException("El rol 'Participante' no puede asignarse manualmente.");
+        }
+
+        // mapeamos y asignamos el role
         CompdesUser compdesUser = compdesUserMapper.createCompdesUserDtoToCompdesUser(createCompdesUserDTO);
+        compdesUser.setRole(role);
 
         // verficar que no exista otro usuario con el mismo username
         if (compdesUserRepository.existsByUsername(compdesUser.getUsername())) {
@@ -96,6 +113,10 @@ public class CompdesUserService {
         CompdesUser compdesUser = compdesUserRepository.findUserByUsername(username).orElseThrow(
                 () -> new NotFoundException("No se encontró un usuario con el ID proporcionado."));
         return compdesUser;
+    }
+
+    public Long count() {
+        return compdesUserRepository.count();
     }
 
 }
