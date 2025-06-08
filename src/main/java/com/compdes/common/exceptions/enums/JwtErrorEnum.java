@@ -6,7 +6,16 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- *
+ * Enumeración de errores relacionados con la validación de tokens JWT.
+ * 
+ * Cada constante representa un tipo específico de fallo que puede ocurrir
+ * durante el procesamiento de un token JWT, encapsulando una instancia de
+ * {@link InvalidTokenException} con su código y mensaje correspondiente
+ * definidos en {@link ErrorCodeMessageEnum}.
+ * 
+ * Esta enumeración permite manejar de forma estructurada y reutilizable
+ * las distintas causas de errores al validar tokens, facilitando su integración
+ * con el controlador global de excepciones.
  *
  * @author Luis Monterroso
  * @version 1.0

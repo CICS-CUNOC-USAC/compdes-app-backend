@@ -9,6 +9,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -48,7 +49,7 @@ public class RegistrationStatus extends Auditor {
     @Column(nullable = true)
     private Boolean isCashPayment;
 
-    @Column(nullable = true, length = 10)
+    @Column(nullable = true, unique = true, length = 10)
     private String voucherNumber;
 
     /**
@@ -59,12 +60,30 @@ public class RegistrationStatus extends Auditor {
      * @param isApproved    indica si el registro fue aprobado
      * @param isCashPayment indica si el pago fue realizado en efectivo
      */
+    @Builder
     public RegistrationStatus(Participant participant, Boolean isApproved, Boolean isCashPayment,
             String voucherNumber) {
         this.participant = participant;
         this.isApproved = isApproved;
         this.isCashPayment = isCashPayment;
         this.voucherNumber = voucherNumber;
+    }
+
+    /**
+     * Aprueba el estado de registro si aún no ha sido aprobado.
+     * 
+     * Este método valida si el estado ya fue aprobado previamente. En caso de que
+     * ya esté aprobado, lanza una excepción para evitar una operación redundante
+     * o inconsistente.
+     * 
+     * @throws IllegalStateException si el estado de registro ya ha sido aprobado
+     *                               previamente
+     */
+    public void approve() {
+        if (isApproved) {
+            throw new IllegalStateException("El estado de registro ya ha sido aprobado previamente.");
+        }
+        isApproved = true;
     }
 
 }

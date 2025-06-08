@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.compdes.common.exceptions.FileStorageException;
 import com.compdes.common.exceptions.NotFoundException;
 import com.compdes.storedFiles.models.dto.internal.StoredFileInternalDTO;
 import com.compdes.storedFiles.models.dto.request.SaveStoredFileDTO;
@@ -36,12 +35,22 @@ public class StoredFileService {
     private final StoredFileManager fileManager;
     private final MultipartFileConverter multipartConverter;
 
+    /**
+     * Guarda un archivo multipart en base de datos y en el sistema de archivos.
+     * 
+     * Convierte el archivo recibido en un DTO interno, y luego delega el
+     * almacenamiento físico y lógico a {@link #saveFile(SaveStoredFileDTO)}.
+     * 
+     * @param multipartFile archivo recibido como {@code MultipartFile}
+     * @return {@link StoredFile} entidad persistida con metadatos del archivo
+     */
     public StoredFile saveFile(MultipartFile multipartFile) {
-        //mandamos a convertir el mutipartFile a un DTO
+        // mandamos a convertir el mutipartFile a un DTO
         SaveStoredFileDTO saveStoredFileDTO = multipartConverter.convertMultipartFileToSaveStoredFileDTO(multipartFile);
-        //retornamos el resultado de la llamada al metodo saveFile
+        // retornamos el resultado de la llamada al metodo saveFile
         return saveFile(saveStoredFileDTO);
     }
+
     /**
      * Guarda un archivo en base de datos y en el sistema de archivos.
      *
@@ -51,10 +60,6 @@ public class StoredFileService {
      * @param saveStoredFileDTO datos del archivo a guardar (nombre, MIME,
      *                          contenido)
      * @return {@link StoredFile} entidad StoredFile persistida
-     * @throws FileStorageException     si ocurre un error al guardar el archivo en
-     *                                  disco
-     * @throws IllegalArgumentException si la extensión no es una
-     *                                  imagen válida
      */
     public StoredFile saveFile(SaveStoredFileDTO saveStoredFileDTO) {
 
@@ -83,11 +88,6 @@ public class StoredFileService {
      * @return {@link StoredFile} entidad StoredFile actualizada
      * @throws NotFoundException        si no se encuentra el archivo en la base de
      *                                  datos
-     * @throws FileStorageException     si ocurre un error al actualizar el archivo
-     *                                  en
-     *                                  disco
-     * @throws IllegalArgumentException si la extensión no es una
-     *                                  imagen válida
      */
     public StoredFile editFile(String fileId, SaveStoredFileDTO editStoredFileDTO) throws NotFoundException {
 
@@ -120,7 +120,6 @@ public class StoredFileService {
      *         contenido del archivo
      * @throws NotFoundException    si no se encuentra el archivo en la base de
      *                              datos
-     * @throws FileStorageException si ocurre un error al leer el archivo físico
      */
     public StoredFileInternalDTO getStoredFileById(String fileId) throws NotFoundException {
         // mandamos a trer el file de la imagen

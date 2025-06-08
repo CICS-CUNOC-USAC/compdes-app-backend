@@ -21,7 +21,7 @@ import com.compdes.common.exceptions.NotFoundException;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -49,12 +49,13 @@ public class CompdesUserController {
      *                           etiqueta
      *                           proporcionada
      */
-    @Operation(summary = "Crear nuevo usuario", responses = {
+    @Operation(summary = "Crear nuevo usuario", description = "Crea un nuevo usuario del sistema (no participante). Solo accesible para usuarios con rol `ADMIN`.", security = @SecurityRequirement(name = "bearerAuth"), responses = {
             @ApiResponse(responseCode = "201", description = "Usuario creado exitosamente"),
-            @ApiResponse(responseCode = "400", description = "Datos inválidos o incompletos"),
+            @ApiResponse(responseCode = "400", description = "Si el rol `Participante` intenta asiganrse,"),
             @ApiResponse(responseCode = "409", description = "Nombre de usuario ya registrado"),
             @ApiResponse(responseCode = "404", description = "Rol no encontrado"),
-            @ApiResponse(responseCode = "403", description = "Acceso denegado al recurso (requiere rol ADMIN)")
+            @ApiResponse(responseCode = "403", description = "Acceso denegado al recurso (requiere rol `ADMIN`), Token inválido o no proporcionado"),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor al procesar la solicitud")
     })
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -72,11 +73,12 @@ public class CompdesUserController {
      * @return DTO del usuario encontrado
      * @throws NotFoundException si no se encuentra un usuario con el ID dado
      */
-    @Operation(summary = "Buscar usuario por ID", responses = {
+    @Operation(summary = "Buscar usuario por ID", description = "Busca un usuario específico por su ID. Solo accesible para usuarios con rol `ADMIN`.", security = @SecurityRequirement(name = "bearerAuth"), responses = {
+
             @ApiResponse(responseCode = "200", description = "Usuario encontrado correctamente"),
-            @ApiResponse(responseCode = "403", description = "Acceso denegado: requiere rol ADMIN"),
             @ApiResponse(responseCode = "404", description = "Usuario no encontrado"),
-            @ApiResponse(responseCode = "403", description = "Acceso denegado al recurso (requiere rol ADMIN)")
+            @ApiResponse(responseCode = "403", description = "Acceso denegado al recurso (requiere rol `ADMIN`), Token inválido o no proporcionado"),
+
     })
     @GetMapping("/{userId}")
     @ResponseStatus(HttpStatus.OK)
@@ -94,11 +96,11 @@ public class CompdesUserController {
      * @throws NotFoundException si no se encuentra un usuario con el nombre
      *                           proporcionado
      */
-    @Operation(summary = "Buscar usuario por nombre de usuario", responses = {
+    @Operation(summary = "Buscar usuario por nombre de usuario", description = "Busca un usuario específico por su nombre de usuario. Solo accesible para usuarios con rol `ADMIN`.", security = @SecurityRequirement(name = "bearerAuth"), responses = {
             @ApiResponse(responseCode = "200", description = "Usuario encontrado correctamente"),
-            @ApiResponse(responseCode = "403", description = "Acceso denegado: requiere rol ADMIN"),
+            @ApiResponse(responseCode = "403", description = "Acceso denegado al recurso (requiere rol `ADMIN`), Token inválido o no proporcionado"),
             @ApiResponse(responseCode = "404", description = "Usuario no encontrado con el nombre indicado"),
-            @ApiResponse(responseCode = "403", description = "Acceso denegado al recurso (requiere rol ADMIN)")
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor"),
     })
     @GetMapping("/byUsername/{username}")
     @ResponseStatus(HttpStatus.OK)
@@ -115,11 +117,10 @@ public class CompdesUserController {
      * @return DTO con información básica del usuario autenticado
      * @throws NotFoundException
      */
-    @Operation(summary = "Obtener usuario autenticado", description = "Devuelve la información del usuario autenticado basado en el token JWT proporcionado.")
-    @ApiResponses(value = {
+    @Operation(summary = "Obtener usuario autenticado", description = "Devuelve la información del usuario autenticado basado en el token JWT proporcionado.", security = @SecurityRequirement(name = "bearerAuth"), responses = {
             @ApiResponse(responseCode = "200", description = "Usuario autenticado encontrado"),
-            @ApiResponse(responseCode = "404", description = "Usuario no encontrado"),
-            @ApiResponse(responseCode = "401", description = "Token inválido o no proporcionado")
+            @ApiResponse(responseCode = "403", description = "Token inválido o no proporcionado"),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
     @GetMapping("/me")
     public CompdesUserDTO getAuthenticatedUser(@AuthenticationPrincipal UserDetails userDetails)

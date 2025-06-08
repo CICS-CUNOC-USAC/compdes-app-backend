@@ -2,6 +2,9 @@ package com.compdes.participants.models.entities;
 
 import org.hibernate.annotations.DynamicUpdate;
 
+import com.compdes.auth.users.models.entities.CompdesUser;
+import com.compdes.common.exceptions.QrCodeException;
+import com.compdes.common.exceptions.enums.QrCodeErrorEnum;
 import com.compdes.common.models.entities.Auditor;
 import com.compdes.paymentProofs.models.entities.PaymentProof;
 import com.compdes.qrCodes.models.entities.QrCode;
@@ -12,9 +15,11 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
+import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * Representa a un participante registrado en el sistema.
@@ -59,12 +64,16 @@ public class Participant extends Auditor {
     @Column(nullable = false)
     private Boolean isAuthor;
 
+    @Column(nullable = false)
+    private Boolean isGuest;
+
     @OneToOne
     @JoinColumn(nullable = true)
     private PaymentProof paymentProof;
 
     @OneToOne
     @JoinColumn(nullable = true)
+    @Setter(value = AccessLevel.NONE)
     private QrCode qrCode;
 
     @OneToOne
@@ -73,6 +82,11 @@ public class Participant extends Auditor {
     @OneToOne
     @JoinColumn(nullable = true)
     private StoredFile paymentProofImage;
+
+    @OneToOne
+    @JoinColumn(nullable = true)
+    @Setter(value = AccessLevel.NONE)
+    private CompdesUser compdesUser;
 
     /**
      * Constructor utilizado para crear y persistir un nuevo participante por
@@ -92,7 +106,7 @@ public class Participant extends Auditor {
      */
     public Participant(String firstName, String lastName, String email, String phone, String organisation,
             String identificationDocument, Boolean isAuthor, PaymentProof paymentProof, QrCode qrCode,
-            RegistrationStatus registrationStatus, StoredFile paymentProofImage) {
+            RegistrationStatus registrationStatus, StoredFile paymentProofImage, Boolean isGuest) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -104,5 +118,47 @@ public class Participant extends Auditor {
         this.qrCode = qrCode;
         this.registrationStatus = registrationStatus;
         this.paymentProofImage = paymentProofImage;
+        this.isGuest = isGuest;
+    }
+
+    /**
+     * Asocia un usuario del sistema al participante actual.
+     * 
+     * Este método asigna la instancia de {@link CompdesUser} al participante,
+     * siempre que no tenga ya un usuario asociado previamente.
+     * 
+     * Si el participante ya tiene un usuario, lanza una excepción para prevenir
+     * sobrescritura no intencionada.
+     * 
+     * @param compdesUser el usuario del sistema que se desea asociar
+     * @throws IllegalStateException si el participante ya tiene un usuario asociado
+     */
+    public void setCompdesUser(CompdesUser compdesUser) {
+        if (this.compdesUser != null) {
+            throw new IllegalStateException(
+                    "El participante ya tiene un usuario asociado y no se puede asignar uno nuevo.");
+        }
+        this.compdesUser = compdesUser;
+    }
+
+    /**
+     * Establece la relación entre este participante y un {@link QrCode}.
+     * 
+     * Este método asigna un código QR al participante, siempre que no tenga ya uno
+     * previamente asociado. Si ya existe una relación con un QR, se lanza una
+     * excepción para evitar la sobrescritura no permitida.
+     * 
+     * Lanza una instancia de {@link QrCodeException} definida en
+     * {@link QrCodeErrorEnum#PARTICIPANT_ALREADY_HAS_QR} si el participante ya
+     * tiene un código QR asignado.
+     * 
+     * @param qrCode el código QR que se desea asociar
+     * @throws QrCodeException si el participante ya tiene un código QR asociado
+     */
+    public void setQrCode(QrCode qrCode) {
+        if (this.qrCode != null) {
+            throw QrCodeErrorEnum.PARTICIPANT_ALREADY_HAS_QR.getQrCodeException();
+        }
+        this.qrCode = qrCode;
     }
 }

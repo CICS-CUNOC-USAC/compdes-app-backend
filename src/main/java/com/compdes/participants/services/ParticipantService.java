@@ -5,21 +5,19 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.compdes.auth.users.models.entities.CompdesUser;
 import com.compdes.common.exceptions.DuplicateResourceException;
-import com.compdes.common.exceptions.FileStorageException;
 import com.compdes.participants.mappers.ParticipantMapper;
-import com.compdes.participants.models.dto.internal.CreateNonAuthorParticipantInternalDTO;
-import com.compdes.participants.models.dto.request.CreateAuthorParticipantDTO;
+import com.compdes.participants.models.dto.internal.CreateParticipantInternalDTO;
 import com.compdes.participants.models.dto.request.CreateParticipantByAdminDTO;
 import com.compdes.participants.models.dto.request.CreateParticipantDTO;
 import com.compdes.participants.models.entities.Participant;
 import com.compdes.participants.repositories.ParticipantRepository;
-import com.compdes.paymentProofs.models.entities.PaymentProof;
-import com.compdes.paymentProofs.services.PaymentProofService;
+import com.compdes.participants.strategies.paymentproof.PaymentProofStrategyFactory;
+import com.compdes.qrCodes.models.entities.QrCode;
+import com.compdes.qrCodes.services.QrCodeService;
 import com.compdes.registrationStatus.models.entities.RegistrationStatus;
 import com.compdes.registrationStatus.services.RegistrationStatusService;
-import com.compdes.storedFiles.models.entities.StoredFile;
-import com.compdes.storedFiles.services.StoredFileService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -41,191 +39,187 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ParticipantService {
 
-    private final ParticipantMapper participantMapper;
-    private final ParticipantRepository participantRepository;
-    private final PaymentProofService paymentProofService;
-    private final RegistrationStatusService registrationStatusService;
-    private final StoredFileService storedFileService;
+        private final ParticipantMapper participantMapper;
+        private final ParticipantRepository participantRepository;
+        private final PaymentProofStrategyFactory paymentProofStrategyFactory;
+        private final RegistrationStatusService registrationStatusService;
+        private final QrCodeService qrCodeService;
 
-    /**
-     * Obtiene la lista de todos los participantes registrados en el sistema.
-     *
-     * @return lista de participantes
-     */
-    public List<Participant> getAllParticipants() {
-        return participantRepository.findAll();
-    }
-
-    /**
-     * Crea un participante no autor, guarda sus datos y asocia una prueba de pago.
-     * 
-     * Se espera que el participante proporcione una prueba de pago ya sea como
-     * formulario
-     * (link u objeto estructurado) o como imagen cargada. Si no se proporciona
-     * ninguna
-     * prueba de pago válida, se lanza una excepción.
-     *
-     * @param createParticipantDTO DTO con los datos del participante y su
-     *                             comprobante de pago
-     * @return el participante guardado con su comprobante asociado
-     * @throws IllegalArgumentException   si no se proporciona ninguna prueba de
-     *                                    pago
-     *                                    o si la extensión del archivo de imagen no
-     *                                    es válida
-     * @throws FileStorageException       si ocurre un error al guardar el archivo
-     *                                    en
-     *                                    disco
-     * @throws DuplicateResourceException si ya existe un participante con el mismo
-     *                                    correo
-     *                                    o documento de identificación
-     */
-    public Participant createNonAuthorParticipant(CreateNonAuthorParticipantInternalDTO createParticipantDTO) {
-
-        // mandar a guardar al participante
-        Participant savedParticipant = saveGenericParticipantOlineMethod(createParticipantDTO, false, false, null);
-
-        // decidimos si guardar el comprobante de pago como link o como imagen
-        // dependiendo que objeto venga nulo en el DTO
-        if (createParticipantDTO.getPaymentProof() != null) {
-
-            // mandamos a crear la prueba de pago y lo asignamos
-            PaymentProof paymentProof = paymentProofService.createPaymentProof(createParticipantDTO.getPaymentProof(),
-                    savedParticipant);
-
-            // le gurardamosF al participante su pruba de pago y guardamos los cambios
-            savedParticipant.setPaymentProof(paymentProof);
-
-        } else if (createParticipantDTO.getPaymentProofImageMultipartFile() != null
-                && !createParticipantDTO.getPaymentProofImageMultipartFile().isEmpty()) {
-
-            // si viene una imagen de prueba de pago, la guardamos como imagen
-            StoredFile storedFile = storedFileService
-                    .saveFile(createParticipantDTO.getPaymentProofImageMultipartFile());
-
-            // se adjuntamos el archivo guardado a nuestro participante
-            savedParticipant.setPaymentProofImage(storedFile);
-        } else {
-            throw new IllegalArgumentException(
-                    "No se proporcionó ninguna prueba de pago: debe enviarse un formulario o una imagen.");
+        /**
+         * Obtiene la lista de todos los participantes registrados en el sistema.
+         *
+         * @return lista de participantes
+         */
+        public List<Participant> getAllParticipants() {
+                return participantRepository.findAll();
         }
 
-        savedParticipant = participantRepository.save(savedParticipant);
-        return savedParticipant;
+        /**
+         * Crea un participante no autor, guarda sus datos y asocia una prueba de pago.
+         * 
+         * Se espera que el participante proporcione una prueba de pago ya sea como
+         * formulario
+         * (link u objeto estructurado) o como imagen cargada. Si no se proporciona
+         * ninguna
+         * prueba de pago válida, se lanza una excepción.
+         *
+         * @param createParticipantDTO DTO con los datos del participante y su
+         *                             comprobante de pago
+         * @return el participante guardado con su comprobante asociado
+         */
+        public Participant createParticipant(CreateParticipantInternalDTO createParticipantDTO) {
+                RegistrationStatus registrationStatus = RegistrationStatus.builder()
+                                .isApproved(false)
+                                .isCashPayment(false)
+                                .voucherNumber(null)
+                                .build();
 
-    }
+                // mandar a guardar al participante
+                Participant savedParticipant = saveGenericParticipant(createParticipantDTO,
+                                registrationStatus, false);
 
-    /**
-     * Crea un participante (autor o no autor) desde el panel de administración.
-     * 
-     * Si el participante no es autor, se espera que proporcione un número de
-     * comprobante
-     * de pago, y se marca el tipo de pago como realizado en efectivo. En el caso de
-     * autores,
-     * no se requiere comprobante ni se marca pago.
-     *
-     * Este método delega el guardado final al método genérico
-     * {@code saveGenericParticipantOlineMethod}.
-     *
-     * @param createParticipantByAdminDTO DTO con la información del participante a
-     *                                    crear
-     * @return el participante creado y persistido en base de datos
-     *
-     * @throws DuplicateResourceException si ya existe un participante con el mismo
-     *                                    correo
-     *                                    o documento de identificación
-     */
-    public Participant createParticipantByAdmin(CreateParticipantByAdminDTO createParticipantByAdminDTO) {
+                // aplicar una estrategia
+                paymentProofStrategyFactory
+                                .resolve(createParticipantDTO)
+                                .process(savedParticipant, createParticipantDTO);
 
-        String voucherNumber = null;
-        Boolean isCashPayment = false;
-
-        // si el participante no es un autor entonces se necestia guardar su comprobante
-        // de pago e indicar que el pago se hizo en efectivo
-        if (!createParticipantByAdminDTO.getIsAuthor()) {
-            voucherNumber = createParticipantByAdminDTO.getVoucherNumber();
-            isCashPayment = true;
+                return participantRepository.save(savedParticipant);// se vuelve a guardar porque las estrategias
+                                                                    // generan
+                                                                    // relaciones
         }
 
-        // ahora que ya esta configurado todo podemos mandar a guardar
-        Participant savedParticipant = saveGenericParticipantOlineMethod(createParticipantByAdminDTO,
-                createParticipantByAdminDTO.getIsAuthor(),
-                isCashPayment, voucherNumber);
+        /**
+         * Crea un participante (autor o no autor) desde el panel de administración.
+         * 
+         * Si el participante no es autor, se espera que proporcione un número de
+         * comprobante
+         * de pago, y se marca el tipo de pago como realizado en efectivo. En el caso de
+         * autores,
+         * no se requiere comprobante ni se marca pago.
+         *
+         * Este método delega el guardado final al método genérico
+         * {@code saveGenericParticipantOlineMethod}.
+         *
+         * @param createParticipantByAdminDTO DTO con la información del participante a
+         *                                    crear
+         * @return el participante creado y persistido en base de datos
+         */
+        public Participant createParticipantByAdmin(CreateParticipantByAdminDTO createParticipantByAdminDTO) {
+                // se construye un nuevo estado de registro para el participante
+                RegistrationStatus registrationStatus = RegistrationStatus.builder()
+                                .isApproved(false) // se marca como no aprobado por defecto
+                                // se indica si el pago fue en efectivo solo si no es invitado (invitado no
+                                // paga)
+                                .isCashPayment(createParticipantByAdminDTO.getIsGuest() ? null : true)
+                                // si el participante es invitado, no se asigna número de comprobante; de lo
+                                // contrario, si
+                                .voucherNumber(createParticipantByAdminDTO.getIsGuest() ? null
+                                                : createParticipantByAdminDTO.getVoucherNumber())
+                                .build();
 
-        return savedParticipant;
-    }
+                // ahora que ya esta configurado todo podemos mandar a guardar
+                Participant savedParticipant = saveGenericParticipant(createParticipantByAdminDTO,
+                                registrationStatus, createParticipantByAdminDTO.getIsGuest());
 
-    /**
-     * Crea un participante autor desde el formulario público (no administrador).
-     * 
-     * Dado que los autores no deben realizar pago, este método no asocia
-     * ningún comprobante ni tipo de pago al participante.
-     *
-     * Se delega el guardado al método genérico
-     * {@code saveGenericParticipantOlineMethod}.
-     *
-     * @param createParticipantDTO DTO con los datos del autor a registrar
-     * @return el participante autor creado y guardado en base de datos
-     *
-     * @throws DuplicateResourceException si ya existe un participante con el mismo
-     *                                    correo
-     *                                    o documento de identificación
-     */
-    public Participant createAuthorParticipant(CreateAuthorParticipantDTO createParticipantDTO) {
-        // mandar a guardar al participante, mandmaos null en el tipo de pago ya que un
-        // autor no pagaS
-        Participant savedParticipant = saveGenericParticipantOlineMethod(createParticipantDTO, true, null, null);
-        return savedParticipant;
-    }
-
-    /**
-     * Guarda un nuevo participante en el sistema y le asigna su estado de registro.
-     * 
-     *
-     * @param createParticipantDTO DTO con los datos del participante
-     * @param isAuthor             indica si el participante es autor
-     * @param isCashPayment        indica si el pago fue realizado en efectivo
-     *                             (puede ser null para autores)
-     * @param voucherNumer         número de comprobante, si corresponde (puede ser
-     *                             null)
-     * @return el participante guardado con su estado de registro asignado
-     *
-     * @throws DuplicateResourceException si ya existe un participante con el mismo
-     *                                    correo
-     *                                    o documento de identificación
-     */
-    private Participant saveGenericParticipantOlineMethod(CreateParticipantDTO createParticipantDTO, Boolean isAuthor,
-            Boolean isCashPayment, String voucherNumer) throws DuplicateResourceException {
-
-        Participant participant = participantMapper.createParticipantDtoToParticipant(createParticipantDTO);
-        participant.setIsAuthor(isAuthor);// le seteamos si es un autor o no
-
-        // verificar que no exista otro participante con el mismo email
-        if (participantRepository.existsByEmail(participant.getEmail())) {
-            throw new DuplicateResourceException(
-                    "No se puede completar el registro: el correo ingresado ya está asociado a otro participante.");
+                return savedParticipant;
         }
 
-        // verificar que no exista otro participante con el mismo doc de identificacion
-        if (participantRepository.existsByIdentificationDocument(participant.getIdentificationDocument())) {
-            throw new DuplicateResourceException(
-                    "No se puede completar el registro: el documento de identificación ya está asociado a otro participante.");
+        /**
+         * Guarda un nuevo participante en el sistema y le asigna su estado de registro.
+         * 
+         *
+         * @param createParticipantDTO DTO con los datos del participante
+         * @param isAuthor             indica si el participante es autor
+         * @param isCashPayment        indica si el pago fue realizado en efectivo
+         *                             (puede ser null para autores)
+         * @param voucherNumer         número de comprobante, si corresponde (puede ser
+         *                             null)
+         * @return el participante guardado con su estado de registro asignado
+         *
+         * @throws DuplicateResourceException si ya existe un participante con el mismo
+         *                                    correo
+         *                                    o documento de identificación
+         */
+        private Participant saveGenericParticipant(CreateParticipantDTO createParticipantDTO,
+                        RegistrationStatus registrationStatus, Boolean isGuest) throws DuplicateResourceException {
+
+                Participant participant = participantMapper.createParticipantDtoToParticipant(createParticipantDTO);
+                participant.setIsGuest(isGuest);
+
+                // verificar que no exista otro participante con el mismo email
+                if (participantRepository.existsByEmail(participant.getEmail())) {
+                        throw new DuplicateResourceException(
+                                        "No se puede completar el registro: el correo ingresado ya está asociado a otro participante.");
+                }
+
+                // verificar que no exista otro participante con el mismo doc de identificacion
+                if (participantRepository.existsByIdentificationDocument(participant.getIdentificationDocument())) {
+                        throw new DuplicateResourceException(
+                                        "No se puede completar el registro: el documento de identificación ya está asociado a otro participante.");
+
+                }
+
+                // guardamos el participante para obtener un id y podr asociar una constancia de
+                // pago
+                participant = participantRepository.save(participant);
+                // guardamos el estado del registro
+                registrationStatus = registrationStatusService
+                                .createRegistrationStatus(registrationStatus, participant);
+
+                // le seteamos al participante su estado de registro
+                participant.setRegistrationStatus(registrationStatus);
+
+                return participantRepository.save(participant);
+        }
+
+        /**
+         * Asocia un usuario del sistema a un participante y persiste la relación en la
+         * base de datos.
+         * 
+         * Este método asigna la instancia de {@link CompdesUser} al participante dado,
+         * guarda
+         * la entidad actualizada en la base de datos y retorna el participante
+         * resultante.
+         * 
+         * <strong>Nota:</strong> Este método forma parte de la lógica interna de la
+         * aplicación y
+         * no está diseñado para ser expuesto como un endpoint HTTP.
+         * 
+         * @param compdesUser usuario del sistema que se desea asociar al participante
+         * @param participant entidad del participante al que se le asignará el usuario
+         * @return el participante actualizado con el usuario asociado
+         */
+        public Participant setUserParticipant(CompdesUser compdesUser, Participant participant) {
+                // Asigna el usuario proporcionado al participante
+                participant.setCompdesUser(compdesUser);
+
+                // Retorna el participante actualizado
+                return participantRepository.save(participant);
 
         }
 
-        // guardamos el participante para obtener un id y podr asociar una constancia de
-        // pago
-        participant = participantRepository.save(participant);
+        /**
+         * Asigna un código QR disponible a un participante y persiste la relación.
+         * 
+         * Este método obtiene un código QR no asignado mediante el servicio
+         * {@link QrCodeService}, establece la relación entre el participante y el
+         * código QR, y guarda los cambios en la base de datos.
+         * 
+         * @param participant participante al que se asignará el código QR
+         * @return el participante actualizado con el código QR asignado
+         */
+        public Participant assignQrToParticipant(Participant participant) {
+                // mandamos a traer un codigo Qr vacio al usuario
+                QrCode qrCode = qrCodeService.findAvailableQrCode();
 
-        // le creamos un estado de registro y lo guardamos
-        RegistrationStatus registrationStatus = new RegistrationStatus(participant, false, isCashPayment, voucherNumer);
-        registrationStatus = registrationStatusService
-                .createRegistrationStatus(registrationStatus, participant);
+                // asignamos el participante al qr
+                qrCode = qrCodeService.assignParticipantToQrCode(participant, qrCode);
 
-        // le seteamos al participante su estado de registro
-        participant.setRegistrationStatus(registrationStatus);
-        participant = participantRepository.save(participant);
+                // le asignamos el qr al participante
+                participant.setQrCode(qrCode);
 
-        return participant;
-    }
+                // Retorna el participante actualizado
+                return participantRepository.save(participant);
+        }
 
 }

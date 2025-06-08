@@ -3,7 +3,7 @@ package com.compdes.participants.mappers;
 import java.util.List;
 
 import org.mapstruct.Mapper;
-import org.mapstruct.ReportingPolicy;
+import org.mapstruct.Mapping;
 
 import com.compdes.participants.models.dto.request.CreateParticipantDTO;
 import com.compdes.participants.models.dto.response.ParticipantDTO;
@@ -17,37 +17,52 @@ import com.compdes.registrationStatus.mappers.RegistrationStatusMapper;
  * @version 1.0
  * @since 2025-05-30
  */
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = {
+@Mapper(componentModel = "spring", uses = {
         RegistrationStatusMapper.class })
 public interface ParticipantMapper {
 
     /**
-     * Convierte un DTO de creación de participante a una entidad `Participant`.
+     * Convierte un DTO de creación de participante a una entidad
+     * {@link Participant}.
      * 
      * Este método realiza el mapeo directo entre las propiedades coincidentes
-     * del DTO y de la entidad, excluyendo propiedades que no están presentes
-     * o no son relevantes en el contexto de creación inicial.
+     * del DTO y la entidad, excluyendo aquellas propiedades que no son relevantes
+     * o no deben ser inicializadas durante la creación.
      * 
      * <p>
-     * <strong> Propiedades no mapeadas automáticamente:</strong>
+     * <strong>Propiedades ignoradas explícitamente:</strong>
      * </p>
      * <ul>
-     * <li><strong>Participant:</strong> <code>id</code>, <code>createdAt</code>,
-     * <code>updatedAt</code>,
-     * <code>deletedAt</code>, <code>desactivatedAt</code>, <code>isAuthor</code>,
-     * <code>qrCode</code>, <code>registrationStatus</code></li>
-     * <li><strong>PaymentProof:</strong> <code>id</code>, <code>createdAt</code>,
-     * <code>updatedAt</code>,
-     * <code>deletedAt</code>, <code>desactivatedAt</code>,
-     * <code>participant</code></li>
+     * <li><code>createdAt</code></li>
+     * <li><code>deletedAt</code></li>
+     * <li><code>desactivatedAt</code></li>
+     * <li><code>id</code></li>
+     * <li><code>updatedAt</code></li>
+     * <li><code>compdesUser</code></li>
+     * <li><code>isGuest</code></li>
+     * <li><code>paymentProof</code></li>
+     * <li><code>paymentProofImage</code></li>
+     * <li><code>qrCode</code></li>
+     * <li><code>registrationStatus</code></li>
      * </ul>
      * 
      * Estas propiedades deben ser asignadas manualmente desde la lógica de servicio
-     * o mediante métodos de mapeo adicionales.
+     * o mediante métodos de mapeo complementarios.
      * 
      * @param createParticipantDTO DTO con la información base del participante
-     * @return instancia de `Participant` parcialmente mapeada
+     * @return instancia de {@link Participant} parcialmente mapeada
      */
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "deletedAt", ignore = true)
+    @Mapping(target = "desactivatedAt", ignore = true)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "compdesUser", ignore = true)
+    @Mapping(target = "isGuest", ignore = true)
+    @Mapping(target = "paymentProof", ignore = true)
+    @Mapping(target = "paymentProofImage", ignore = true)
+    @Mapping(target = "qrCode", ignore = true)
+    @Mapping(target = "registrationStatus", ignore = true)
     public Participant createParticipantDtoToParticipant(CreateParticipantDTO createParticipantDTO);
 
     /**
