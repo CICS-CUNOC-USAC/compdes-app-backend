@@ -6,6 +6,7 @@ import com.compdes.participants.models.dto.request.CreateParticipantDTO;
 import com.compdes.paymentProofs.models.dto.request.CreatePaymentProofDTO;
 
 import lombok.Getter;
+import lombok.Setter;
 
 /**
  * DTO interno utilizado para el registro de participantes no autores.
@@ -24,20 +25,17 @@ import lombok.Getter;
  * @since 2025-06-03
  */
 @Getter
-public class CreateNonAuthorParticipantInternalDTO extends CreateParticipantDTO {
+@Setter
+public class CreateParticipantInternalDTO extends CreateParticipantDTO {
 
-    CreatePaymentProofDTO paymentProof;
-    MultipartFile paymentProofImageMultipartFile;
+    private CreatePaymentProofDTO paymentProof;
+    private MultipartFile paymentProofImageMultipartFile;
 
-    public CreateNonAuthorParticipantInternalDTO(String firstName, String lastName, String email, String phone,
-            String organisation, String identificationDocument, CreatePaymentProofDTO paymentProof,
+    public CreateParticipantInternalDTO(String firstName, String lastName, String email, String phone,
+            String organisation, String identificationDocument, Boolean isAuthor, CreatePaymentProofDTO paymentProof,
             MultipartFile paymentProofImageMultipartFile) {
-        super(firstName, lastName, email, phone, organisation, identificationDocument);
+        super(firstName, lastName, email, phone, organisation, identificationDocument, isAuthor);
         this.paymentProof = paymentProof;
-        this.paymentProofImageMultipartFile = paymentProofImageMultipartFile;
-    }
-
-    public void setPaymentProofImage(MultipartFile paymentProofImageMultipartFile) {
         this.paymentProofImageMultipartFile = paymentProofImageMultipartFile;
     }
 

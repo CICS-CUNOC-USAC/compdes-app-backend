@@ -1,5 +1,7 @@
 package com.compdes.registrationStatus.repositories;
 
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -17,4 +19,8 @@ import com.compdes.registrationStatus.models.entities.RegistrationStatus;
 public interface RegistrationStatusRepository extends JpaRepository<RegistrationStatus, String> {
 
     public Boolean existsByParticipant(Participant participant);
+
+    public Boolean existsByVoucherNumberIsNotNullAndVoucherNumber(String voucherNumber);
+
+    public Optional<RegistrationStatus> findByParticipant_Id(String id);
 }

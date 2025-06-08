@@ -1,0 +1,37 @@
+package com.compdes.qrCodes.repositories;
+
+import java.util.Optional;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import com.compdes.participants.models.entities.Participant;
+import com.compdes.qrCodes.models.entities.QrCode;
+
+/**
+ * Repositorio JPA para la entidad {@link QrCode}.
+ * 
+ * Proporciona operaciones de persistencia, consulta y eliminación para los
+ * códigos QR registrados en el sistema, utilizando los métodos estándar de
+ * {@link JpaRepository}.
+ * 
+ * @author Luis Monterroso
+ * @version 1.0
+ * @since 2025-06-06
+ */
+@Repository
+public interface QrCodeRepository extends JpaRepository<QrCode, String> {
+
+    /**
+     * Busca el primer código QR que no esté asociado a ningún participante.
+     * 
+     * Este método se utiliza para recuperar un código QR disponible para
+     * asignación,
+     * es decir, cuya relación con {@link Participant} sea nula.
+     * 
+     * @return un {@link Optional} que contiene el primer código QR disponible si
+     *         existe,
+     *         o vacío si no se encuentra ninguno.
+     */
+    public Optional<QrCode> findFirstByParticipantIsNull();
+}

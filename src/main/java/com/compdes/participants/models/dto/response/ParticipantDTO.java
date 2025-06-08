@@ -17,7 +17,7 @@ import lombok.Value;
  */
 @Value
 public class ParticipantDTO {
-    
+
     String id;
     String firstName;
     String lastName;
@@ -26,6 +26,7 @@ public class ParticipantDTO {
     String organisation;
     String identificationDocument;
     Boolean isAuthor;
+    Boolean isGuest;
     RegistrationStatusDTO registrationStatus;
 
 }
