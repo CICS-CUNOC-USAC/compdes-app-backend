@@ -9,10 +9,11 @@ import com.compdes.auth.users.services.CompdesUserService;
 import com.compdes.common.exceptions.DuplicateResourceException;
 import com.compdes.common.exceptions.IncompleteDataException;
 import com.compdes.common.exceptions.NotFoundException;
-import com.compdes.common.exceptions.QrCodeException;
 import com.compdes.common.exceptions.enums.IncompleteDataErrorEnum;
 import com.compdes.participants.models.entities.Participant;
 import com.compdes.participants.services.ParticipantService;
+import com.compdes.registrationStatus.events.RegistrationApprovedEvent;
+import com.compdes.registrationStatus.events.publishers.RegistrationEventPublisher;
 import com.compdes.registrationStatus.models.entities.RegistrationStatus;
 import com.compdes.registrationStatus.repositories.RegistrationStatusRepository;
 
@@ -34,12 +35,15 @@ public class RegistrationStatusService {
     private final RegistrationStatusRepository registrationStatusRepository;
     private final CompdesUserService compdesUserService;
     private final ParticipantService participantService;
+    private final RegistrationEventPublisher registrationEventPublisher;
 
     public RegistrationStatusService(RegistrationStatusRepository registrationStatusRepository,
-            @Lazy CompdesUserService compdesUserService, @Lazy ParticipantService participantService) {
+            @Lazy CompdesUserService compdesUserService, @Lazy ParticipantService participantService,
+            RegistrationEventPublisher registrationEventPublisher) {
         this.registrationStatusRepository = registrationStatusRepository;
         this.compdesUserService = compdesUserService;
         this.participantService = participantService;
+        this.registrationEventPublisher = registrationEventPublisher;
     }
 
     /**
@@ -95,12 +99,8 @@ public class RegistrationStatusService {
      * 
      * @param participantId identificador del participante cuyo estado de registro
      *                      se desea aprobar
-     * @throws NotFoundException     si no se encuentra un estado de registro
-     *                               asociado al participante
-     * @throws IllegalStateException si el estado de registro ya ha sido aprobado
-     *                               previamente o si el participante ya tiene un
-     *                               usuario asignado
-     * @throws QrCodeException       si no hay códigos QR disponibles para asignar
+     * @throws NotFoundException si no se encuentra un estado de registro
+     *                           asociado al participante
      */
     public void approveRegistrationByParticipantId(String participantId) throws NotFoundException {
         RegistrationStatus registrationStatus = findByParticipantId(participantId);
@@ -119,9 +119,9 @@ public class RegistrationStatusService {
         registrationStatusRepository.save(registrationStatus);
 
         // lanzamos el evento de que se aprobo un participante
-
-        // TERMINAAAAAR
-
+        registrationEventPublisher
+                .publishRegistrationApproved(new RegistrationApprovedEvent(compdesUser.getId(), participant.getEmail(),
+                participant.getFullName()));
     }
 
     /**

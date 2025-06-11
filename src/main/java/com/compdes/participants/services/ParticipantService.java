@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.compdes.auth.users.models.entities.CompdesUser;
 import com.compdes.common.exceptions.DuplicateResourceException;
+import com.compdes.common.exceptions.NotFoundException;
 import com.compdes.participants.mappers.ParticipantMapper;
 import com.compdes.participants.models.dto.internal.CreateParticipantInternalDTO;
 import com.compdes.participants.models.dto.request.CreateParticipantByAdminDTO;
@@ -52,6 +53,25 @@ public class ParticipantService {
          */
         public List<Participant> getAllParticipants() {
                 return participantRepository.findAll();
+        }
+
+        /**
+         * Busca un participante en la base de datos utilizando su identificador único.
+         * 
+         * Este método intenta recuperar un {@link Participant} por su ID. Si no se
+         * encuentra
+         * ningún registro correspondiente, lanza una excepción indicando que el
+         * participante no existe.
+         * 
+         * @param id identificador único del participante a buscar
+         * @return el participante correspondiente al ID proporcionado
+         * @throws NotFoundException si no se encuentra ningún participante con el ID
+         *                           especificado
+         */
+        public Participant findParticipantById(String id) throws NotFoundException {
+                return participantRepository.findById(id).orElseThrow(
+                                () -> new NotFoundException(
+                                                "No se encontró un participante con el ID proporcionado. Por favor, verifica la información e intenta nuevamente."));
         }
 
         /**
