@@ -48,7 +48,8 @@ public class CompdesUser extends Auditor {
     @JoinColumn(nullable = true)
     private Participant participant;
 
-    public CompdesUser(String username, String password, RolesEnum role, Participant participant) {
+    public CompdesUser(String id, String username, String password, RolesEnum role, Participant participant) {
+        super(id);
         this.username = username;
         this.password = password;
         this.role = role;

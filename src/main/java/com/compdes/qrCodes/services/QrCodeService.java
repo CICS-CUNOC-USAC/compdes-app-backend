@@ -1,6 +1,9 @@
 package com.compdes.qrCodes.services;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.compdes.common.exceptions.QrCodeException;
 import com.compdes.common.exceptions.enums.QrCodeErrorEnum;
@@ -23,9 +26,36 @@ import lombok.RequiredArgsConstructor;
  */
 @Service
 @RequiredArgsConstructor
+@Transactional(rollbackFor = Exception.class)
 public class QrCodeService {
 
     private final QrCodeRepository qrCodeRepository;
+
+    /**
+     * Genera y guarda un nuevo código QR con un número incremental.
+     * 
+     * Este método obtiene el último código QR existente en la base de datos,
+     * ordenado
+     * por el campo {@code numberCode} de forma descendente. Si no existe ningún
+     * registro,
+     * comienza desde 1. De lo contrario, incrementa el valor más alto encontrado en
+     * uno.
+     * 
+     * No está diseñado para ser expuesto como un endpoint HTTP, sino para uso
+     * interno del sistema.
+     * 
+     * @return el nuevo código QR generado y persistido
+     */
+    public QrCode createQrCode() {
+        // mandamos a trer el ultimo qr creado en base a su codigo numerico
+        Optional<QrCode> optionalQrCode = qrCodeRepository.findFirstByOrderByNumberCodeDesc();
+        // Si no existe, empezamos desde 1; si sí, incrementamos el valor
+        int newNumberCode = optionalQrCode.map(qr -> qr.getNumberCode() + 1).orElse(1);
+
+        // cramos el nuevo QR
+        QrCode qrCode = new QrCode(null, newNumberCode);
+        return qrCodeRepository.save(qrCode);
+    }
 
     /**
      * Busca y retorna un código QR disponible para asignación.
@@ -46,7 +76,7 @@ public class QrCodeService {
      * @throws QrCodeException si no hay códigos QR disponibles para asignar
      */
     public QrCode findAvailableQrCode() {
-        return qrCodeRepository.findFirstByParticipantIsNull().orElseThrow(
+        return qrCodeRepository.findFirstByParticipantIsNullOrderByNumberCodeDesc().orElseThrow(
                 () -> QrCodeErrorEnum.NO_AVAILABLE_QR_CODE.getQrCodeException());
     }
 
@@ -76,4 +106,7 @@ public class QrCodeService {
         return qrCodeRepository.save(qrCode);
     }
 
+    public Long count() {
+        return qrCodeRepository.count();
+    }
 }
