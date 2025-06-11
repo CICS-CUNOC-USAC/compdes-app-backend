@@ -54,7 +54,17 @@ public enum ErrorCodeMessageEnum {
                         "El 'isApproved' no puede ser nulo al crear un estado de registro."),
 
         NO_AUTHOR_REGISTRATION_STATUS_INCOMPLETE("REG-001",
-                        "El campo 'isCashPayment' no puede ser nulo al crear un estado de registro de un participant4 no autor.");
+                        "El campo 'isCashPayment' no puede ser nulo al crear un estado de registro de un participant4 no autor."),
+
+        // ------------------------------------------------------ errores en QR
+        NO_AVAILABLE_QR_CODE("QR-001",
+                        "No se encontró ningún código QR disponible para asignar."),
+        QR_ALREADY_ASSIGNED("QR-002",
+                        "El código QR que se intentó asignar ya está vinculado a un participante. Es posible que haya sido utilizado por otro proceso."),
+        PARTICIPANT_ALREADY_HAS_QR("QR-003",
+                        "El Participante que se intentó asignar ya está vinculado a un QR. Es posible que haya sido utilizado por otro proceso."),
+
+        ;
 
         private final String code;
         private final String message;

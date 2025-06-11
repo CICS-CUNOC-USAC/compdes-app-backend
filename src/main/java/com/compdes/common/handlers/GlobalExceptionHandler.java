@@ -13,6 +13,7 @@ import com.compdes.common.exceptions.FileStorageException;
 import com.compdes.common.exceptions.IncompleteDataException;
 import com.compdes.common.exceptions.InvalidTokenException;
 import com.compdes.common.exceptions.NotFoundException;
+import com.compdes.common.exceptions.QrCodeException;
 import com.compdes.common.models.dto.response.ErrorDTO;
 import com.compdes.common.utils.MethodArgumentErrorExtractor;
 
@@ -50,7 +51,6 @@ public class GlobalExceptionHandler {
         return new ErrorDTO("El archivo supera el tamaño máximo permitido.");
     }
 
-    
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorDTO handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
@@ -85,6 +85,22 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorDTO handleDuplicateResourceException(DuplicateResourceException ex) {
         return new ErrorDTO(ex.getMessage());
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorDTO handleIllegalStateException(IllegalStateException ex) {
+        return new ErrorDTO(ex.getMessage());
+    }
+
+    @ExceptionHandler(QrCodeException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorDTO handleQrCodeException(QrCodeException ex) {
+        return new ErrorDTO(
+                """
+                        Ocurrió un error al procesar el código QR.
+                        Por favor, intenta nuevamente o contacta al equipo de soporte con el siguiente código de error: """
+                        + ex.getCode());
     }
 
     @ExceptionHandler(InvalidTokenException.class)

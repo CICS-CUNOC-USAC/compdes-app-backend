@@ -4,11 +4,14 @@ import org.hibernate.annotations.DynamicUpdate;
 
 import com.compdes.auth.users.enums.RolesEnum;
 import com.compdes.common.models.entities.Auditor;
+import com.compdes.participants.models.entities.Participant;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -31,20 +34,25 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = true)
 public class CompdesUser extends Auditor {
 
-    @Column(nullable = false, unique = true, length = 50)
+    @Column(nullable = true, unique = true, length = 50)
     private String username;
 
-    @Column(nullable = false, length = 100)
+    @Column(nullable = true, length = 100)
     private String password;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private RolesEnum role;
 
-    public CompdesUser(String username, String password, RolesEnum role) {
+    @OneToOne
+    @JoinColumn(nullable = true)
+    private Participant participant;
+
+    public CompdesUser(String username, String password, RolesEnum role, Participant participant) {
         this.username = username;
         this.password = password;
         this.role = role;
+        this.participant = participant;
     }
 
 }

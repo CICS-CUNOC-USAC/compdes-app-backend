@@ -2,6 +2,7 @@ package com.compdes.participants.models.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -46,5 +47,8 @@ public class CreateParticipantDTO {
     @NotBlank(message = "Debe ingresar el número del documento de identificación")
     @Size(max = 30, message = "El documento de identificación no puede exceder los 30 caracteres")
     private String identificationDocument;
+
+    @NotNull(message = "Debe indicar si la persona es autor")
+    private Boolean isAuthor;
 
 }
