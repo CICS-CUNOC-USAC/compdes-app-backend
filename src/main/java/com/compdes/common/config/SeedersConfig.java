@@ -4,8 +4,9 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import com.compdes.auth.users.enums.RolesEnum;
-import com.compdes.auth.users.models.dto.request.CreateCompdesUserDTO;
+import com.compdes.auth.users.models.dto.request.CreateNonParticipantCompdesUserDTO;
 import com.compdes.auth.users.services.CompdesUserService;
+import com.compdes.qrCodes.services.QrCodeService;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 public class SeedersConfig implements CommandLineRunner {
 
 	private final CompdesUserService compdesUserService;
+	private final QrCodeService qrCodeService;
 
 	@Override
 	@Transactional(rollbackOn = Exception.class)
@@ -22,11 +24,22 @@ public class SeedersConfig implements CommandLineRunner {
 
 		if (compdesUserService.count() == 0) {
 			System.out.println("Creando el usuario admin.");
-			CreateCompdesUserDTO createCompdesUserDTO = new CreateCompdesUserDTO("admin", "12345678",
+			CreateNonParticipantCompdesUserDTO compdesUserDTO = new CreateNonParticipantCompdesUserDTO("Administrador@Cunoc",
+					"f3rn4nd03sg4Y",
 					RolesEnum.ADMIN.getRoleLabel());
-			compdesUserService.createNonParticipantUser(createCompdesUserDTO);
+			compdesUserService.createNonParticipantUser(compdesUserDTO);
 
 		}
+
+		// generar 500 qr si no hay ninguno creado
+		if (qrCodeService.count() == 0) {
+			System.out.println("Creando qrs.");
+
+			for (int x = 0; x < 500; x++) {
+				qrCodeService.createQrCode();
+			}
+		}
+
 	}
 
 }

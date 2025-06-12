@@ -122,6 +122,17 @@ public class Participant extends Auditor {
     }
 
     /**
+     * Retorna el nombre completo del participante.
+     * 
+     * Concatena el nombre y el apellido separados por un espacio.
+     * 
+     * @return el nombre completo en formato "Nombre Apellido"
+     */
+    public String getFullName() {
+        return this.firstName + " " + this.lastName;
+    }
+
+    /**
      * Asocia un usuario del sistema al participante actual.
      * 
      * Este método asigna la instancia de {@link CompdesUser} al participante,

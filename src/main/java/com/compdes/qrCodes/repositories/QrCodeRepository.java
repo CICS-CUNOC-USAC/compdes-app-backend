@@ -23,6 +23,18 @@ import com.compdes.qrCodes.models.entities.QrCode;
 public interface QrCodeRepository extends JpaRepository<QrCode, String> {
 
     /**
+     * Obtiene el último código QR generado, basado en el valor más alto de
+     * {@code numberCode}.
+     * 
+     * Este método busca el primer registro en la tabla de códigos QR,
+     * ordenado de forma descendente por el campo {@code numberCode}.
+     * 
+     * @return un {@link Optional} que contiene el código QR con el número más alto,
+     *         o vacío si no existen registros.
+     */
+    public Optional<QrCode> findFirstByOrderByNumberCodeDesc();
+
+    /**
      * Busca el primer código QR que no esté asociado a ningún participante.
      * 
      * Este método se utiliza para recuperar un código QR disponible para
@@ -33,5 +45,5 @@ public interface QrCodeRepository extends JpaRepository<QrCode, String> {
      *         existe,
      *         o vacío si no se encuentra ninguno.
      */
-    public Optional<QrCode> findFirstByParticipantIsNull();
+    public Optional<QrCode> findFirstByParticipantIsNullOrderByNumberCodeDesc();
 }

@@ -49,13 +49,6 @@ public enum ErrorCodeMessageEnum {
         FILE_INPUT_STREAM_ERROR("FILE-011",
                         "No se pudo obtener el flujo de entrada del archivo cargado (posible fallo en el almacenamiento temporal del archivo)"),
 
-        // ------------------------------------------------------ errores en registro
-        REGISTRATION_STATUS_INCOMPLETE("REG-001",
-                        "El 'isApproved' no puede ser nulo al crear un estado de registro."),
-
-        NO_AUTHOR_REGISTRATION_STATUS_INCOMPLETE("REG-001",
-                        "El campo 'isCashPayment' no puede ser nulo al crear un estado de registro de un participant4 no autor."),
-
         // ------------------------------------------------------ errores en QR
         NO_AVAILABLE_QR_CODE("QR-001",
                         "No se encontró ningún código QR disponible para asignar."),
@@ -64,7 +57,16 @@ public enum ErrorCodeMessageEnum {
         PARTICIPANT_ALREADY_HAS_QR("QR-003",
                         "El Participante que se intentó asignar ya está vinculado a un QR. Es posible que haya sido utilizado por otro proceso."),
 
-        ;
+        // ------------------------------------------------------ errores por mala
+        // programacion
+        REGISTRATION_STATUS_INCOMPLETE("STP-001",
+                        "El 'isApproved' no puede ser nulo al crear un estado de registro."),
+
+        NO_AUTHOR_REGISTRATION_STATUS_INCOMPLETE("STP-002",
+                        "El campo 'isCashPayment' no puede ser nulo al crear un estado de registro de un participant4 no autor."),
+                  
+                  
+                        ;
 
         private final String code;
         private final String message;

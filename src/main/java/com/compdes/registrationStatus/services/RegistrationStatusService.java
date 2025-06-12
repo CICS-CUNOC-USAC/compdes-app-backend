@@ -7,12 +7,12 @@ import org.springframework.transaction.annotation.Transactional;
 import com.compdes.auth.users.models.entities.CompdesUser;
 import com.compdes.auth.users.services.CompdesUserService;
 import com.compdes.common.exceptions.DuplicateResourceException;
-import com.compdes.common.exceptions.IncompleteDataException;
 import com.compdes.common.exceptions.NotFoundException;
-import com.compdes.common.exceptions.QrCodeException;
-import com.compdes.common.exceptions.enums.IncompleteDataErrorEnum;
+import com.compdes.common.exceptions.enums.CustomRuntimeErrorEnum;
 import com.compdes.participants.models.entities.Participant;
 import com.compdes.participants.services.ParticipantService;
+import com.compdes.registrationStatus.events.RegistrationApprovedEvent;
+import com.compdes.registrationStatus.events.publishers.RegistrationEventPublisher;
 import com.compdes.registrationStatus.models.entities.RegistrationStatus;
 import com.compdes.registrationStatus.repositories.RegistrationStatusRepository;
 
@@ -34,12 +34,15 @@ public class RegistrationStatusService {
     private final RegistrationStatusRepository registrationStatusRepository;
     private final CompdesUserService compdesUserService;
     private final ParticipantService participantService;
+    private final RegistrationEventPublisher registrationEventPublisher;
 
     public RegistrationStatusService(RegistrationStatusRepository registrationStatusRepository,
-            @Lazy CompdesUserService compdesUserService, @Lazy ParticipantService participantService) {
+            @Lazy CompdesUserService compdesUserService, @Lazy ParticipantService participantService,
+            RegistrationEventPublisher registrationEventPublisher) {
         this.registrationStatusRepository = registrationStatusRepository;
         this.compdesUserService = compdesUserService;
         this.participantService = participantService;
+        this.registrationEventPublisher = registrationEventPublisher;
     }
 
     /**
@@ -57,15 +60,14 @@ public class RegistrationStatusService {
      * @throws IncompleteDataException    si los campos isApproved o isCashPayment
      *                                    están vacíos
      */
-    public RegistrationStatus createRegistrationStatus(RegistrationStatus registrationStatus, Participant participant)
-            throws DuplicateResourceException, IncompleteDataException {
+    public RegistrationStatus createRegistrationStatus(RegistrationStatus registrationStatus, Participant participant) {
 
         if (registrationStatus.getIsApproved() == null) {
-            throw IncompleteDataErrorEnum.REGISTRATION_STATUS_INCOMPLETE.getIncompleteDataException();
+            throw CustomRuntimeErrorEnum.REGISTRATION_STATUS_INCOMPLETE.getCustomRuntimeException();
         }
 
         if (registrationStatus.getIsCashPayment() == null && !participant.getIsGuest()) {
-            throw IncompleteDataErrorEnum.NO_AUTHOR_REGISTRATION_STATUS_INCOMPLETE.getIncompleteDataException();
+            throw CustomRuntimeErrorEnum.NO_AUTHOR_REGISTRATION_STATUS_INCOMPLETE.getCustomRuntimeException();
         }
 
         // verificar que no exista otro registro con el mismo participante
@@ -87,24 +89,41 @@ public class RegistrationStatusService {
     }
 
     /**
-     * Aprueba el estado de registro asociado a un participante específico.
+     * Aprueba el estado de registro de un participante a partir de su
+     * identificador.
      * 
-     * Este método busca el estado de registro correspondiente al ID del
-     * participante, verifica si ya ha sido aprobado y, si no lo ha sido, lo aprueba
-     * y guarda los cambios en la base de datos.
+     * Este método busca al participante por su ID, recupera su estado de registro y
+     * delega
+     * la aprobación al método correspondiente.
      * 
-     * @param participantId identificador del participante cuyo estado de registro
-     *                      se desea aprobar
-     * @throws NotFoundException     si no se encuentra un estado de registro
-     *                               asociado al participante
-     * @throws IllegalStateException si el estado de registro ya ha sido aprobado
-     *                               previamente o si el participante ya tiene un
-     *                               usuario asignado
-     * @throws QrCodeException       si no hay códigos QR disponibles para asignar
+     * @param participantId identificador único del participante
+     * @throws NotFoundException si no se encuentra el estado de registro asociado
+     *                           al participante
      */
     public void approveRegistrationByParticipantId(String participantId) throws NotFoundException {
         RegistrationStatus registrationStatus = findByParticipantId(participantId);
-        Participant participant = registrationStatus.getParticipant();
+        approveRegistrationByParticipant(registrationStatus.getParticipant());
+    }
+
+    /**
+     * Aprueba el estado de registro de un participante.
+     * 
+     * Este método valida y actualiza el estado de registro de un participante,
+     * inicializando un usuario en blanco, generando su código QR y publicando el
+     * evento correspondiente.
+     * 
+     * <strong>Nota:</strong> El participante debe tener su estado de registro
+     * (`registrationStatus`)
+     * previamente inicializado o estar dentro del contexto de persistencia de
+     * Spring
+     * (por ejemplo, haber sido recuperado directamente desde el repositorio) para
+     * que
+     * la asociación pueda resolverse correctamente.
+     * 
+     * @param participant participante cuyo estado de registro será aprobado
+     */
+    public void approveRegistrationByParticipant(Participant participant) {
+        RegistrationStatus registrationStatus = participant.getRegistrationStatus();
 
         // enviamos a crearle un usuario en blanco al participante
         CompdesUser compdesUser = compdesUserService.initializeBlankParticipantUser(participant);
@@ -119,9 +138,9 @@ public class RegistrationStatusService {
         registrationStatusRepository.save(registrationStatus);
 
         // lanzamos el evento de que se aprobo un participante
-
-        // TERMINAAAAAR
-
+        registrationEventPublisher
+                .publishRegistrationApproved(new RegistrationApprovedEvent(compdesUser.getId(), participant.getEmail(),
+                        participant.getFullName()));
     }
 
     /**
