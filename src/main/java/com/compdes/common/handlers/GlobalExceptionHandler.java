@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
+import com.compdes.common.exceptions.CustomRuntimeException;
 import com.compdes.common.exceptions.DuplicateResourceException;
 import com.compdes.common.exceptions.FileStorageException;
-import com.compdes.common.exceptions.IncompleteDataException;
 import com.compdes.common.exceptions.InvalidTokenException;
 import com.compdes.common.exceptions.NotFoundException;
 import com.compdes.common.exceptions.QrCodeException;
@@ -55,17 +55,6 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorDTO handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
         return new ErrorDTO(argumentErrorExtractor.extractMethodArgumentError(ex));
-    }
-
-    @ExceptionHandler(IncompleteDataException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorDTO handleIncompleteDataException(IncompleteDataException ex) {
-        return new ErrorDTO(
-                """
-                        No se pudo completar la operación porque faltan datos obligatorios.
-                        Por favor, revisa que toda la información requerida esté completa antes de continuar.
-                        Si el problema persiste, contacta al equipo de soporte e indica el siguiente código de error: """
-                        + ex.getCode());
     }
 
     @ExceptionHandler(BadCredentialsException.class)
@@ -121,6 +110,16 @@ public class GlobalExceptionHandler {
                 """
                         Ocurrió un error al procesar el archivo. Por favor, intenta la operación nuevamente.
                         Si el problema persiste, contacta al equipo de soporte e indica el siguiente código de error: """
+                        + ex.getCode());
+    }
+
+    @ExceptionHandler(CustomRuntimeException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorDTO handleCustomRuntimeException(CustomRuntimeException ex) {
+        return new ErrorDTO(
+                """
+                        Ocurrió un error inesperado al procesar la información.
+                        Por favor, contacta al equipo de soporte e indica el siguiente código de error: """
                         + ex.getCode());
     }
 

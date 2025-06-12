@@ -24,8 +24,8 @@ public class SeedersConfig implements CommandLineRunner {
 
 		if (compdesUserService.count() == 0) {
 			System.out.println("Creando el usuario admin.");
-			CreateNonParticipantCompdesUserDTO compdesUserDTO = new CreateNonParticipantCompdesUserDTO("admin",
-					"12345678",
+			CreateNonParticipantCompdesUserDTO compdesUserDTO = new CreateNonParticipantCompdesUserDTO("Administrador@Cunoc",
+					"f3rn4nd03sg4Y",
 					RolesEnum.ADMIN.getRoleLabel());
 			compdesUserService.createNonParticipantUser(compdesUserDTO);
 

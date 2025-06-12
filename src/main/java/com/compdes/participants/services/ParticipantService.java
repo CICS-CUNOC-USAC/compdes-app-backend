@@ -140,7 +140,8 @@ public class ParticipantService {
                 // ahora que ya esta configurado todo podemos mandar a guardar
                 Participant savedParticipant = saveGenericParticipant(createParticipantByAdminDTO,
                                 registrationStatus, createParticipantByAdminDTO.getIsGuest());
-
+                // madamos a aprovar el registro
+                registrationStatusService.approveRegistrationByParticipant(savedParticipant);
                 return savedParticipant;
         }
 
