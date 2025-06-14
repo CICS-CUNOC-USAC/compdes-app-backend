@@ -1,7 +1,8 @@
 package com.compdes.participants.services;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,8 +13,10 @@ import com.compdes.participants.mappers.ParticipantMapper;
 import com.compdes.participants.models.dto.internal.CreateParticipantInternalDTO;
 import com.compdes.participants.models.dto.request.CreateParticipantByAdminDTO;
 import com.compdes.participants.models.dto.request.CreateParticipantDTO;
+import com.compdes.participants.models.dto.request.ParticipantFilterDTO;
 import com.compdes.participants.models.entities.Participant;
 import com.compdes.participants.repositories.ParticipantRepository;
+import com.compdes.participants.repositories.specifications.ParticipantSpecification;
 import com.compdes.participants.strategies.paymentproof.PaymentProofStrategyFactory;
 import com.compdes.qrCodes.models.entities.QrCode;
 import com.compdes.qrCodes.services.QrCodeService;
@@ -51,8 +54,44 @@ public class ParticipantService {
          *
          * @return lista de participantes
          */
-        public List<Participant> getAllParticipants() {
-                return participantRepository.findAll();
+        public Page<Participant> getAllParticipants(ParticipantFilterDTO filters, Pageable pageable) {
+                Specification<Participant> spec = Specification.allOf(
+                                ParticipantSpecification.filterBy(filters));
+                return participantRepository.findAll(spec,pageable);
+        }
+
+        /**
+         * Recupera un participante utilizando su documento de identificación.
+         * 
+         * @param identificationDocument documento de identificación del participante
+         * @return el participante correspondiente al documento proporcionado
+         * @throws NotFoundException si no se encuentra ninguna inscripción con el
+         *                           documento dado.
+         */
+        public Participant getParticipantByIdentificationDocument(String identificationDocument)
+                        throws NotFoundException {
+                return participantRepository.findByIdentificationDocument(identificationDocument).orElseThrow(
+                                () -> new NotFoundException(
+                                                "No se encontró ninguna inscripción asociada al documento de identificación ingresado. "
+                                                                + "Por favor, verifica que los datos sean correctos. "
+                                                                + "Si estás seguro de que te inscribiste, pero aún así no puedes ver tu información, contacta al equipo de soporte."));
+
+        }
+
+        /**
+         * Obtiene un participante a partir del nombre de usuario.
+         * 
+         * @param username nombre de usuario del sistema COMPDES
+         * @return el participante asociado al nombre de usuario proporcionado
+         * @throws NotFoundException si no existe ningún participante vinculado al
+         *                           usuario ingresado
+         */
+        public Participant getParticipantByUserName(String username)
+                        throws NotFoundException {
+                return participantRepository.findByCompdesUser_Username(username).orElseThrow(
+                                () -> new NotFoundException(
+                                                "No se encontró ninguna inscripción vinculada al usuario ingresado. "
+                                                                + "Verifica tus datos o contacta al equipo de soporte si ya realizaste tu inscripción."));
         }
 
         /**
@@ -68,7 +107,7 @@ public class ParticipantService {
          * @throws NotFoundException si no se encuentra ningún participante con el ID
          *                           especificado
          */
-        public Participant findParticipantById(String id) throws NotFoundException {
+        public Participant getParticipantById(String id) throws NotFoundException {
                 return participantRepository.findById(id).orElseThrow(
                                 () -> new NotFoundException(
                                                 "No se encontró un participante con el ID proporcionado. Por favor, verifica la información e intenta nuevamente."));

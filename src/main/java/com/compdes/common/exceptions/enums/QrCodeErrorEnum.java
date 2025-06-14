@@ -32,6 +32,12 @@ public enum QrCodeErrorEnum {
         PARTICIPANT_ALREADY_HAS_QR(new QrCodeException(
                         ErrorCodeMessageEnum.PARTICIPANT_ALREADY_HAS_QR.getCode(),
                         ErrorCodeMessageEnum.PARTICIPANT_ALREADY_HAS_QR.getMessage())),
+        QR_GENERATION_FAILED(new QrCodeException(
+                        ErrorCodeMessageEnum.QR_GENERATION_FAILED.getCode(),
+                        ErrorCodeMessageEnum.QR_GENERATION_FAILED.getMessage())),
+        QR_IMAGE_ENCODING_FAILED(new QrCodeException(
+                        ErrorCodeMessageEnum.QR_IMAGE_ENCODING_FAILED.getCode(),
+                        ErrorCodeMessageEnum.QR_IMAGE_ENCODING_FAILED.getMessage())),
                         ;
 
         private final QrCodeException qrCodeException;

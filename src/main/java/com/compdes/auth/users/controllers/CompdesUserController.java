@@ -112,7 +112,7 @@ public class CompdesUserController {
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN')")
     public CompdesUserDTO findUserById(@PathVariable String userId) throws NotFoundException {
-        CompdesUser compdesUser = compdesUserService.findUserById(userId);
+        CompdesUser compdesUser = compdesUserService.getUserById(userId);
         return compdesUserMapper.compdesUserToCompdesUserDTO(compdesUser);
     }
 
@@ -130,11 +130,11 @@ public class CompdesUserController {
             @ApiResponse(responseCode = "404", description = "Usuario no encontrado con el nombre indicado"),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor"),
     })
-    @GetMapping("/byUsername/{username}")
+    @GetMapping("/by-username/{username}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN')")
-    public CompdesUserDTO createNonAuthorParticipant(@PathVariable String username) throws NotFoundException {
-        CompdesUser compdesUser = compdesUserService.findUserByUsername(username);
+    public CompdesUserDTO getUserByUsername(@PathVariable String username) throws NotFoundException {
+        CompdesUser compdesUser = compdesUserService.getUserByUsername(username);
         return compdesUserMapper.compdesUserToCompdesUserDTO(compdesUser);
     }
 
@@ -153,7 +153,7 @@ public class CompdesUserController {
     @GetMapping("/me")
     public CompdesUserDTO getAuthenticatedUser(@AuthenticationPrincipal UserDetails userDetails)
             throws NotFoundException {
-        CompdesUser compdesUser = compdesUserService.findUserByUsername(userDetails.getUsername());
+        CompdesUser compdesUser = compdesUserService.getUserByUsername(userDetails.getUsername());
         return compdesUserMapper.compdesUserToCompdesUserDTO(compdesUser);
     }
 }

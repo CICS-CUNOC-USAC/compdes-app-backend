@@ -5,11 +5,13 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.compdes.common.exceptions.NotFoundException;
 import com.compdes.common.exceptions.QrCodeException;
 import com.compdes.common.exceptions.enums.QrCodeErrorEnum;
 import com.compdes.participants.models.entities.Participant;
 import com.compdes.qrCodes.models.entities.QrCode;
 import com.compdes.qrCodes.repositories.QrCodeRepository;
+import com.compdes.qrCodes.utils.QrCodeImageGeneratorUtil;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 public class QrCodeService {
 
     private final QrCodeRepository qrCodeRepository;
+    private final QrCodeImageGeneratorUtil qrImageGenerator;
 
     /**
      * Genera y guarda un nuevo código QR con un número incremental.
@@ -104,6 +107,78 @@ public class QrCodeService {
     public QrCode assignParticipantToQrCode(Participant participant, QrCode qrCode) {
         qrCode.setParticipant(participant);
         return qrCodeRepository.save(qrCode);
+    }
+
+    /**
+     * Genera la imagen del código QR (formato PNG) a partir de su ID.
+     * 
+     * @param qrId identificador del código QR
+     * @return arreglo de bytes que representa la imagen PNG del código QR generado
+     * @throws NotFoundException     si no se encuentra un código QR con el ID
+     *                               especificado
+     * @throws IllegalStateException si el código QR no está vinculado a ningún
+     *                               participante
+     */
+    public byte[] getQrImageByQrId(String qrId) throws NotFoundException {
+        QrCode qrCode = getQrCodeById(qrId);
+        validateQrCodeHasParticipant(qrCode);
+        return qrImageGenerator.generateQrCode(qrCode.getId());
+    }
+
+    /**
+     * Obtiene la imagen del código QR en formato PNG asociada al usuario indicado.
+     * 
+     * @param username nombre de usuario del participante
+     * @return arreglo de bytes con la imagen PNG del código QR
+     * @throws NotFoundException     si no se encuentra un código QR asociado al
+     *                               usuario
+     * @throws IllegalStateException si el código QR no está vinculado a un
+     *                               participante
+     */
+    public byte[] getQrImageByQrUsername(String username) throws NotFoundException {
+        QrCode qrCode = getQrCodeByUsername(username);
+        validateQrCodeHasParticipant(qrCode);
+        return qrImageGenerator.generateQrCode(qrCode.getId());
+    }
+
+    /**
+     * Recupera un código QR por su ID.
+     * 
+     * @param id identificador del código QR
+     * @return el código QR correspondiente
+     * @throws NotFoundException si no se encuentra un código QR con el ID dado
+     */
+    private QrCode getQrCodeById(String id) throws NotFoundException {
+        return qrCodeRepository.findById(id).orElseThrow(() -> new NotFoundException("No se encontró ningún código QR. "
+                + "Si estás seguro de que el código QR existe o te pertenece, contacta al equipo de soporte."));
+    }
+
+    /**
+     * Obtiene un código QR vinculado a un nombre de usuario.
+     * 
+     * @param username nombre de usuario del participante
+     * @return código QR asociado
+     * @throws NotFoundException si no se encuentra un código QR vinculado al
+     *                           usuario
+     */
+    private QrCode getQrCodeByUsername(String username) throws NotFoundException {
+        return qrCodeRepository.findByParticipant_CompdesUser_Username(username)
+                .orElseThrow(() -> new NotFoundException("No pudimos encontrar un código QR vinculado a tu usuario. "
+                        + "Si estás seguro de que ya completaste tu inscripción o este QR te pertenece, por favor contacta al equipo de soporte para ayudarte."));
+    }
+
+    /**
+     * Valida que el código QR tenga un participante asociado.
+     * 
+     * @param qrCode código QR a validar
+     * @throws IllegalStateException si el código QR no tiene un participante
+     *                               asociado
+     */
+    private void validateQrCodeHasParticipant(QrCode qrCode) {
+        if (qrCode.getParticipant() == null) {
+            throw new IllegalStateException("Parece que este código QR aún no está vinculado a ningún participante. "
+                    + "Si ya completaste tu inscripción y crees que este es tu código, por favor contacta al equipo de soporte para ayudarte.");
+        }
     }
 
     public Long count() {

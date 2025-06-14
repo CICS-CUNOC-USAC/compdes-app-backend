@@ -2,6 +2,7 @@ package com.compdes.common.handlers;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -62,6 +63,13 @@ public class GlobalExceptionHandler {
     public ErrorDTO handleBadCredentialsException(BadCredentialsException ex) {
         return new ErrorDTO("Autenticación fallida: El correo electrónico o la contraseña son incorrectos."
                 + " Por favor, verifica tus credenciales e intenta de nuevo.");
+    }
+
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorDTO handleAuthorizationDeniedException(AuthorizationDeniedException ex) {
+        return new ErrorDTO("No tienes autorización para acceder a este recurso. "
+                + "Verifica que tengas los permisos adecuados o contacta al equipo de soporte si consideras que esto es un error.");
     }
 
     @ExceptionHandler(NotFoundException.class)

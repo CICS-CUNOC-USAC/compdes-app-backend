@@ -30,6 +30,8 @@
 	<properties>
 		<java.version>21</java.version>
 		<org.mapstruct.version>1.6.3</org.mapstruct.version>
+		<org.hibernate.jpamodelgen.version>7.0.2.Final</org.hibernate.jpamodelgen.version>
+		<com.google.zxing>3.5.3</com.google.zxing>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -127,6 +129,27 @@
 			<scope>runtime</scope>
 		</dependency>
 
+		<!--Metamodel-->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-jpamodelgen</artifactId>
+			<version>${org.hibernate.jpamodelgen.version}</version>
+			<type>pom</type>
+			<scope>provided</scope>
+		</dependency>
+
+		<!--QR-->
+		<dependency>
+			<groupId>com.google.zxing</groupId>
+			<artifactId>core</artifactId>
+			<version>${com.google.zxing}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.zxing</groupId>
+			<artifactId>javase</artifactId>
+			<version>${com.google.zxing}</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
@@ -149,6 +172,11 @@
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok-mapstruct-binding</artifactId>
 							<version>0.2.0</version>
+						</path>
+						<path>
+							<groupId>org.hibernate</groupId>
+							<artifactId>hibernate-jpamodelgen</artifactId>
+							<version>${org.hibernate.jpamodelgen.version}</version>
 						</path>
 					</annotationProcessorPaths>
 				</configuration>

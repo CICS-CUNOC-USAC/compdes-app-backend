@@ -22,6 +22,9 @@ public class AppProperties {
     @Value("${app.frontendHost}")
     private String frontendHost;
 
+    @Value("${backend.host}")
+    private String backendHost;
+
     @Value("${spring.mail.username}")
     private String mailFrom;
 }
