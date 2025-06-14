@@ -2,7 +2,8 @@ package com.compdes.registrationStatus.mappers;
 
 import org.mapstruct.Mapper;
 
-import com.compdes.registrationStatus.models.dto.response.RegistrationStatusDTO;
+import com.compdes.registrationStatus.models.dto.response.PrivateRegistrationStatusInfoDTO;
+import com.compdes.registrationStatus.models.dto.response.PublicRegistrationStatusInfoDTO;
 import com.compdes.registrationStatus.models.entities.RegistrationStatus;
 
 /**
@@ -20,10 +21,28 @@ import com.compdes.registrationStatus.models.entities.RegistrationStatus;
 public interface RegistrationStatusMapper {
 
     /**
-     * Convierte una entidad RegistrationStatus en un RegistrationStatusDTO.
-     *
-     * @param registrationStatus la entidad a convertir
-     * @return el DTO correspondiente
+     * Convierte una entidad {@link RegistrationStatus} a un DTO
+     * {@link PrivateRegistrationStatusInfoDTO},
+     * incluyendo información sensible.
+     * 
+     * @param registrationStatus entidad de estado de registro a convertir
+     * @return DTO con información privada del estado de registro
      */
-    public RegistrationStatusDTO registrationStatusToRegistrationStatusDTO(RegistrationStatus registrationStatus);
+    public PrivateRegistrationStatusInfoDTO registrationStatusToPrivateRegistrationStatusInfoDto(
+            RegistrationStatus registrationStatus);
+
+    /**
+     * Convierte una entidad {@link RegistrationStatus} a un DTO
+     * {@link PublicRegistrationStatusInfoDTO},
+     * exponiendo únicamente el estado de aprobación.
+     * 
+     * Este DTO es adecuado para respuestas públicas o endpoints sin autenticación,
+     * ya que no incluye información sensible.
+     * 
+     * @param registrationStatus entidad de estado de registro a convertir
+     * @return DTO con información pública del estado de registro
+     */
+    public PublicRegistrationStatusInfoDTO registrationStatusToPublicRegistrationStatusInfoDto(
+            RegistrationStatus registrationStatus);
+
 }

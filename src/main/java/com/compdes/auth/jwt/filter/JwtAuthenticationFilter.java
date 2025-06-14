@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.compdes.auth.jwt.utils.JwtTokenInspector;
@@ -57,10 +58,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain)
             throws ServletException, IOException {
 
-        String path = request.getRequestURI();
-
         // Saltar validación si es endpoint público
-        if (isPublicEndpoint(path)) {
+        if (isPublicEndpoint(request)) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -96,9 +95,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      * @param path URI de la solicitud.
      * @return true si el path es público, false si requiere autenticación.
      */
-    private boolean isPublicEndpoint(String path) {
-        for (PublicEndpointsEnum endpoint : PublicEndpointsEnum.values()) {
-            if (path.equals(endpoint.getPath())) {
+    private boolean isPublicEndpoint(HttpServletRequest request) {
+        String requestPath = request.getRequestURI();
+        AntPathMatcher matcher = new AntPathMatcher();
+
+        for (PublicEndpointsEnum endpointsEnum : PublicEndpointsEnum.values()) {
+            if (matcher.match(endpointsEnum.getPath(), requestPath)) {
                 return true;
             }
         }
@@ -131,7 +133,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String username = jwtTokenInspector.extractUsername(jwt);
         String userType = jwtTokenInspector.extractUserType(jwt);
-        
+
         // Validar si el token ya ha sido autenticado
         if (username == null || SecurityContextHolder.getContext().getAuthentication() != null) {
             return Optional.empty();

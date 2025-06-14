@@ -57,6 +57,8 @@ public enum ErrorCodeMessageEnum {
         PARTICIPANT_ALREADY_HAS_QR("QR-003",
                         "El Participante que se intentó asignar ya está vinculado a un QR. Es posible que haya sido utilizado por otro proceso."),
 
+        QR_GENERATION_FAILED("QR-004", "Ocurrió un error al generar el código QR."),
+        QR_IMAGE_ENCODING_FAILED("QR-005", "No se pudo codificar la imagen del código QR en formato PNG."),
         // ------------------------------------------------------ errores por mala
         // programacion
         REGISTRATION_STATUS_INCOMPLETE("STP-001",
@@ -64,9 +66,8 @@ public enum ErrorCodeMessageEnum {
 
         NO_AUTHOR_REGISTRATION_STATUS_INCOMPLETE("STP-002",
                         "El campo 'isCashPayment' no puede ser nulo al crear un estado de registro de un participant4 no autor."),
-                  
-                  
-                        ;
+
+        ;
 
         private final String code;
         private final String message;

@@ -41,7 +41,7 @@ public class RoleController {
             @ApiResponse(responseCode = "200", description = "Lista de roles obtenida exitosamente"),
             @ApiResponse(responseCode = "500", description = "Error interno al intentar obtener los roles")
     })
-    @GetMapping("/all")
+    @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.OK)
     public List<RoleDTO> getAllRoles() {

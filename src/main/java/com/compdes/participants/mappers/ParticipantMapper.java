@@ -2,83 +2,163 @@ package com.compdes.participants.mappers;
 
 import java.util.List;
 
+import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import com.compdes.common.config.AppProperties;
 import com.compdes.participants.models.dto.request.CreateParticipantDTO;
-import com.compdes.participants.models.dto.response.ParticipantDTO;
+import com.compdes.participants.models.dto.response.AdminParticipantProfileDTO;
+import com.compdes.participants.models.dto.response.ParticipantProfileDTO;
+import com.compdes.participants.models.dto.response.PublicParticipantProfileDTO;
 import com.compdes.participants.models.entities.Participant;
+import com.compdes.qrCodes.controllers.QrCodeController;
 import com.compdes.registrationStatus.mappers.RegistrationStatusMapper;
+import com.compdes.storedFiles.controllers.StoredFileController;
 
 /**
- *
+ * Mapper encargado de convertir entidades {@link Participant} a distintos DTOs
+ * de presentación.
  *
  * @author Luis Monterroso
  * @version 1.0
  * @since 2025-05-30
  */
 @Mapper(componentModel = "spring", uses = {
-        RegistrationStatusMapper.class })
-public interface ParticipantMapper {
+                RegistrationStatusMapper.class })
+public abstract class ParticipantMapper {
 
-    /**
-     * Convierte un DTO de creación de participante a una entidad
-     * {@link Participant}.
-     * 
-     * Este método realiza el mapeo directo entre las propiedades coincidentes
-     * del DTO y la entidad, excluyendo aquellas propiedades que no son relevantes
-     * o no deben ser inicializadas durante la creación.
-     * 
-     * <p>
-     * <strong>Propiedades ignoradas explícitamente:</strong>
-     * </p>
-     * <ul>
-     * <li><code>createdAt</code></li>
-     * <li><code>deletedAt</code></li>
-     * <li><code>desactivatedAt</code></li>
-     * <li><code>id</code></li>
-     * <li><code>updatedAt</code></li>
-     * <li><code>compdesUser</code></li>
-     * <li><code>isGuest</code></li>
-     * <li><code>paymentProof</code></li>
-     * <li><code>paymentProofImage</code></li>
-     * <li><code>qrCode</code></li>
-     * <li><code>registrationStatus</code></li>
-     * </ul>
-     * 
-     * Estas propiedades deben ser asignadas manualmente desde la lógica de servicio
-     * o mediante métodos de mapeo complementarios.
-     * 
-     * @param createParticipantDTO DTO con la información base del participante
-     * @return instancia de {@link Participant} parcialmente mapeada
-     */
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "deletedAt", ignore = true)
-    @Mapping(target = "desactivatedAt", ignore = true)
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
-    @Mapping(target = "compdesUser", ignore = true)
-    @Mapping(target = "isGuest", ignore = true)
-    @Mapping(target = "paymentProof", ignore = true)
-    @Mapping(target = "paymentProofImage", ignore = true)
-    @Mapping(target = "qrCode", ignore = true)
-    @Mapping(target = "registrationStatus", ignore = true)
-    public Participant createParticipantDtoToParticipant(CreateParticipantDTO createParticipantDTO);
+        @Autowired
+        private AppProperties appProperties;
 
-    /**
-     * Convierte una entidad Participant en un ParticipantDTO.
-     *
-     * @param participant la entidad Participant a convertir
-     * @return el DTO correspondiente
-     */
-    public ParticipantDTO participantToParticipantDto(Participant participant);
+        /**
+         * Convierte un DTO de creación de participante a una entidad
+         * {@link Participant}.
+         * 
+         * Este método realiza el mapeo directo entre las propiedades coincidentes
+         * del DTO y la entidad, excluyendo aquellas propiedades que no son relevantes
+         * o no deben ser inicializadas durante la creación.
+         * 
+         * <p>
+         * <strong>Nota:</strong>
+         * Se espera qie las propiedades ingoradas sean asignadas manualmente desde la
+         * lógica de servicio
+         * o mediante métodos de mapeo complementarios.
+         * </p>
+         * 
+         * @param createParticipantDTO DTO con la información base del participante
+         * @return {@link Participant} parcialmente mapeada
+         */
+        public abstract Participant createParticipantDtoToParticipant(CreateParticipantDTO createParticipantDTO);
 
-    /**
-     * Convierte una lista de entidades Participant en una lista de ParticipantDTOs.
-     *
-     * @param participants la lista de entidades Participant a convertir
-     * @return una lista de DTOs correspondientes
-     */
-    public List<ParticipantDTO> participantsToParticipantDtos(List<Participant> participants);
+        /**
+         * Convierte una entidad {@link Participant} en un DTO
+         * {@link PublicParticipantProfileDTO}
+         * que expone únicamente información pública del participante.
+         * 
+         * 
+         * @param participant entidad participante a convertir
+         * @return DTO con la información pública del participante
+         */
+        public abstract PublicParticipantProfileDTO participantToPublicParticipantInfoDto(Participant participant);
+
+        /**
+         * Convierte una entidad {@link Participant} en un DTO
+         * {@link ParticipantProfileDTO} que expone información detallada y privada del
+         * perfil
+         * del participante.
+         * 
+         * @param participant entidad participante a convertir
+         * @return DTO con la información del perfil del participante
+         */
+        @Mapping(target = "qrCodeLink", ignore = true)
+        public abstract ParticipantProfileDTO participantToParticipantProfileDto(Participant participant);
+
+        /**
+         * Convierte una entidad {@link Participant} en un DTO
+         * {@link AdminParticipantProfileDTO} que expone información privada
+         * del participante.
+         *
+         * @param participant entidad participante a mapear
+         * @return DTO con la información privada del participante
+         */
+        @Mapping(target = "qrCodeLink", ignore = true)
+        @Mapping(target = "cardPaymentProofLink", ignore = true)
+        @Mapping(target = "transferPaymentProofLink", ignore = true)
+        @Mapping(target = "isCardPayment", ignore = true)
+        @Mapping(target = "isTransferPayment", ignore = true)
+        public abstract AdminParticipantProfileDTO participantToPrivateParticipantInfoDto(Participant participant);
+
+        /**
+         * Convierte una lista de entidades {@link Participant} en una lista de DTOs
+         * {@link AdminParticipantProfileDTO}
+         * que contienen información detallada y sensible de cada participante.
+         * 
+         * @param participant lista de participantes a convertir
+         * @return lista de DTOs con información privada de los participantes
+         */
+        public abstract List<AdminParticipantProfileDTO> participantsToPrivateParticipantInfoDtos(
+                        List<Participant> participant);
+
+        /**
+         * Agrega información adicional al DTO {@link ParticipantProfileDTO}
+         * después del mapeo principal.
+         * 
+         * @param dto         DTO ya mapeado que será enriquecido
+         * @param participant entidad de origen con los datos originales
+         */
+        @AfterMapping
+        protected void enrichParticipantProfileDto(@MappingTarget ParticipantProfileDTO dto, Participant participant) {
+                dto.setQrCodeLink(
+                                (participant.getQrCode() != null)
+                                                ? appProperties.getBackendHost()
+                                                                + QrCodeController.BASE_PATH
+                                                                + QrCodeController.BASE_GET_QR_IMAGE_BY_ID_FOR_PARTICIPANT
+                                                : null);
+        }
+
+        /**
+         * Agrega información adicional al DTO {@link AdminParticipantProfileDTO} tras
+         * el mapeo principal.
+         *
+         * @param dto         DTO a enriquecer
+         * @param participant entidad participante de origen
+         */
+        @AfterMapping
+        protected void enrichWithLinks(@MappingTarget AdminParticipantProfileDTO dto, Participant participant) {
+
+                // marca si el participante tiene un comprobante estructurado (formulario)
+                dto.setIsCardPayment((participant.getPaymentProof() != null) ? Boolean.TRUE : Boolean.FALSE);
+
+                // marca si el participante subió una imagen como comprobante de transferencia
+                dto.setIsTransferPayment((participant.getPaymentProofImage() != null) ? Boolean.TRUE : Boolean.FALSE);
+
+                // genera el enlace absoluto al código QR, si existe
+                dto.setQrCodeLink((participant.getQrCode() != null)
+                                ? appProperties.getBackendHost()
+                                                + QrCodeController.BASE_PATH
+                                                + QrCodeController.BASE_GET_QR_IMAGE_BY_ID_FOR_ADMIN
+                                                + "/"
+                                                + participant.getQrCode().getId()
+                                : null);
+
+                // enlace absoluto al comprobante de tarjeta, si existe
+                dto.setCardPaymentProofLink(
+                                (participant.getPaymentProof() != null)
+                                                ? participant.getPaymentProof().getLink()
+                                                : null);
+
+                // enlace absoluto a la imagen de comprobante de transferencia, si existe
+                dto.setTransferPaymentProofLink(
+                                (participant.getPaymentProofImage() != null)
+                                                ? appProperties.getBackendHost()
+                                                                + StoredFileController.BASE_PATH
+                                                                + StoredFileController.BASE_GET_FILE_BY_ID
+                                                                + participant.getPaymentProofImage().getId()
+                                                : null);
+        }
+
 
 }
