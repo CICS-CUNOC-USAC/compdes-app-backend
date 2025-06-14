@@ -46,7 +46,7 @@ public class LoginService {
     public LoginResponseDTO login(LoginDTO loginDTO) {
         try {
             // mandar a buscar el usuario por user name
-            CompdesUser user = compdesUserService.findUserByUsername(loginDTO.getUsername());
+            CompdesUser user = compdesUserService.getUserByUsername(loginDTO.getUsername());
 
             // vemos si las contrasenas coinciden
             if (!passwordEncoder.matches(loginDTO.getPassword(), user.getPassword())) {

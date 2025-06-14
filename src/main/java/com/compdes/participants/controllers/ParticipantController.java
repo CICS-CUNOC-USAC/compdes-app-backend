@@ -2,11 +2,16 @@ package com.compdes.participants.controllers;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,16 +20,22 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.compdes.common.exceptions.NotFoundException;
+import com.compdes.common.models.dto.response.ErrorDTO;
 import com.compdes.participants.mappers.CreateParticipantInternalDtoMapper;
 import com.compdes.participants.mappers.ParticipantMapper;
 import com.compdes.participants.models.dto.internal.CreateParticipantInternalDTO;
-import com.compdes.participants.models.dto.request.CreateParticipantWithPaymentDTO;
 import com.compdes.participants.models.dto.request.CreateParticipantByAdminDTO;
-import com.compdes.participants.models.dto.response.ParticipantDTO;
+import com.compdes.participants.models.dto.request.CreateParticipantWithPaymentDTO;
+import com.compdes.participants.models.dto.request.ParticipantFilterDTO;
+import com.compdes.participants.models.dto.response.AdminParticipantProfileDTO;
+import com.compdes.participants.models.dto.response.ParticipantProfileDTO;
+import com.compdes.participants.models.dto.response.PublicParticipantProfileDTO;
 import com.compdes.participants.models.entities.Participant;
 import com.compdes.participants.services.ParticipantService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -55,27 +66,133 @@ public class ParticipantController {
         private final CreateParticipantInternalDtoMapper createParticipantInternalDtoMapper;
 
         /**
-         * Obtiene la lista de todos los participantes registrados.
-         *
-         * Este endpoint solo puede ser accedido por usuarios con rol ADMIN.
-         * Retorna la lista completa de participantes registrados en el sistema.
-         *
-         * @return lista de objetos ParticipantDTO que representan a los participantes
-         *         registrados
+         * Obtiene la lista de todos los participantes registrados aplicando filtros
+         * opcionales.
+         * 
+         * <p>
+         * Este endpoint está restringido a usuarios con rol ADMIN y expone datos
+         * sensibles
+         * de los participantes, como correo electrónico, número de documento y estado
+         * de aprobación.
+         * Se debe utilizar con precaución y únicamente con fines administrativos.
+         * </p>
+         * 
+         * @param filters objeto que contiene los criterios de búsqueda opcionales
+         * @return lista de objetos AdminParticipantProfileDTO que representan a los
+         *         participantes encontrados
          */
-        @Operation(summary = "Obtener todos los participantes registrados", description = "Devuelve la lista de todos los participantes registrados. Solo accesible para usuarios con rol `ADMIN`.", security = @SecurityRequirement(name = "bearerAuth"), responses = {
+        @Operation(summary = "Obtener todos los participantes registrados", description = """
+                        Devuelve la lista de todos los participantes registrados, permitiendo aplicar filtros opcionales como nombre, correo, organización, estado de aprobación y tipo de pago.
+                        Este endpoint está restringido a usuarios con rol `ADMIN` y expone información sensible del sistema.
+                        """, security = @SecurityRequirement(name = "bearerAuth"), responses = {
                         @ApiResponse(responseCode = "200", description = "Lista de participantes obtenida exitosamente"),
-                        @ApiResponse(responseCode = "403", description = "Acceso denegado al recurso (requiere rol `ADMIN`), Token inválido o no proporcionado"),
+                        @ApiResponse(responseCode = "403", description = "Acceso denegado al recurso (requiere rol `ADMIN`), Token inválido o no proporcionado", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class))),
                         @ApiResponse(responseCode = "500", description = "Error interno del servidor al recuperar los participantes")
         })
         @GetMapping("/all")
         @PreAuthorize("hasRole('ADMIN')")
         @ResponseStatus(HttpStatus.OK)
-        public List<ParticipantDTO> getAllParticipants() {
+        public Page<AdminParticipantProfileDTO> getAllParticipants(
+                        @Parameter(description = "TODOS OPCIONALES, MANDARLO TAMBIEN ES OPCIONAL") @ModelAttribute ParticipantFilterDTO filters,
+                        Pageable pageable) {
 
-                List<Participant> participants = participantService.getAllParticipants();
-                List<ParticipantDTO> participantDTOs = participantMapper.participantsToParticipantDtos(participants);
-                return participantDTOs;
+                Page<Participant> participants = participantService.getAllParticipants(filters, pageable);
+                return participants.map(participantMapper::participantToPrivateParticipantInfoDto);
+        }
+
+        /**
+         * Obtiene la información privada de un participante a partir de su ID.
+         * 
+         * Este endpoint solo puede ser accedido por usuarios con rol ADMIN. Retorna
+         * los detalles completos del participante, incluyendo correo, teléfono,
+         * documento de identificación y estado de registro.
+         * 
+         * @param id identificador único del participante
+         * @return DTO con la información privada del participante
+         * @throws NotFoundException si no se encuentra ningún participante con el ID
+         *                           proporcionado
+         */
+        @Operation(summary = "Obtener perfil de un participante por ID (uso administrativo)", description = "Retorna los datos completos de un participante a partir de su ID. "
+                        + "Incluye información privada. "
+                        + "Solo accesible para usuarios con rol `ADMIN`.", security = @SecurityRequirement(name = "bearerAuth"), responses = {
+                                        @ApiResponse(responseCode = "200", description = "Participante encontrado exitosamente"),
+                                        @ApiResponse(responseCode = "404", description = "No se encontró un participante con el ID especificado"),
+                                        @ApiResponse(responseCode = "403", description = "Acceso denegado al recurso (requiere rol `ADMIN`), token inválido o no proporcionado"),
+                                        @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+                        })
+        @GetMapping("/{id}")
+        @PreAuthorize("hasRole('ADMIN')")
+        @ResponseStatus(HttpStatus.OK)
+        public AdminParticipantProfileDTO getAdminParticipantProfile(
+                        @PathVariable String id) throws NotFoundException {
+                Participant participant = participantService
+                                .getParticipantById(id);
+                AdminParticipantProfileDTO participantInfoDTO = participantMapper
+                                .participantToPrivateParticipantInfoDto(participant);
+                return participantInfoDTO;
+        }
+
+        /**
+         * Recupera el estado público de la inscripción de un participante mediante su
+         * documento de identificación.
+         * 
+         * Este endpoint no requiere autenticación y permite consultar el estado de
+         * registro (público) de una persona
+         * que se haya inscrito utilizando su número de documento. La respuesta no
+         * incluye datos sensibles del participante.
+         * 
+         * @param identificationDocument documento de identificación del participante
+         * @return información pública de la inscripción correspondiente
+         * @throws NotFoundException si no se encuentra una inscripción asociada al
+         *                           documento proporcionado
+         */
+        @Operation(summary = "Consultar inscripción pública por documento de identificación", description = "Permite consultar el estado público de una inscripción mediante el documento de identificación. "
+                        + "No requiere autenticación y no expone información sensible del participante.", responses = {
+                                        @ApiResponse(responseCode = "200", description = "Inscripción encontrada exitosamente"),
+                                        @ApiResponse(responseCode = "404", description = "No se encontró ninguna inscripción asociada al documento ingresado"),
+                                        @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+                        })
+
+        @GetMapping("/public-inscription/by-document/{identificationDocument}")
+        @ResponseStatus(HttpStatus.OK)
+        public PublicParticipantProfileDTO getParticipantByIdentificationDocument(
+                        @PathVariable String identificationDocument) throws NotFoundException {
+
+                Participant participant = participantService
+                                .getParticipantByIdentificationDocument(identificationDocument);
+                PublicParticipantProfileDTO participantInfoDTO = participantMapper
+                                .participantToPublicParticipantInfoDto(participant);
+                return participantInfoDTO;
+        }
+
+        /**
+         * Obtiene el perfil del participante autenticado.
+         * 
+         * <p>
+         * Este método recupera la información detallada del perfil del usuario actual
+         * utilizando su nombre de usuario desde el contexto de autenticación.
+         * </p>
+         * 
+         * @param userDetails detalles del usuario autenticado extraídos del token JWT
+         * @return DTO con la información del perfil del participante autenticado
+         * @throws NotFoundException si no se encuentra un participante vinculado al
+         *                           usuario
+         */
+        @Operation(summary = "Obtener perfil propio", description = "Retorna el perfil del participante autenticado basado en el token Bearer JWT proporcionado.", security = @SecurityRequirement(name = "bearerAuth"), responses = {
+                        @ApiResponse(responseCode = "200", description = "Perfil obtenido exitosamente"),
+                        @ApiResponse(responseCode = "401", description = "Token de autenticación inválido o ausente"),
+                        @ApiResponse(responseCode = "404", description = "No se encontró un participante vinculado al usuario autenticado")
+        })
+        @GetMapping("/my-profile")
+        @PreAuthorize("hasRole('PARTICIPANT')")
+        @ResponseStatus(HttpStatus.OK)
+        public ParticipantProfileDTO getMyProfile(@AuthenticationPrincipal UserDetails userDetails)
+                        throws NotFoundException {
+                Participant participant = participantService
+                                .getParticipantByUserName(userDetails.getUsername());
+                ParticipantProfileDTO participantInfoDTO = participantMapper
+                                .participantToParticipantProfileDto(participant);
+                return participantInfoDTO;
         }
 
         /**

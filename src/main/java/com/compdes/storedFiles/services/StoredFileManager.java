@@ -78,7 +78,7 @@ public class StoredFileManager {
             return extension;
         } catch (IndexOutOfBoundsException e) {// si se lanza esta excepcion, signofica que no hay una extension en el
                                                // archivo
-            log.warn("No se pudo extraer una extensión válida del archivo: '{}'", fileFullName);
+            log.error("No se pudo extraer una extensión válida del archivo: '{}: {}'", fileFullName, e.getMessage(), e);
             throw FileStorageErrorEnum.FILE_EXTENSION_NULL_OR_INVALID.getFileStorageException();
         }
     }
@@ -125,22 +125,27 @@ public class StoredFileManager {
         try {
             Files.copy(fileInputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
         } catch (FileAlreadyExistsException e) {
-            log.warn("Intento de sobrescribir un archivo ya existente: '{}'", filePath.toAbsolutePath());
+            log.error("Intento de sobrescribir un archivo ya existente: '{}': {}", filePath.toAbsolutePath(),
+                    e.getMessage(), e);
             throw FileStorageErrorEnum.FILE_ALREADY_EXISTS.getFileStorageException();
         } catch (DirectoryNotEmptyException e) {
-            log.warn("No se pudo sobrescribir porque el destino no está vacío: '{}'", filePath.toAbsolutePath());
+            log.error("No se pudo sobrescribir porque el destino no está vacío: '{}': {}", filePath.toAbsolutePath(),
+                    e.getMessage(), e);
             throw FileStorageErrorEnum.FILE_IO_EXCEPTION.getFileStorageException();
         } catch (UnsupportedOperationException e) {
-            log.warn("Operación no soportada al guardar archivo en: '{}'", filePath.toAbsolutePath());
+            log.error("Operación no soportada al guardar archivo en: '{}': {}", filePath.toAbsolutePath(),
+                    e.getMessage(), e);
             throw FileStorageErrorEnum.UNSUPPORTED_FILE_OPERATION.getFileStorageException();
         } catch (SecurityException e) {
-            log.warn("Permiso denegado al intentar guardar archivo en: '{}'", filePath.toAbsolutePath());
+            log.error("Permiso denegado al intentar guardar archivo en: '{}': {}", filePath.toAbsolutePath(),
+                    e.getMessage(), e);
             throw FileStorageErrorEnum.FILE_SECURITY_EXCEPTION.getFileStorageException();
         } catch (IOException e) {
-            log.warn("Error de entrada/salida al intentar guardar archivo en: '{}'. Error: {}",
-                    filePath.toAbsolutePath(), e.getMessage());
+            log.error("Error de entrada/salida al intentar guardar archivo en: '{}': {}", filePath.toAbsolutePath(),
+                    e.getMessage(), e);
             throw FileStorageErrorEnum.FILE_IO_EXCEPTION.getFileStorageException();
         }
+
     }
 
     /**
@@ -170,23 +175,24 @@ public class StoredFileManager {
             // Reemplazamos el archivo original con el nuevo
             Files.move(tempPath, originalPath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
         } catch (FileAlreadyExistsException e) {
-            log.warn("El archivo ya existe y no se puede reemplazar: '{}'. Error: {}", originalPath.toAbsolutePath(),
-                    e.getMessage());
+            log.error("El archivo ya existe y no se puede reemplazar: '{}': {}", originalPath.toAbsolutePath(),
+                    e.getMessage(), e);
             throw FileStorageErrorEnum.FILE_ALREADY_EXISTS.getFileStorageException();
         } catch (DirectoryNotEmptyException e) {
-            log.warn("No se pudo mover el archivo porque el directorio no está vacío: '{}'. Error: {}",
-                    originalPath.toAbsolutePath(), e.getMessage());
+            log.error("No se pudo mover el archivo porque el directorio no está vacío: '{}': {}",
+                    originalPath.toAbsolutePath(), e.getMessage(), e);
             throw FileStorageErrorEnum.DIRECTORY_NOT_EMPTY.getFileStorageException();
         } catch (UnsupportedOperationException e) {
-            log.warn("Operación no soportada al intentar mover archivo de '{}' a '{}'. Error: {}",
-                    tempPath.toAbsolutePath(), originalPath.toAbsolutePath(), e.getMessage());
+            log.error("Operación no soportada al intentar mover archivo de '{}' a '{}': {}", tempPath.toAbsolutePath(),
+                    originalPath.toAbsolutePath(), e.getMessage(), e);
             throw FileStorageErrorEnum.UNSUPPORTED_FILE_OPERATION.getFileStorageException();
         } catch (SecurityException e) {
-            log.warn("Permiso denegado al intentar reemplazar archivo en: '{}'. Error: {}",
-                    originalPath.toAbsolutePath(), e.getMessage());
+            log.error("Permiso denegado al intentar reemplazar archivo en: '{}': {}", originalPath.toAbsolutePath(),
+                    e.getMessage(), e);
+            throw FileStorageErrorEnum.FILE_SECURITY_EXCEPTION.getFileStorageException();
         } catch (IOException e) {
-            log.warn("Error de entrada/salida al actualizar archivo. Temporal: '{}', Destino: '{}'. Error: {}",
-                    tempPath.toAbsolutePath(), originalPath.toAbsolutePath(), e.getMessage());
+            log.error("Error de entrada/salida al actualizar archivo. Temporal: '{}', Destino: '{}': {}",
+                    tempPath.toAbsolutePath(), originalPath.toAbsolutePath(), e.getMessage(), e);
             throw FileStorageErrorEnum.FILE_IO_EXCEPTION.getFileStorageException();
         } finally {
             if (tempCreated) {
@@ -214,16 +220,16 @@ public class StoredFileManager {
             // Eliminamos el archivo
             return Files.deleteIfExists(filePath);
         } catch (DirectoryNotEmptyException e) {
-            log.warn("No se pudo eliminar el archivo porque el directorio no está vacío: '{}'. Error: {}",
-                    filePath.toAbsolutePath(), e.getMessage());
+            log.error("No se pudo eliminar el archivo porque el directorio no está vacío: '{}': {}",
+                    filePath.toAbsolutePath(), e.getMessage(), e);
             throw FileStorageErrorEnum.DIRECTORY_NOT_EMPTY.getFileStorageException();
         } catch (SecurityException e) {
-            log.warn("Permiso denegado al intentar eliminar el archivo: '{}'. Error: {}", filePath.toAbsolutePath(),
-                    e.getMessage());
+            log.error("Permiso denegado al intentar eliminar el archivo: '{}': {}", filePath.toAbsolutePath(),
+                    e.getMessage(), e);
             throw FileStorageErrorEnum.FILE_SECURITY_EXCEPTION.getFileStorageException();
         } catch (IOException e) {
-            log.warn("Error de entrada/salida al intentar eliminar el archivo: '{}'. Error: {}",
-                    filePath.toAbsolutePath(), e.getMessage());
+            log.error("Error de entrada/salida al intentar eliminar el archivo: '{}': {}", filePath.toAbsolutePath(),
+                    e.getMessage(), e);
             throw FileStorageErrorEnum.FILE_IO_EXCEPTION.getFileStorageException();
         }
     }
@@ -254,8 +260,8 @@ public class StoredFileManager {
                 throw new NotFoundException("El archivo no existe: " + fileFullName);
             }
         } catch (SecurityException e) {
-            log.warn("Permiso denegado al verificar la existencia del archivo: '{}'. Error: {}",
-                    fullPath.toAbsolutePath(), e.getMessage());
+            log.error("Permiso denegado al verificar la existencia del archivo: '{}': {}", fullPath.toAbsolutePath(),
+                    e.getMessage(), e);
             throw FileStorageErrorEnum.FILE_SECURITY_EXCEPTION.getFileStorageException();
         }
 
@@ -265,26 +271,28 @@ public class StoredFileManager {
                 throw new SecurityException("El archivo no es legible: " + fileFullName);
             }
         } catch (SecurityException e) {
-            log.warn("Permiso denegado al verificar legibilidad del archivo: '{}'. Error: {}",
-                    fullPath.toAbsolutePath(), e.getMessage());
+            log.error("Permiso denegado al verificar legibilidad del archivo: '{}': {}", fullPath.toAbsolutePath(),
+                    e.getMessage(), e);
             throw FileStorageErrorEnum.FILE_SECURITY_EXCEPTION.getFileStorageException();
         }
+
         try {
             // Devolvemos un InputStream para que el archivo pueda ser leído
             return Files.readAllBytes(fullPath);
         } catch (OutOfMemoryError e) {
-            log.warn("El archivo es demasiado grande para cargarlo en memoria: '{}'. Error: {}",
-                    fullPath.toAbsolutePath(), e.getMessage());
+            log.error("El archivo es demasiado grande para cargarlo en memoria: '{}': {}", fullPath.toAbsolutePath(),
+                    e.getMessage(), e);
             throw FileStorageErrorEnum.FILE_READ_OUT_OF_MEMORY.getFileStorageException();
         } catch (SecurityException e) {
-            log.warn("Permiso denegado al intentar leer el archivo: '{}'. Error: {}", fullPath.toAbsolutePath(),
-                    e.getMessage());
+            log.error("Permiso denegado al intentar leer el archivo: '{}': {}", fullPath.toAbsolutePath(),
+                    e.getMessage(), e);
             throw FileStorageErrorEnum.FILE_SECURITY_EXCEPTION.getFileStorageException();
         } catch (IOException e) {
-            log.warn("Error de entrada/salida al intentar leer el archivo: '{}'. Error: {}", fullPath.toAbsolutePath(),
-                    e.getMessage());
+            log.error("Error de entrada/salida al intentar leer el archivo: '{}': {}", fullPath.toAbsolutePath(),
+                    e.getMessage(), e);
             throw FileStorageErrorEnum.FILE_IO_EXCEPTION.getFileStorageException();
         }
+
     }
 
     /**
@@ -317,9 +325,8 @@ public class StoredFileManager {
         try {
             return path.resolve(fileFullName);
         } catch (InvalidPathException e) {
-            log.warn("getFullPath() -> Nombre de archivo inválido al intentar resolver la ruta: '{}'. Error: {}",
-                    fileFullName,
-                    e.getMessage());
+            log.error("getFullPath() -> Nombre de archivo inválido al intentar resolver la ruta: '{}': {}",
+                    fileFullName, e.getMessage(), e);
             throw FileStorageErrorEnum.FILE_INVALID_PATH.getFileStorageException();
         }
     }
@@ -332,7 +339,7 @@ public class StoredFileManager {
         try {
             uploadPath = Paths.get(uploadDir);
         } catch (InvalidPathException e) {
-            log.warn("[{}] Ruta base inválida: '{}'. Error: {}", method, uploadDir, e.getMessage());
+            log.error("[{}] Ruta base inválida: '{}': {}", method, uploadDir, e.getMessage(), e);
             throw FileStorageErrorEnum.FILE_INVALID_PATH.getFileStorageException();
         }
 
@@ -341,29 +348,30 @@ public class StoredFileManager {
                 return uploadPath;
             }
         } catch (SecurityException e) {
-            log.warn("[{}] Permiso denegado al verificar existencia del directorio: '{}'. Error: {}", method,
-                    uploadPath.toAbsolutePath(), e.getMessage());
+            log.error("[{}] Permiso denegado al verificar existencia del directorio: '{}': {}", method,
+                    uploadPath.toAbsolutePath(), e.getMessage(), e);
             throw FileStorageErrorEnum.FILE_INVALID_PATH.getFileStorageException();
         }
 
         try {
             return Files.createDirectories(uploadPath);
         } catch (FileAlreadyExistsException e) {
-            log.warn("[{}] El directorio ya existe y no puede ser creado: '{}'. Error: {}", method,
-                    uploadPath.toAbsolutePath(), e.getMessage());
+            log.error("[{}] El directorio ya existe y no puede ser creado: '{}': {}", method,
+                    uploadPath.toAbsolutePath(), e.getMessage(), e);
             throw FileStorageErrorEnum.FILE_ALREADY_EXISTS.getFileStorageException();
         } catch (UnsupportedOperationException e) {
-            log.warn("[{}] Operación no soportada al crear el directorio: '{}'. Error: {}", method,
-                    uploadPath.toAbsolutePath(), e.getMessage());
+            log.error("[{}] Operación no soportada al crear el directorio: '{}': {}", method,
+                    uploadPath.toAbsolutePath(), e.getMessage(), e);
             throw FileStorageErrorEnum.UNSUPPORTED_FILE_OPERATION.getFileStorageException();
         } catch (SecurityException e) {
-            log.warn("[{}] Permiso denegado al crear el directorio: '{}'. Error: {}", method,
-                    uploadPath.toAbsolutePath(), e.getMessage());
+            log.error("[{}] Permiso denegado al crear el directorio: '{}': {}", method, uploadPath.toAbsolutePath(),
+                    e.getMessage(), e);
             throw FileStorageErrorEnum.FILE_SECURITY_EXCEPTION.getFileStorageException();
         } catch (IOException e) {
-            log.warn("[{}] Error de entrada/salida al crear el directorio: '{}'. Error: {}", method,
-                    uploadPath.toAbsolutePath(), e.getMessage());
+            log.error("[{}] Error de entrada/salida al crear el directorio: '{}': {}", method,
+                    uploadPath.toAbsolutePath(), e.getMessage(), e);
             throw FileStorageErrorEnum.FILE_IO_EXCEPTION.getFileStorageException();
         }
+
     }
 }

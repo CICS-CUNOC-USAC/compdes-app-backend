@@ -114,7 +114,8 @@ public class CompdesUserService {
      * @return el usuario participante creado y guardado en la base de datos
      * @throws NotFoundException        si no se encuentra el usuario con el ID
      *                                  proporcionado.
-     * @throws IllegalStateException    si el participante aún no ha sido aprobado
+     * @throws IllegalStateException    si el participante aún no ha sido aprobado,
+     *                                  o ya se ha completado el registro
      * @throws IllegalArgumentException si el documento de identificación no
      *                                  coincide con el del participante
      */
@@ -123,15 +124,22 @@ public class CompdesUserService {
         // mandamos a traer el participante por su id
         try {
             // encontrar el usuario por su id
-            CompdesUser blankUser = findUserById(userId);
+            CompdesUser blankUser = getUserById(userId);
             Participant participant = blankUser.getParticipant();
-            ;
+            
+            // si ya tiene credenciales el usuario entonces ya se termino el proceso de
+            // inscripcion, lanzar error
+            if (blankUser.getUsername() != null || blankUser.getPassword() != null) {
+                throw new IllegalStateException(
+                        "Parece que este participante ya completó su registro anteriormente. "
+                                + "Si necesitas actualizar tus datos de acceso, por favor hazlo desde la sección correspondiente o comunícate con el equipo de soporte para recibir ayuda.");
+            }
 
             // asegurarse que el participante ya esta aprovado
             if (participant == null || !participant.getRegistrationStatus().getIsApproved()) {
                 throw new IllegalStateException(
-                        "No se puede completar la operación porque el participante aún no ha sido aprobado. "
-                                + "Por favor, espera la aprobación antes de continuar.");
+                        "Aún no puedes completar esta acción porque tu registro está pendiente de aprobación. "
+                                + "Por favor, espera a ser aprobado o contacta al equipo de soporte si tienes alguna duda.");
             }
 
             // validar que el participante tenga el mismo doc de identificacion que el
@@ -190,7 +198,7 @@ public class CompdesUserService {
      * @return el usuario encontrado
      * @throws NotFoundException si no existe un usuario con el ID proporcionado
      */
-    public CompdesUser findUserById(String id) throws NotFoundException {
+    public CompdesUser getUserById(String id) throws NotFoundException {
         CompdesUser compdesUser = compdesUserRepository.findById(id).orElseThrow(
                 () -> new NotFoundException("No se encontró un usuario con el ID proporcionado."));
         return compdesUser;
@@ -203,7 +211,7 @@ public class CompdesUserService {
      * @return el usuario encontrado
      * @throws NotFoundException si no existe un usuario con el nombre proporcionado
      */
-    public CompdesUser findUserByUsername(String username) throws NotFoundException {
+    public CompdesUser getUserByUsername(String username) throws NotFoundException {
         CompdesUser compdesUser = compdesUserRepository.findUserByUsername(username).orElseThrow(
                 () -> new NotFoundException("No se encontró un usuario con el ID proporcionado."));
         return compdesUser;

@@ -46,4 +46,19 @@ public interface QrCodeRepository extends JpaRepository<QrCode, String> {
      *         o vacío si no se encuentra ninguno.
      */
     public Optional<QrCode> findFirstByParticipantIsNullOrderByNumberCodeDesc();
+
+    /**
+     * Busca un código QR asociado a un participante cuyo usuario tenga el nombre
+     * especificado.
+     * 
+     * Este método permite recuperar un {@link QrCode} navegando por la relación
+     * entre
+     * el participante y su usuario de sistema, filtrando por el nombre de usuario
+     * exacto.
+     * 
+     * @param username nombre de usuario asociado al participante
+     * @return un {@link Optional} que contiene el código QR si existe, o vacío si
+     *         no se encuentra coincidencia
+     */
+    public Optional<QrCode> findByParticipant_CompdesUser_Username(String username);
 }

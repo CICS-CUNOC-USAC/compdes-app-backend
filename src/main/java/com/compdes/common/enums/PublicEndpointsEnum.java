@@ -1,6 +1,7 @@
 package com.compdes.common.enums;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.util.AntPathMatcher;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,9 +20,12 @@ import lombok.Getter;
  * 
  * Es importante que los valores definidos aquí coincidan exactamente con los
  * paths utilizados en los controladores correspondientes, de lo contrario,
- * no serán excluidos correctamente del filtro de autenticación.
+ * no serán excluidos correctamente del filtro de autenticación.<br>
+ * <p>
+ * Los valores de `path` pueden contener comodines usando el estilo de patrones
+ * Ant {@link AntPathMatcher}</p>
  * 
- * Ejemplos de uso:
+ * <li>Ejemplos de uso:</li>
  * 
  * <pre>
  *     // Permitir POST en login
@@ -39,6 +43,7 @@ import lombok.Getter;
  * @author Luis Monterroso
  * @version 1.1
  * @since 2025-05-31
+ * @see AntPathMatcher
  */
 @Getter
 @AllArgsConstructor
@@ -47,6 +52,7 @@ public enum PublicEndpointsEnum {
     AUTH_LOGIN(HttpMethod.POST, "/api/v1/login"),
     PARTICIPANT_CREATE(HttpMethod.POST, "/api/v1/participants"),
     PARTICIPANT_AUTHOR_CREATE(HttpMethod.POST, "/api/v1/participants/author"),
+    PUBLIC_INSCRIPTION_BY_DOCUMENT(HttpMethod.GET, "/api/v1/participants/public-inscription/by-document/*"),
     SWAGGER_UI(null, "/swagger-ui/**"),
     API_DOCS(null, "/v3/api-docs/**");
 
