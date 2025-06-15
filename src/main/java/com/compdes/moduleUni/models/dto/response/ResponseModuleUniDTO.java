@@ -13,7 +13,7 @@ import jakarta.validation.constraints.Size;
  * @version 1.0
  * @since 2025-06-05
  */
-public class ResponseModuleDTO {
+public class ResponseModuleUniDTO {
     @NotBlank(message = "Debe ingresar el nombre del salon")
     @Size(max = 50, message = "El nombre no puede exceder los 50 caracteres")
     private String name;

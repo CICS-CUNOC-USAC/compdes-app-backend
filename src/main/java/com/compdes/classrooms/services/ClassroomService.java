@@ -40,11 +40,11 @@ public class ClassroomService {
     * */
     public Classroom createClassroom(CreateClassroomDTO createClassroomDTO) {
         Classroom classroom = classroomMapper.createClassroomDtoToClassroom(createClassroomDTO);
-        if(classroomRepository.exists(classroom)){
+        /*if(classroomRepository.exists(classroom)){
             throw new DuplicateResourceException(
                 "No se puede completar el registro: el salon ya esta registrado"
             );
-        }
+        }*/
         classroom = classroomRepository.save(classroom);
         return classroom;
     }
@@ -55,7 +55,7 @@ public class ClassroomService {
     public List<ResponseClassroomDTO> getAllClassrooms() {
         List<Classroom> iterable = classroomRepository.findAll();
         return iterable.stream()
-                .map(classroomMapper::classroomToResponseDto) // asumiendo que tienes este método
+                .map(classroomMapper::classroomToResponseDto)
                 .collect(Collectors.toList());
     }
 
