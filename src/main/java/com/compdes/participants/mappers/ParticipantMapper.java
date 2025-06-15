@@ -33,6 +33,8 @@ public abstract class ParticipantMapper {
         @Autowired
         private AppProperties appProperties;
 
+        private final String HOST = "https://compdes.cunoc.edu.gt/api";
+
         /**
          * Convierte un DTO de creación de participante a una entidad
          * {@link Participant}.
@@ -113,7 +115,7 @@ public abstract class ParticipantMapper {
         protected void enrichParticipantProfileDto(@MappingTarget ParticipantProfileDTO dto, Participant participant) {
                 dto.setQrCodeLink(
                                 (participant.getQrCode() != null)
-                                                ? appProperties.getBackendHost()
+                                                ? HOST
                                                                 + QrCodeController.BASE_PATH
                                                                 + QrCodeController.BASE_GET_QR_IMAGE_BY_ID_FOR_PARTICIPANT
                                                 : null);
@@ -137,7 +139,7 @@ public abstract class ParticipantMapper {
 
                 // genera el enlace absoluto al código QR, si existe
                 dto.setQrCodeLink((participant.getQrCode() != null)
-                                ? appProperties.getBackendHost()
+                                ? HOST
                                                 + QrCodeController.BASE_PATH
                                                 + QrCodeController.BASE_GET_QR_IMAGE_BY_ID_FOR_ADMIN
                                                 + "/"
@@ -153,7 +155,7 @@ public abstract class ParticipantMapper {
                 // enlace absoluto a la imagen de comprobante de transferencia, si existe
                 dto.setTransferPaymentProofLink(
                                 (participant.getPaymentProofImage() != null)
-                                                ? appProperties.getBackendHost()
+                                                ? HOST
                                                                 + StoredFileController.BASE_PATH
                                                                 + StoredFileController.BASE_GET_FILE_BY_ID
                                                                 + participant.getPaymentProofImage().getId()
