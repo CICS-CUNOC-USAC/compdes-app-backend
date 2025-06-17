@@ -1,7 +1,6 @@
 package com.compdes.paymentProofs.mappers;
 
 import org.mapstruct.Mapper;
-import org.mapstruct.ReportingPolicy;
 
 import com.compdes.paymentProofs.models.dto.request.CreatePaymentProofDTO;
 import com.compdes.paymentProofs.models.entities.PaymentProof;
@@ -13,7 +12,7 @@ import com.compdes.paymentProofs.models.entities.PaymentProof;
  * @version 1.0
  * @since 2025-05-30
  */
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring")
 public interface PaymentProofMapper {
 
     /**

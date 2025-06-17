@@ -7,7 +7,6 @@ import com.compdes.participants.models.entities.Participant;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import lombok.Builder;
 import lombok.Data;
@@ -39,8 +38,7 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = true)
 public class RegistrationStatus extends Auditor {
 
-    @OneToOne
-    @JoinColumn(nullable = false, unique = true)
+    @OneToOne(mappedBy = "registrationStatus")
     private Participant participant;
 
     @Column(nullable = false)

@@ -11,6 +11,7 @@ import com.compdes.qrCodes.models.entities.QrCode;
 import com.compdes.registrationStatus.models.entities.RegistrationStatus;
 import com.compdes.storedFiles.models.entities.StoredFile;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -67,7 +68,7 @@ public class Participant extends Auditor {
     @Column(nullable = false)
     private Boolean isGuest;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.REMOVE, orphanRemoval = true)
     @JoinColumn(nullable = true)
     private PaymentProof paymentProof;
 
@@ -76,7 +77,7 @@ public class Participant extends Auditor {
     @Setter(value = AccessLevel.NONE)
     private QrCode qrCode;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.REMOVE, orphanRemoval = true)
     private RegistrationStatus registrationStatus;
 
     @OneToOne

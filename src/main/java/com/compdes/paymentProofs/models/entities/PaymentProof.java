@@ -7,7 +7,6 @@ import com.compdes.participants.models.entities.Participant;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -35,8 +34,7 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = true)
 public class PaymentProof extends Auditor {
 
-    @OneToOne
-    @JoinColumn(nullable = false)
+    @OneToOne(mappedBy = "paymentProof")
     private Participant participant;
 
     @Column(length = 100, nullable = false)

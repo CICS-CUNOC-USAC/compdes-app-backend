@@ -57,7 +57,7 @@ public class ParticipantService {
         public Page<Participant> getAllParticipants(ParticipantFilterDTO filters, Pageable pageable) {
                 Specification<Participant> spec = Specification.allOf(
                                 ParticipantSpecification.filterBy(filters));
-                return participantRepository.findAll(spec,pageable);
+                return participantRepository.findAll(spec, pageable);
         }
 
         /**
@@ -282,4 +282,28 @@ public class ParticipantService {
                 return participantRepository.save(participant);
         }
 
+        /**
+         * Elimina un participante del sistema si aún no ha sido confirmado.
+         * 
+         * Este método recupera al participante por su identificador y valida que su
+         * estado de registro
+         * no esté aprobado. Si el participante ya fue confirmado, lanza una excepción
+         * para evitar
+         * la eliminación de registros válidos y aprobados.
+         * 
+         * @param id identificador del participante que se desea eliminar
+         * @throws NotFoundException     si no se encuentra un participante con el ID
+         *                               proporcionado
+         * @throws IllegalStateException si el participante ya fue confirmado y no puede
+         *                               ser eliminado
+         */
+        public void deleteParticipant(String id) throws NotFoundException {
+                Participant participant = getParticipantById(id);
+
+                if (participant.getRegistrationStatus().getIsApproved()) {
+                        throw new IllegalStateException(
+                                        "No es posible realizar esta operación porque el participante ya fue confirmado previamente.");
+                }
+                participantRepository.deleteById(id);
+        }
 }
