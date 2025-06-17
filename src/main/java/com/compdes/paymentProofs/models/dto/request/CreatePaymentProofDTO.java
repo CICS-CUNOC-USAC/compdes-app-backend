@@ -1,6 +1,7 @@
 package com.compdes.paymentProofs.models.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,7 +21,6 @@ public class CreatePaymentProofDTO {
 
     @NotBlank(message = "Debe proporcionar un enlace al comprobante de pago")
     @Size(max = 100, message = "El enlace no puede exceder los 100 caracteres")
-    // @Pattern(regexp = "^(https?|ftp)://[^\\s/$.?#].[^\\s]*$", message = "El
-    // enlace debe tener un formato de URL válido")
+    @Pattern(regexp = "^https://app\\.recurrente\\.com/checkout-session/[^\\s]+$", message = "Solo se permiten enlaces válidos de la app Recurrente. Ejemplo: https://app.recurrente.com/checkout-session/ch_ejemplodummy123")
     private String link;
 }
