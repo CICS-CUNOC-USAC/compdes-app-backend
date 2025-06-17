@@ -1,7 +1,5 @@
 package com.compdes.participants.controllers;
 
-import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -9,6 +7,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -260,5 +259,18 @@ public class ParticipantController {
         public void createParticipantByAdmin(
                         @RequestBody @Valid CreateParticipantByAdminDTO createParticipantByAdminDTO) {
                 participantService.createParticipantByAdmin(createParticipantByAdminDTO);
+        }
+
+        @Operation(summary = "Eliminar participante", description = "Elimina un participante si aún no ha sido confirmado. "
+                        + "En caso de que el participante ya esté confirmado, se rechaza la operación. Accesible para `ADMIN`", security = @SecurityRequirement(name = "bearerAuth"), responses = {
+                                        @ApiResponse(responseCode = "204", description = "Participante eliminado exitosamente"),
+                                        @ApiResponse(responseCode = "404", description = "Participante no encontrado"),
+                                        @ApiResponse(responseCode = "409", description = "El participante ya fue confirmado y no puede ser eliminado")
+                        })
+        @DeleteMapping("/{id}")
+        @PreAuthorize("hasRole('ADMIN')")
+        @ResponseStatus(HttpStatus.OK)
+        public void deleteParticipant(@PathVariable String id) throws NotFoundException {
+                participantService.deleteParticipant(id);
         }
 }
