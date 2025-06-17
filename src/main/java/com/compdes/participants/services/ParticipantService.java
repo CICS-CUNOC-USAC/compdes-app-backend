@@ -22,6 +22,7 @@ import com.compdes.qrCodes.models.entities.QrCode;
 import com.compdes.qrCodes.services.QrCodeService;
 import com.compdes.registrationStatus.models.entities.RegistrationStatus;
 import com.compdes.registrationStatus.services.RegistrationStatusService;
+import com.compdes.storedFiles.services.StoredFileService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -47,6 +48,7 @@ public class ParticipantService {
         private final ParticipantRepository participantRepository;
         private final PaymentProofStrategyFactory paymentProofStrategyFactory;
         private final RegistrationStatusService registrationStatusService;
+        private final StoredFileService storedFileService;
         private final QrCodeService qrCodeService;
 
         /**
