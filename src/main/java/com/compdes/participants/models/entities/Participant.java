@@ -80,7 +80,7 @@ public class Participant extends Auditor {
     @OneToOne(cascade = CascadeType.REMOVE, orphanRemoval = true)
     private RegistrationStatus registrationStatus;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.REMOVE, orphanRemoval = true)
     @JoinColumn(nullable = true)
     private StoredFile paymentProofImage;
 
