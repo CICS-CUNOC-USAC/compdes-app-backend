@@ -1,4 +1,4 @@
-package com.compdes.common.config;
+package com.compdes.common.config.web;
 
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;

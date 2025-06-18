@@ -1,4 +1,4 @@
-package com.compdes.common.config;
+package com.compdes.common.config.web;
 
 import java.util.List;
 
@@ -17,6 +17,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.compdes.auth.jwt.filter.JwtAuthenticationFilter;
+import com.compdes.common.config.AppProperties;
 import com.compdes.common.enums.PublicEndpointsEnum;
 
 import lombok.RequiredArgsConstructor;
