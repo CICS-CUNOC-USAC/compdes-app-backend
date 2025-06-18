@@ -1,4 +1,4 @@
-package com.compdes.common.handlers;
+package com.compdes.common.config.advice;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;

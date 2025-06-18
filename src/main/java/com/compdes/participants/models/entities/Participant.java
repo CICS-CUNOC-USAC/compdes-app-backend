@@ -17,8 +17,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import lombok.AccessLevel;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
@@ -40,7 +40,7 @@ import lombok.Setter;
 @Entity
 @DynamicUpdate
 @NoArgsConstructor
-@Data
+@Getter
 @EqualsAndHashCode(callSuper = true)
 public class Participant extends Auditor {
 
@@ -173,4 +173,49 @@ public class Participant extends Auditor {
         }
         this.qrCode = qrCode;
     }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName.trim();
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName.trim();
+    }
+
+    public void setEmail(String email) {
+        this.email = email.trim();
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone.trim();
+    }
+
+    public void setOrganisation(String organisation) {
+        this.organisation = organisation.trim();
+    }
+
+    public void setIdentificationDocument(String identificationDocument) {
+        this.identificationDocument = identificationDocument.trim();
+    }
+
+    public void setIsAuthor(Boolean isAuthor) {
+        this.isAuthor = isAuthor;
+    }
+
+    public void setIsGuest(Boolean isGuest) {
+        this.isGuest = isGuest;
+    }
+
+    public void setPaymentProof(PaymentProof paymentProof) {
+        this.paymentProof = paymentProof;
+    }
+
+    public void setRegistrationStatus(RegistrationStatus registrationStatus) {
+        this.registrationStatus = registrationStatus;
+    }
+
+    public void setPaymentProofImage(StoredFile paymentProofImage) {
+        this.paymentProofImage = paymentProofImage;
+    }
+
 }
