@@ -5,7 +5,10 @@ import com.compdes.classrooms.models.dto.response.ResponseClassroomDTO;
 import com.compdes.classrooms.models.entities.Classroom;
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
+
+import java.util.List;
 
 /**
  *
@@ -43,5 +46,11 @@ public interface ClassroomMapper {
     /**
     * Convierte una entidad `Classroom` a un DTO de respuesta.
     */
+    @Mapping(source = "moduleUni.id", target = "moduleUniId")
     public ResponseClassroomDTO classroomToResponseDto(Classroom classroom);
+
+    /**
+     * Convierte una lista de una entidad `Classroom` a una lista DTO de respuesta
+     * */
+    public List<ResponseClassroomDTO> classroomToResponseDto(List<Classroom> classroomList);
 }

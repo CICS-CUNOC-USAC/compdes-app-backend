@@ -6,6 +6,9 @@ import com.compdes.classrooms.models.dto.response.ResponseClassroomDTO;
 import com.compdes.classrooms.models.entities.Classroom;
 import com.compdes.classrooms.repositories.ClassroomRepository;
 import com.compdes.common.exceptions.DuplicateResourceException;
+import com.compdes.common.exceptions.NotFoundException;
+import com.compdes.moduleUni.models.entities.ModuleUni;
+import com.compdes.moduleUni.repositories.ModuleUniRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,18 +38,24 @@ public class ClassroomService {
     private final ClassroomMapper classroomMapper;
     private final ClassroomRepository classroomRepository;
 
+    private final ModuleUniRepository moduleUniRepository;
+
     /**
     * Crea un salon
     * */
-    public Classroom createClassroom(CreateClassroomDTO createClassroomDTO) {
-        Classroom classroom = classroomMapper.createClassroomDtoToClassroom(createClassroomDTO);
-        /*if(classroomRepository.exists(classroom)){
+    public Classroom createClassroom(CreateClassroomDTO createClassroomDTO) throws NotFoundException {
+        ModuleUni module = moduleUniRepository.findById(createClassroomDTO.getModuleId())
+                .orElseThrow(() -> new NotFoundException("Módulo no encontrado"));
+
+        Classroom classroom = new Classroom(createClassroomDTO.getName(), module);
+        if(classroomRepository.existsByName(classroom.getName())
+                && classroomRepository.existsByModuleUni(classroom.getModuleUni())
+        ){
             throw new DuplicateResourceException(
                 "No se puede completar el registro: el salon ya esta registrado"
             );
-        }*/
-        classroom = classroomRepository.save(classroom);
-        return classroom;
+        }
+        return classroomRepository.save(classroom);
     }
 
     /**
@@ -54,9 +63,8 @@ public class ClassroomService {
     * */
     public List<ResponseClassroomDTO> getAllClassrooms() {
         List<Classroom> iterable = classroomRepository.findAll();
-        return iterable.stream()
-                .map(classroomMapper::classroomToResponseDto)
-                .collect(Collectors.toList());
+        return classroomMapper.classroomToResponseDto(iterable);
+
     }
 
 }

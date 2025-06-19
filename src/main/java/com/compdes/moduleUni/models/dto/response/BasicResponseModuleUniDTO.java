@@ -1,10 +1,9 @@
 package com.compdes.moduleUni.models.dto.response;
 
-import lombok.AllArgsConstructor;
 import lombok.Value;
 
 /**
- * DTO utilizado para mandar los datos necesarios para la visualizacion de la lista de salones
+ * DTO utilizado para mandar los datos basicos para la visualizacion de la lista de salones
  *
  * Esta clase es utilizada en peticiones HTTP para transportar
  * la información básica de un nuevo salon del sistema
@@ -14,7 +13,6 @@ import lombok.Value;
  * @since 2025-06-05
  */
 @Value
-public class ResponseModuleUniDTO {
-    private String id;
-    private String name;
+public class BasicResponseModuleUniDTO {
+    protected String name;
 }

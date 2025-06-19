@@ -2,6 +2,7 @@ package com.compdes.classrooms.models.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.Value;
 
 /**
  * DTO utilizado para recibir los datos necesarios para la creación de un
@@ -14,6 +15,7 @@ import jakarta.validation.constraints.Size;
  * @version 1.0
  * @since 2025-06-03
  */
+@Value
 public class CreateClassroomDTO {
     @NotBlank(message = "Debe ingresar el nombre del salon")
     @Size(max = 50, message = "El nombre no puede exceder los 50 caracteres")

@@ -17,7 +17,4 @@ public interface ClassroomRepository extends JpaRepository<Classroom, String> {
      * */
     public Boolean existsByModuleUni(ModuleUni moduleUni);
 
-
-    //public Boolean
-
 }

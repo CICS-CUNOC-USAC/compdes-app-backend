@@ -3,6 +3,7 @@ package com.compdes.moduleUni.services;
 import com.compdes.common.exceptions.DuplicateResourceException;
 import com.compdes.moduleUni.mappers.ModuleUniMapper;
 import com.compdes.moduleUni.models.dto.request.CreateModuleUniDTO;
+import com.compdes.moduleUni.models.dto.response.BasicResponseModuleUniDTO;
 import com.compdes.moduleUni.models.dto.response.ResponseModuleUniDTO;
 import com.compdes.moduleUni.models.entities.ModuleUni;
 import com.compdes.moduleUni.repositories.ModuleUniRepository;
@@ -50,8 +51,14 @@ public class ModuleUniService {
      * */
     public List<ResponseModuleUniDTO> getAllModules(){
         List<ModuleUni> iterable = moduleUniRepository.findAll();
-        return iterable.stream()
-                .map(moduleUniMapper::moduleToResponseDto)
-                .collect(Collectors.toList());
+        return moduleUniMapper.moduleToResponseDto(iterable);
+    }
+
+    /**
+     * Retorna todos los modulos con informacion basica
+     * */
+    public List<BasicResponseModuleUniDTO> getAllForParticipants(){
+        List<ModuleUni> iterable = moduleUniRepository.findAll();
+        return moduleUniMapper.moduleToBasicResponseDto(iterable);
     }
 }

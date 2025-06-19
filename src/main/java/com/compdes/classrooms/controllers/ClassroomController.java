@@ -3,11 +3,13 @@ package com.compdes.classrooms.controllers;
 import com.compdes.classrooms.models.dto.request.CreateClassroomDTO;
 import com.compdes.classrooms.models.dto.response.ResponseClassroomDTO;
 import com.compdes.classrooms.services.ClassroomService;
+import com.compdes.common.exceptions.NotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -42,9 +44,10 @@ public class ClassroomController {
             @ApiResponse(responseCode = "400", description = "Datos inválidos o incompletos"),
             @ApiResponse(responseCode = "409", description = "Salón con el mismo nombre y facultad ya registrado")
     })
-    @PostMapping
+    @PostMapping("/create")
     @ResponseStatus(HttpStatus.CREATED)
-    public void createClassroom(@RequestBody @Valid CreateClassroomDTO createClassroomDTO) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public void createClassroom(@RequestBody @Valid CreateClassroomDTO createClassroomDTO) throws NotFoundException {
         classroomService.createClassroom(createClassroomDTO);
     }
 
@@ -52,7 +55,12 @@ public class ClassroomController {
      * Obtienen todos los salones disponibles
      *
      */
-    @GetMapping
+    @Operation(summary = "Obtiene todos los salones disponibles",
+            description = "Obtiene todos los salones registrados "
+    )
+    @GetMapping("/all")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ADMIN')")
     public List<ResponseClassroomDTO> getAllClassrooms(){
         return classroomService.getAllClassrooms();
     }
