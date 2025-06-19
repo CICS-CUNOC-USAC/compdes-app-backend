@@ -34,11 +34,12 @@ public class AdminParticipantProfileDTO extends ParticipantProfileDTO {
     private Boolean isCardPayment;
     private String cardPaymentProofLink;
     private String transferPaymentProofLink;
+    private String createdAt;
 
     public AdminParticipantProfileDTO(String firstName, String lastName, String organisation, Boolean isAuthor,
             Boolean isGuest, String email, String phone, String identificationDocument, String qrCodeLink, String id,
             PrivateRegistrationStatusInfoDTO registrationStatus, Boolean isTransferPayment, Boolean isCardPayment,
-            String cardPaymentProofLink, String transferPaymentProofLink) {
+            String cardPaymentProofLink, String transferPaymentProofLink, String createdAt) {
         super(firstName, lastName, organisation, isAuthor, isGuest, email, phone, identificationDocument, qrCodeLink);
         this.id = id;
         this.registrationStatus = registrationStatus;
@@ -46,8 +47,7 @@ public class AdminParticipantProfileDTO extends ParticipantProfileDTO {
         this.isCardPayment = isCardPayment;
         this.cardPaymentProofLink = cardPaymentProofLink;
         this.transferPaymentProofLink = transferPaymentProofLink;
+        this.createdAt = createdAt;
     }
-
-    
 
 }
