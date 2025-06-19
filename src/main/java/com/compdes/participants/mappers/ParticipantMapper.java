@@ -9,6 +9,7 @@ import org.mapstruct.MappingTarget;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.compdes.common.config.AppProperties;
+import com.compdes.common.utils.DateFormaterUtil;
 import com.compdes.participants.models.dto.request.CreateParticipantDTO;
 import com.compdes.participants.models.dto.response.AdminParticipantProfileDTO;
 import com.compdes.participants.models.dto.response.ParticipantProfileDTO;
@@ -32,6 +33,8 @@ public abstract class ParticipantMapper {
 
         @Autowired
         private AppProperties appProperties;
+        @Autowired
+        private DateFormaterUtil dateFormater;
 
         /**
          * Convierte un DTO de creación de participante a una entidad
@@ -89,6 +92,7 @@ public abstract class ParticipantMapper {
         @Mapping(target = "transferPaymentProofLink", ignore = true)
         @Mapping(target = "isCardPayment", ignore = true)
         @Mapping(target = "isTransferPayment", ignore = true)
+        @Mapping(target = "createdAt", ignore = true)
         public abstract AdminParticipantProfileDTO participantToPrivateParticipantInfoDto(Participant participant);
 
         /**
@@ -158,7 +162,8 @@ public abstract class ParticipantMapper {
                                                                 + StoredFileController.BASE_GET_FILE_BY_ID
                                                                 + participant.getPaymentProofImage().getId()
                                                 : null);
-        }
+                dto.setCreatedAt(dateFormater.parseToLocalFormat(participant.getCreatedAt()));
 
+        }
 
 }
