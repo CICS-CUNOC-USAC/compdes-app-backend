@@ -1,5 +1,7 @@
 package com.compdes.classrooms.models.dto.response;
 
+import com.compdes.moduleUni.models.dto.response.ResponseModuleUniDTO;
+
 import lombok.Value;
 
 /**
@@ -15,6 +17,6 @@ import lombok.Value;
 @Value
 public class ResponseClassroomDTO {
     private String name;
-    private String moduleUniId;
     private String id;
+    private ResponseModuleUniDTO moduleUni;
 }

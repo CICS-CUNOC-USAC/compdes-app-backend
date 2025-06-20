@@ -46,7 +46,7 @@ public interface ClassroomMapper {
     /**
     * Convierte una entidad `Classroom` a un DTO de respuesta.
     */
-    @Mapping(source = "moduleUni.id", target = "moduleUniId")
+    //@Mapping(source = "moduleUni.id", target = "moduleUniId")
     public ResponseClassroomDTO classroomToResponseDto(Classroom classroom);
 
     /**

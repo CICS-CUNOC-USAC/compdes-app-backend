@@ -34,6 +34,9 @@ public class ActivityController {
     private final ActivityService activityService;
     private final ActivityMapper activityMapper;
 
+    @Operation(summary = "Obtiene todas las actividades", responses = {
+            @ApiResponse(responseCode = "200", description = "Lista de actividades obtenida exitosamente"),
+    })
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<ActivityDTO> getAllActivities() {
