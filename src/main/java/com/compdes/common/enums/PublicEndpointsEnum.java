@@ -53,6 +53,8 @@ public enum PublicEndpointsEnum {
     PARTICIPANT_CREATE(HttpMethod.POST, "/api/v1/participants"),
     PARTICIPANT_AUTHOR_CREATE(HttpMethod.POST, "/api/v1/participants/author"),
     PUBLIC_INSCRIPTION_BY_DOCUMENT(HttpMethod.GET, "/api/v1/participants/public-inscription/by-document/*"),
+    // Rutas publicas de Activity
+    ACTIVITY_GET_ALL(HttpMethod.GET, "/api/v1/activities"),
     SWAGGER_UI(null, "/swagger-ui/**"),
     API_DOCS(null, "/v3/api-docs/**");
 
