@@ -14,10 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 /**
  * Servicio encargado de gestionar la creación y persistencia de salones
@@ -91,6 +89,10 @@ public class ClassroomService {
      * @return
      */
     public List<ResponseClassroomDTO> getAvailableClassrooms(AvailableClassroomsDTO availableClassroomsDTO) {
+        // Verificamos que las fechas de inicio y fin no sean nulas
+        if(availableClassroomsDTO.getInitScheduledDate().isAfter(availableClassroomsDTO.getEndScheduledDate())) {
+            throw new IllegalStateException("La fecha de inicio no puede ser posterior a la fecha de fin");
+        }
         List<Classroom> availableClassrooms = classroomRepository.findAvailableClassrooms(
                 availableClassroomsDTO.getInitScheduledDate(), availableClassroomsDTO.getEndScheduledDate());
         return availableClassrooms.stream()

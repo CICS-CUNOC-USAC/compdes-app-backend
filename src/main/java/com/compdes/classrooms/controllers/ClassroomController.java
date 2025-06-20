@@ -17,8 +17,6 @@ import java.util.List;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-
-
 /**
  * Controlador REST para la gestión de salones.
  *
@@ -60,21 +58,23 @@ public class ClassroomController {
      * Obtienen todos los salones disponibles
      *
      */
-    @Operation(summary = "Obtiene todos los salones disponibles",
-            description = "Obtiene todos los salones registrados "
-    )
+    @Operation(summary = "Obtiene todos los salones disponibles", description = "Obtiene todos los salones registrados ")
     @GetMapping("/all")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN')")
-    public List<ResponseClassroomDTO> getAllClassrooms(){
+    public List<ResponseClassroomDTO> getAllClassrooms() {
         return classroomService.getAllClassrooms();
     }
 
+    @Operation(summary = "Obtiene un salón por medio de su ID", responses = {
+            @ApiResponse(responseCode = "200", description = "Salón encontrado exitosamente"),
+    })
     @PostMapping("/available")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN')")
-    public List<ResponseClassroomDTO> getAvailableClassrooms(@RequestBody @Valid AvailableClassroomsDTO availableClassroomsDTO) {
+    public List<ResponseClassroomDTO> getAvailableClassrooms(
+            @RequestBody @Valid AvailableClassroomsDTO availableClassroomsDTO) {
         return classroomService.getAvailableClassrooms(availableClassroomsDTO);
     }
-    
+
 }
