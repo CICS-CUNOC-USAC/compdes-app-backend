@@ -29,6 +29,12 @@ public class ActivityService {
     }
 
     public Activity createActivity(CreateActivityDTO createActivityDTO) throws NotFoundException {
+        if (activityRepository.existsByClassroomIdAndInitScheduledDateLessThanEqualAndEndScheduledDateGreaterThanEqual(
+                createActivityDTO.getClassroomId(),
+                createActivityDTO.getInitScheduledDate(),
+                createActivityDTO.getEndScheduledDate())) {
+            throw new IllegalArgumentException("Ya existe una actividad programada en este horario para el aula especificada.");
+        }
         Activity activity = activityMapper.toActivity(createActivityDTO);
         Classroom classroom = classroomService.getClassroomById(createActivityDTO.getClassroomId());
         activity.setClassroom(classroom);
@@ -42,7 +48,8 @@ public class ActivityService {
         existingActivity.setName(updateActivityDTO.getName());
         existingActivity.setDescription(updateActivityDTO.getDescription());
         existingActivity.setType(updateActivityDTO.getType());
-        existingActivity.setScheduledDate(updateActivityDTO.getScheduledDate());
+        existingActivity.setInitScheduledDate(updateActivityDTO.getInitScheduledDate());
+        existingActivity.setEndScheduledDate(updateActivityDTO.getEndScheduledDate());
 
         return activityRepository.save(existingActivity);
     }

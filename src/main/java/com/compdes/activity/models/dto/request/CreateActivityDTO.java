@@ -22,8 +22,10 @@ public class CreateActivityDTO {
     private String description;
     @NotNull(message = "Se debe de proporcionar el tipo de actividad")
     private ActivityType type;
-    @NotNull(message = "Se debe de proporcionar la fecha y hora programada para la actividad")
-    private LocalDateTime scheduledDate; // ISO-8601 format (e.g., "2023-10-01T10:00:00")
+    @NotNull(message = "Se debe de proporcionar la fecha y hora de inicio para la actividad")
+    private LocalDateTime initScheduledDate; // ISO-8601 format (e.g., "2023-10-01T10:00:00")
+    @NotNull(message = "Se debe de proporcionar la fecha y hora de fin para la actividad")
+    private LocalDateTime endScheduledDate; // ISO-8601 format (e.g., "2023-10-01T12:00:00")
     @NotBlank(message = "Se debe de porporcionar el aula para la actividad")
     private String classroomId;
 }

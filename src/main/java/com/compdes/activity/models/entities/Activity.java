@@ -28,7 +28,9 @@ public class Activity extends Auditor {
     private String description;
     private ActivityType type;
     @Column(nullable = false)
-    private LocalDateTime scheduledDate;
+    private LocalDateTime initScheduledDate;
+    @Column(nullable = false)
+    private LocalDateTime endScheduledDate;
     @ManyToOne
     @JoinColumn(nullable = false)
     private Classroom classroom;
