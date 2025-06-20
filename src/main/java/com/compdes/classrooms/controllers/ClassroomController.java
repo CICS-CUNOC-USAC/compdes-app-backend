@@ -14,6 +14,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
 
 
 /**
@@ -67,7 +70,7 @@ public class ClassroomController {
         return classroomService.getAllClassrooms();
     }
 
-    @GetMapping("/available")
+    @PostMapping("/available")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN')")
     public List<ResponseClassroomDTO> getAvailableClassrooms(@RequestBody @Valid AvailableClassroomsDTO availableClassroomsDTO) {

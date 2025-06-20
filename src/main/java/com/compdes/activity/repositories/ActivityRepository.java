@@ -14,4 +14,11 @@ public interface ActivityRepository extends JpaRepository<Activity,String> {
             LocalDateTime initScheduledDate,
             LocalDateTime endScheduledDate
     );
+
+    boolean existsByIdNotAndClassroomIdAndInitScheduledDateLessThanEqualAndEndScheduledDateGreaterThanEqual(
+            String id,
+            String classroomId,
+            LocalDateTime initScheduledDate,
+            LocalDateTime endScheduledDate
+    );
 }
