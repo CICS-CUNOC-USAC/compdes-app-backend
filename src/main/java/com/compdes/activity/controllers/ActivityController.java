@@ -69,7 +69,7 @@ public class ActivityController {
     })
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ActivityDTO updateActivity(@PathVariable String id,
             @RequestBody @Valid UpdateActivityDTO updateActivityDTO) throws NotFoundException {
         return activityMapper.toActivityDTO(activityService.updateActivity(id, updateActivityDTO));
@@ -82,7 +82,7 @@ public class ActivityController {
     })
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteActivity(@PathVariable String id) throws NotFoundException {
         activityService.deleteActivity(id);
     }
