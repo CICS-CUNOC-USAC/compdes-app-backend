@@ -1,10 +1,14 @@
 package com.compdes.activity.services;
 
+import com.compdes.activity.enums.ActivityType;
 import com.compdes.activity.mappers.ActivityMapper;
 import com.compdes.activity.models.dto.request.CreateActivityDTO;
 import com.compdes.activity.models.dto.request.UpdateActivityDTO;
 import com.compdes.activity.models.entities.Activity;
 import com.compdes.activity.repositories.ActivityRepository;
+import com.compdes.classrooms.mappers.ClassroomMapper;
+import com.compdes.classrooms.models.entities.Classroom;
+import com.compdes.classrooms.services.ClassroomService;
 import com.compdes.common.exceptions.NotFoundException;
 
 import jakarta.transaction.Transactional;
@@ -19,14 +23,17 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ActivityService {
     private final ActivityRepository activityRepository;
+    private final ClassroomService classroomService;
     private final ActivityMapper activityMapper;
 
     public List<Activity> getAllActivities() {
         return (List<Activity>) activityRepository.findAll();
     }
 
-    public Activity createActivity(CreateActivityDTO createActivityDTO) {
+    public Activity createActivity(CreateActivityDTO createActivityDTO) throws NotFoundException {
         Activity activity = activityMapper.toActivity(createActivityDTO);
+        Classroom classroom = classroomService.getClassroomById(createActivityDTO.getClassroomId());
+        activity.setClassroom(classroom);
         return activityRepository.save(activity);
     }
 

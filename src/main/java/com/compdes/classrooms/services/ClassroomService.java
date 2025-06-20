@@ -67,4 +67,9 @@ public class ClassroomService {
 
     }
 
+    public Classroom getClassroomById(String id) throws NotFoundException {
+        return classroomRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Salon no encontrado por medio del ID: " + id));
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.compdes.activity.models.entities;
 
 import com.compdes.activity.enums.ActivityType;
+import com.compdes.classrooms.models.entities.Classroom;
 import com.compdes.common.models.entities.Auditor;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -26,4 +27,6 @@ public class Activity extends Auditor {
     private ActivityType type;
     @Column(nullable = false)
     private LocalDateTime scheduledDate;
+    @Column(nullable = true)
+    private Classroom classroom;
 }
