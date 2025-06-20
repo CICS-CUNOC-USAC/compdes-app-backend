@@ -43,11 +43,12 @@ public class ActivityController {
     @Operation(summary = "Crear nueva actividad", responses = {
         @ApiResponse(responseCode = "201", description = "Actividad creada exitosamente"),
         @ApiResponse(responseCode = "403", description = "Acceso denegado: requiere rol ADMIN"),
+        @ApiResponse(responseCode = "404", description = "Aula no encontrada"),
     })
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAuthority('ADMIN')")
-    public void createActivity(@RequestBody @Valid CreateActivityDTO createActivityDTO) {
+    public void createActivity(@RequestBody @Valid CreateActivityDTO createActivityDTO) throws NotFoundException {
         activityService.createActivity(createActivityDTO);
     }
 
