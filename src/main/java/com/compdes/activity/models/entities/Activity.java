@@ -5,6 +5,8 @@ import com.compdes.classrooms.models.entities.Classroom;
 import com.compdes.common.models.entities.Auditor;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -27,6 +29,7 @@ public class Activity extends Auditor {
     private ActivityType type;
     @Column(nullable = false)
     private LocalDateTime scheduledDate;
-    @Column(nullable = true)
+    @ManyToOne
+    @JoinColumn(nullable = false)
     private Classroom classroom;
 }
