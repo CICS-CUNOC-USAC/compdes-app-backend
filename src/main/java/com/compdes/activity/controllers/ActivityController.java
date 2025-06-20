@@ -34,26 +34,30 @@ public class ActivityController {
     private final ActivityService activityService;
     private final ActivityMapper activityMapper;
 
-    @GetMapping
+    @Operation(summary = "Obtiene todas las actividades", responses = {
+            @ApiResponse(responseCode = "200", description = "Lista de actividades obtenida exitosamente"),
+    })
+    @GetMapping("/all")
     @ResponseStatus(HttpStatus.OK)
     public List<ActivityDTO> getAllActivities() {
         return activityMapper.toActivityDTOList(activityService.getAllActivities());
     }
 
     @Operation(summary = "Crear nueva actividad", responses = {
-        @ApiResponse(responseCode = "201", description = "Actividad creada exitosamente"),
-        @ApiResponse(responseCode = "403", description = "Acceso denegado: requiere rol ADMIN"),
+            @ApiResponse(responseCode = "201", description = "Actividad creada exitosamente"),
+            @ApiResponse(responseCode = "403", description = "Acceso denegado: requiere rol ADMIN"),
+            @ApiResponse(responseCode = "404", description = "Aula no encontrada"),
     })
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasAuthority('ADMIN')")
-    public void createActivity(@RequestBody @Valid CreateActivityDTO createActivityDTO) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public void createActivity(@RequestBody @Valid CreateActivityDTO createActivityDTO) throws NotFoundException {
         activityService.createActivity(createActivityDTO);
     }
 
     @Operation(summary = "Obtiene una actividad por medio de su ID", responses = {
-        @ApiResponse(responseCode = "204", description = "Actividad eliminada exitosamente"),
-        @ApiResponse(responseCode = "404", description = "Actividad no encontrada"),
+            @ApiResponse(responseCode = "204", description = "Actividad eliminada exitosamente"),
+            @ApiResponse(responseCode = "404", description = "Actividad no encontrada"),
     })
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
@@ -62,26 +66,26 @@ public class ActivityController {
     }
 
     @Operation(summary = "Actualiza una actividad por medio de su ID", responses = {
-        @ApiResponse(responseCode = "200", description = "Actividad actualizada exitosamente"),
-        @ApiResponse(responseCode = "403", description = "Acceso denegado: requiere rol ADMIN"),
-        @ApiResponse(responseCode = "404", description = "Actividad no encontrada"),
+            @ApiResponse(responseCode = "200", description = "Actividad actualizada exitosamente"),
+            @ApiResponse(responseCode = "403", description = "Acceso denegado: requiere rol ADMIN"),
+            @ApiResponse(responseCode = "404", description = "Actividad no encontrada"),
     })
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ActivityDTO updateActivity(@PathVariable String id,
             @RequestBody @Valid UpdateActivityDTO updateActivityDTO) throws NotFoundException {
         return activityMapper.toActivityDTO(activityService.updateActivity(id, updateActivityDTO));
     }
 
     @Operation(summary = "Elimina una actividad por medio de su ID", responses = {
-        @ApiResponse(responseCode = "204", description = "Actividad eliminada exitosamente"),
-        @ApiResponse(responseCode = "403", description = "Acceso denegado: requiere rol ADMIN"),
-        @ApiResponse(responseCode = "404", description = "Actividad no encontrada"),
+            @ApiResponse(responseCode = "204", description = "Actividad eliminada exitosamente"),
+            @ApiResponse(responseCode = "403", description = "Acceso denegado: requiere rol ADMIN"),
+            @ApiResponse(responseCode = "404", description = "Actividad no encontrada"),
     })
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteActivity(@PathVariable String id) throws NotFoundException {
         activityService.deleteActivity(id);
     }
