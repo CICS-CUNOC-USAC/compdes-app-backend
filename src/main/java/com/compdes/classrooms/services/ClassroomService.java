@@ -1,6 +1,7 @@
 package com.compdes.classrooms.services;
 
 import com.compdes.classrooms.mappers.ClassroomMapper;
+import com.compdes.classrooms.models.dto.request.AvailableClassroomsDTO;
 import com.compdes.classrooms.models.dto.request.CreateClassroomDTO;
 import com.compdes.classrooms.models.dto.response.ResponseClassroomDTO;
 import com.compdes.classrooms.models.entities.Classroom;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -41,35 +43,59 @@ public class ClassroomService {
     private final ModuleUniRepository moduleUniRepository;
 
     /**
-    * Crea un salon
-    * */
+     * Crea un nuevo salón de clases para conferencias.
+     * @param createClassroomDTO
+     * @return
+     * @throws NotFoundException
+     */
     public Classroom createClassroom(CreateClassroomDTO createClassroomDTO) throws NotFoundException {
         ModuleUni module = moduleUniRepository.findById(createClassroomDTO.getModuleId())
                 .orElseThrow(() -> new NotFoundException("Módulo no encontrado"));
 
         Classroom classroom = new Classroom(createClassroomDTO.getName(), module);
-        if(classroomRepository.existsByName(classroom.getName())
-                && classroomRepository.existsByModuleUni(classroom.getModuleUni())
-        ){
+        if (classroomRepository.existsByName(classroom.getName())
+                && classroomRepository.existsByModuleUni(classroom.getModuleUni())) {
             throw new DuplicateResourceException(
-                "No se puede completar el registro: el salon ya esta registrado"
-            );
+                    "No se puede completar el registro: el salon ya esta registrado");
         }
         return classroomRepository.save(classroom);
     }
 
     /**
-    * obtiene todos los salones y los convierte en un tipo de dato DTO
-    * */
+     * Obtiene todos los salones registrados en el sistema
+     * @return List<ResponseClassroomDTO>
+     */
     public List<ResponseClassroomDTO> getAllClassrooms() {
         List<Classroom> iterable = classroomRepository.findAll();
         return classroomMapper.classroomToResponseDto(iterable);
 
     }
 
+    /**
+     * Obtiene un salon por medio de su ID
+     * 
+     * @param id
+     * @return Classroom
+     * @throws NotFoundException
+     */
     public Classroom getClassroomById(String id) throws NotFoundException {
         return classroomRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Salon no encontrado por medio del ID: " + id));
+    }
+
+    /**
+     * Obtiene una lista de salones disponibles
+     * 
+     * @param initScheduledDate
+     * @param endScheduledDate
+     * @return
+     */
+    public List<ResponseClassroomDTO> getAvailableClassrooms(AvailableClassroomsDTO availableClassroomsDTO) {
+        List<Classroom> availableClassrooms = classroomRepository.findAvailableClassrooms(
+                availableClassroomsDTO.getInitScheduledDate(), availableClassroomsDTO.getEndScheduledDate());
+        return availableClassrooms.stream()
+                .map(classroomMapper::classroomToResponseDto)
+                .collect(Collectors.toList());
     }
 
 }

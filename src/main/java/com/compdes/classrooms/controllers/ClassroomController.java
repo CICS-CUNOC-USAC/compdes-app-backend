@@ -1,5 +1,6 @@
 package com.compdes.classrooms.controllers;
 
+import com.compdes.classrooms.models.dto.request.AvailableClassroomsDTO;
 import com.compdes.classrooms.models.dto.request.CreateClassroomDTO;
 import com.compdes.classrooms.models.dto.response.ResponseClassroomDTO;
 import com.compdes.classrooms.services.ClassroomService;
@@ -13,6 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
 
 /**
  * Controlador REST para la gestión de salones.
@@ -64,4 +66,12 @@ public class ClassroomController {
     public List<ResponseClassroomDTO> getAllClassrooms(){
         return classroomService.getAllClassrooms();
     }
+
+    @GetMapping("/available")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<ResponseClassroomDTO> getAvailableClassrooms(@RequestBody @Valid AvailableClassroomsDTO availableClassroomsDTO) {
+        return classroomService.getAvailableClassrooms(availableClassroomsDTO);
+    }
+    
 }
