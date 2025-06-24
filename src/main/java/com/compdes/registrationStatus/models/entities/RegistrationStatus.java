@@ -8,10 +8,12 @@ import com.compdes.participants.models.entities.Participant;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToOne;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * Representa el estado del registro de un participante.
@@ -48,6 +50,7 @@ public class RegistrationStatus extends Auditor {
     private Boolean isCashPayment;
 
     @Column(nullable = true, unique = true, length = 10)
+    @Setter(value = AccessLevel.PRIVATE)
     private String voucherNumber;
 
     /**
@@ -65,6 +68,34 @@ public class RegistrationStatus extends Auditor {
         this.isApproved = isApproved;
         this.isCashPayment = isCashPayment;
         this.voucherNumber = voucherNumber;
+    }
+
+    /**
+     * Asigna un nuevo número de comprobante al estado de registro.
+     * 
+     * Este método actualiza el campo {@code voucherNumber} únicamente si el
+     * participante realizó un pago en efectivo. Si el campo {@code isCashPayment}
+     * es falso o nulo, se lanza una excepción para evitar una asignación inválida.
+     * 
+     * @param voucherNumber nuevo número de comprobante a asignar
+     * @throws IllegalArgumentException si el pago no fue en efectivo o esta nulo
+     */
+    public void updateVoucherNumber(String voucherNumber) {
+        if (isCashPayment == null) {
+            throw new IllegalArgumentException(
+                    "Este participante está registrado como invitado y no realizó ningún pago, por lo tanto, no se le puede asignar un número de talonario.");
+        }
+
+        if (!isCashPayment) {
+            throw new IllegalArgumentException(
+                    "Parece que este participante no realizó un pago en efectivo, por lo tanto, no se le puede asignar un número de talonario.");
+        }
+
+        if (isCashPayment && voucherNumber == null) {
+            throw new IllegalArgumentException(
+                    "Este participante realizó un pago en efectivo, por lo tanto, es necesario asignar un número de talonario.");
+        }
+        setVoucherNumber(voucherNumber);
     }
 
     /**

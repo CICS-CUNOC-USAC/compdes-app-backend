@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,6 +28,7 @@ import com.compdes.participants.models.dto.internal.CreateParticipantInternalDTO
 import com.compdes.participants.models.dto.request.CreateParticipantByAdminDTO;
 import com.compdes.participants.models.dto.request.CreateParticipantWithPaymentDTO;
 import com.compdes.participants.models.dto.request.ParticipantFilterDTO;
+import com.compdes.participants.models.dto.request.UpdateParticipantByAdminDTO;
 import com.compdes.participants.models.dto.response.AdminParticipantProfileDTO;
 import com.compdes.participants.models.dto.response.ParticipantProfileDTO;
 import com.compdes.participants.models.dto.response.PublicParticipantProfileDTO;
@@ -85,8 +87,8 @@ public class ParticipantController {
                         Este endpoint está restringido a usuarios con rol `ADMIN` y expone información sensible del sistema.
                         """, security = @SecurityRequirement(name = "bearerAuth"), responses = {
                         @ApiResponse(responseCode = "200", description = "Lista de participantes obtenida exitosamente"),
-                        @ApiResponse(responseCode = "403", description = "Acceso denegado al recurso (requiere rol `ADMIN`), Token inválido o no proporcionado", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class))),
-                        @ApiResponse(responseCode = "500", description = "Error interno del servidor al recuperar los participantes")
+                        @ApiResponse(responseCode = "403", description = "Acceso denegado al recurso (requiere rol `ADMIN`), Token inválido o no proporcionado", content = @Content(schema = @Schema(implementation = ErrorDTO.class))),
+                        @ApiResponse(responseCode = "500", description = "Error interno del servidor al recuperar los participantes", content = @Content(schema = @Schema(implementation = ErrorDTO.class)))
         })
         @GetMapping("/all")
         @PreAuthorize("hasRole('ADMIN')")
@@ -115,9 +117,9 @@ public class ParticipantController {
                         + "Incluye información privada. "
                         + "Solo accesible para usuarios con rol `ADMIN`.", security = @SecurityRequirement(name = "bearerAuth"), responses = {
                                         @ApiResponse(responseCode = "200", description = "Participante encontrado exitosamente"),
-                                        @ApiResponse(responseCode = "404", description = "No se encontró un participante con el ID especificado"),
-                                        @ApiResponse(responseCode = "403", description = "Acceso denegado al recurso (requiere rol `ADMIN`), token inválido o no proporcionado"),
-                                        @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+                                        @ApiResponse(responseCode = "404", description = "No se encontró un participante con el ID especificado", content = @Content(schema = @Schema(implementation = ErrorDTO.class))),
+                                        @ApiResponse(responseCode = "403", description = "Acceso denegado al recurso (requiere rol `ADMIN`), token inválido o no proporcionado", content = @Content(schema = @Schema(implementation = ErrorDTO.class))),
+                                        @ApiResponse(responseCode = "500", description = "Error interno del servidor", content = @Content(schema = @Schema(implementation = ErrorDTO.class)))
                         })
         @GetMapping("/{id}")
         @PreAuthorize("hasRole('ADMIN')")
@@ -148,8 +150,8 @@ public class ParticipantController {
         @Operation(summary = "Consultar inscripción pública por documento de identificación", description = "Permite consultar el estado público de una inscripción mediante el documento de identificación. "
                         + "No requiere autenticación y no expone información sensible del participante.", responses = {
                                         @ApiResponse(responseCode = "200", description = "Inscripción encontrada exitosamente"),
-                                        @ApiResponse(responseCode = "404", description = "No se encontró ninguna inscripción asociada al documento ingresado"),
-                                        @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+                                        @ApiResponse(responseCode = "404", description = "No se encontró ninguna inscripción asociada al documento ingresado", content = @Content(schema = @Schema(implementation = ErrorDTO.class))),
+                                        @ApiResponse(responseCode = "500", description = "Error interno del servidor", content = @Content(schema = @Schema(implementation = ErrorDTO.class)))
                         })
 
         @GetMapping("/public-inscription/by-document/{identificationDocument}")
@@ -179,8 +181,8 @@ public class ParticipantController {
          */
         @Operation(summary = "Obtener perfil propio", description = "Retorna el perfil del participante autenticado basado en el token Bearer JWT proporcionado.", security = @SecurityRequirement(name = "bearerAuth"), responses = {
                         @ApiResponse(responseCode = "200", description = "Perfil obtenido exitosamente"),
-                        @ApiResponse(responseCode = "401", description = "Token de autenticación inválido o ausente"),
-                        @ApiResponse(responseCode = "404", description = "No se encontró un participante vinculado al usuario autenticado")
+                        @ApiResponse(responseCode = "401", description = "Token de autenticación inválido o ausente", content = @Content(schema = @Schema(implementation = ErrorDTO.class))),
+                        @ApiResponse(responseCode = "404", description = "No se encontró un participante vinculado al usuario autenticado", content = @Content(schema = @Schema(implementation = ErrorDTO.class)))
         })
         @GetMapping("/my-profile")
         @PreAuthorize("hasRole('PARTICIPANT')")
@@ -209,9 +211,9 @@ public class ParticipantController {
          */
         @Operation(summary = "Registrar participante", description = "Registra un nuevo participante (autor o no autor) desde el formulario público. debe proporcionar un comprobante de pago ya sea como archivo o formulario.", requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Formulario con los datos del participante y el archivo del comprobante (campo 'file')", required = true, content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE, schema = @Schema(implementation = CreateParticipantWithPaymentDTO.class))), responses = {
                         @ApiResponse(responseCode = "201", description = "Participante creado exitosamente"),
-                        @ApiResponse(responseCode = "400", description = "Datos inválidos o incompletos"),
-                        @ApiResponse(responseCode = "409", description = "Participante ya registrado con el mismo correo o documento"),
-                        @ApiResponse(responseCode = "500", description = "Error al procesar el archivo o la solicitud")
+                        @ApiResponse(responseCode = "400", description = "Datos inválidos o incompletos", content = @Content(schema = @Schema(implementation = ErrorDTO.class))),
+                        @ApiResponse(responseCode = "409", description = "Participante ya registrado con el mismo correo o documento", content = @Content(schema = @Schema(implementation = ErrorDTO.class))),
+                        @ApiResponse(responseCode = "500", description = "Error al procesar el archivo o la solicitud", content = @Content(schema = @Schema(implementation = ErrorDTO.class)))
         })
         @PostMapping
         @ResponseStatus(HttpStatus.CREATED)
@@ -248,10 +250,10 @@ public class ParticipantController {
                         + "Los participantes no invitados deben proporcionar un comprobante de pago (voucherNumber). "
                         + "Solo accesible para usuarios con rol `ADMIN`.", security = @SecurityRequirement(name = "bearerAuth"), responses = {
                                         @ApiResponse(responseCode = "201", description = "Participante creado exitosamente"),
-                                        @ApiResponse(responseCode = "400", description = "Datos inválidos o comprobante de pago faltante o incorrecto"),
-                                        @ApiResponse(responseCode = "409", description = "Participante ya registrado con el mismo correo o documento"),
-                                        @ApiResponse(responseCode = "403", description = "Acceso denegado al recurso (requiere rol `ADMIN`), Token inválido o no proporcionado"),
-                                        @ApiResponse(responseCode = "500", description = "Error interno del servidor al procesar la solicitud")
+                                        @ApiResponse(responseCode = "400", description = "Datos inválidos o comprobante de pago faltante o incorrecto", content = @Content(schema = @Schema(implementation = ErrorDTO.class))),
+                                        @ApiResponse(responseCode = "409", description = "Participante ya registrado con el mismo correo o documento", content = @Content(schema = @Schema(implementation = ErrorDTO.class))),
+                                        @ApiResponse(responseCode = "403", description = "Acceso denegado al recurso (requiere rol `ADMIN`), Token inválido o no proporcionado", content = @Content(schema = @Schema(implementation = ErrorDTO.class))),
+                                        @ApiResponse(responseCode = "500", description = "Error interno del servidor al procesar la solicitud", content = @Content(schema = @Schema(implementation = ErrorDTO.class)))
                         })
         @PostMapping("/byAdmin")
         @PreAuthorize("hasRole('ADMIN')")
@@ -261,11 +263,35 @@ public class ParticipantController {
                 participantService.createParticipantByAdmin(createParticipantByAdminDTO);
         }
 
+        @Operation(summary = "Actualizar participante", description = "Actualiza los datos de un participante desde el panel de administración. "
+                        +
+                        "Solo puede enviarse uno de los siguientes campos opcionales: 'voucherNumber' o 'paymentProof'. "
+                        +
+                        "Si se envía 'voucherNumber', el participante debe haber realizado un pago en efectivo. " +
+                        "Si se envía 'paymentProof.link', el participante debe haber pagado con tarjeta. " +
+                        "También se valida que el correo electrónico y el documento de identificación no estén ya registrados por otro participante. "
+                        +
+                        "Requiere rol `ADMIN`.", security = @SecurityRequirement(name = "bearerAuth"), responses = {
+                                        @ApiResponse(responseCode = "200", description = "Participante actualizado correctamente"),
+                                        @ApiResponse(responseCode = "400", description = "Datos inválidos o reglas de negocio incumplidas. Puede ocurrir si: se intenta guardar un link sin pago con tarjeta, un número de comprobante sin pago en efectivo, o si se envían ambos campos opcionales a la vez.", content = @Content(schema = @Schema(implementation = ErrorDTO.class))),
+                                        @ApiResponse(responseCode = "404", description = "No se encontró un participante con el ID proporcionado", content = @Content(schema = @Schema(implementation = ErrorDTO.class))),
+                                        @ApiResponse(responseCode = "409", description = "Ya existe otro participante con el mismo correo electrónico o documento de identificación", content = @Content(schema = @Schema(implementation = ErrorDTO.class))),
+                                        @ApiResponse(responseCode = "500", description = "Error interno del servidor", content = @Content(schema = @Schema(implementation = ErrorDTO.class)))
+                        })
+        @PatchMapping("/{id}")
+        @PreAuthorize("hasRole('ADMIN')")
+        @ResponseStatus(HttpStatus.OK)
+        public void updateParticipantByAdmin(
+                        @PathVariable String id, @RequestBody @Valid UpdateParticipantByAdminDTO dto)
+                        throws NotFoundException {
+                participantService.updateParticipantByAdmin(id, dto);
+        }
+
         @Operation(summary = "Eliminar participante", description = "Elimina un participante si aún no ha sido confirmado. "
                         + "En caso de que el participante ya esté confirmado, se rechaza la operación. Accesible para `ADMIN`", security = @SecurityRequirement(name = "bearerAuth"), responses = {
                                         @ApiResponse(responseCode = "204", description = "Participante eliminado exitosamente"),
-                                        @ApiResponse(responseCode = "404", description = "Participante no encontrado"),
-                                        @ApiResponse(responseCode = "409", description = "El participante ya fue confirmado y no puede ser eliminado")
+                                        @ApiResponse(responseCode = "404", description = "Participante no encontrado", content = @Content(schema = @Schema(implementation = ErrorDTO.class))),
+                                        @ApiResponse(responseCode = "409", description = "El participante ya fue confirmado y no puede ser eliminado", content = @Content(schema = @Schema(implementation = ErrorDTO.class)))
                         })
         @DeleteMapping("/{id}")
         @PreAuthorize("hasRole('ADMIN')")

@@ -9,17 +9,21 @@ import org.springframework.transaction.annotation.Transactional;
 import com.compdes.auth.users.models.entities.CompdesUser;
 import com.compdes.common.exceptions.DuplicateResourceException;
 import com.compdes.common.exceptions.NotFoundException;
+import com.compdes.participants.enums.ParticipantErrorMessages;
+import com.compdes.participants.factories.PaymentProofStrategyFactory;
 import com.compdes.participants.mappers.ParticipantMapper;
 import com.compdes.participants.models.dto.internal.CreateParticipantInternalDTO;
 import com.compdes.participants.models.dto.request.CreateParticipantByAdminDTO;
 import com.compdes.participants.models.dto.request.CreateParticipantDTO;
 import com.compdes.participants.models.dto.request.ParticipantFilterDTO;
+import com.compdes.participants.models.dto.request.UpdateParticipantByAdminDTO;
 import com.compdes.participants.models.entities.Participant;
 import com.compdes.participants.repositories.ParticipantRepository;
 import com.compdes.participants.repositories.specifications.ParticipantSpecification;
-import com.compdes.participants.strategies.paymentproof.PaymentProofStrategyFactory;
+import com.compdes.paymentProofs.services.PaymentProofService;
 import com.compdes.qrCodes.models.entities.QrCode;
 import com.compdes.qrCodes.services.QrCodeService;
+import com.compdes.registrationStatus.factories.RegistrationStatusFactory;
 import com.compdes.registrationStatus.models.entities.RegistrationStatus;
 import com.compdes.registrationStatus.services.RegistrationStatusService;
 import com.compdes.storedFiles.services.StoredFileService;
@@ -48,6 +52,9 @@ public class ParticipantService {
         private final ParticipantRepository participantRepository;
         private final PaymentProofStrategyFactory paymentProofStrategyFactory;
         private final RegistrationStatusService registrationStatusService;
+        private final PaymentProofService paymentProofService;
+        private final RegistrationStatusFactory registrationStatusFactory;
+        private final ParticipantValidationService participantValidationService;
         private final StoredFileService storedFileService;
         private final QrCodeService qrCodeService;
 
@@ -74,9 +81,7 @@ public class ParticipantService {
                         throws NotFoundException {
                 return participantRepository.findByIdentificationDocument(identificationDocument).orElseThrow(
                                 () -> new NotFoundException(
-                                                "No se encontró ninguna inscripción asociada al documento de identificación ingresado. "
-                                                                + "Por favor, verifica que los datos sean correctos. "
-                                                                + "Si estás seguro de que te inscribiste, pero aún así no puedes ver tu información, contacta al equipo de soporte."));
+                                                ParticipantErrorMessages.NOT_FOUND_BY_DOCUMENT.getMessage()));
 
         }
 
@@ -92,17 +97,11 @@ public class ParticipantService {
                         throws NotFoundException {
                 return participantRepository.findByCompdesUser_Username(username).orElseThrow(
                                 () -> new NotFoundException(
-                                                "No se encontró ninguna inscripción vinculada al usuario ingresado. "
-                                                                + "Verifica tus datos o contacta al equipo de soporte si ya realizaste tu inscripción."));
+                                                ParticipantErrorMessages.NOT_FOUND_BY_USERNAME.getMessage()));
         }
 
         /**
          * Busca un participante en la base de datos utilizando su identificador único.
-         * 
-         * Este método intenta recuperar un {@link Participant} por su ID. Si no se
-         * encuentra
-         * ningún registro correspondiente, lanza una excepción indicando que el
-         * participante no existe.
          * 
          * @param id identificador único del participante a buscar
          * @return el participante correspondiente al ID proporcionado
@@ -111,8 +110,7 @@ public class ParticipantService {
          */
         public Participant getParticipantById(String id) throws NotFoundException {
                 return participantRepository.findById(id).orElseThrow(
-                                () -> new NotFoundException(
-                                                "No se encontró un participante con el ID proporcionado. Por favor, verifica la información e intenta nuevamente."));
+                                () -> new NotFoundException(ParticipantErrorMessages.NOT_FOUND_BY_ID.getMessage()));
         }
 
         /**
@@ -129,24 +127,17 @@ public class ParticipantService {
          * @return el participante guardado con su comprobante asociado
          */
         public Participant createParticipant(CreateParticipantInternalDTO createParticipantDTO) {
-                RegistrationStatus registrationStatus = RegistrationStatus.builder()
-                                .isApproved(false)
-                                .isCashPayment(false)
-                                .voucherNumber(null)
-                                .build();
+                // obtiene una instancia de RegistrationStatus
+                RegistrationStatus registrationStatus = registrationStatusFactory.createDefaultForPublic();
 
-                // mandar a guardar al participante
                 Participant savedParticipant = saveGenericParticipant(createParticipantDTO,
-                                registrationStatus, false);
+                                registrationStatus, false);// guarda el participante para obtener un id
 
-                // aplicar una estrategia
                 paymentProofStrategyFactory
                                 .resolve(createParticipantDTO)
-                                .process(savedParticipant, createParticipantDTO);
+                                .process(savedParticipant, createParticipantDTO);// aplica una estrategia
 
-                return participantRepository.save(savedParticipant);// se vuelve a guardar porque las estrategias
-                                                                    // generan
-                                                                    // relaciones
+                return participantRepository.save(savedParticipant);// guarda las estrategias
         }
 
         /**
@@ -158,32 +149,64 @@ public class ParticipantService {
          * autores,
          * no se requiere comprobante ni se marca pago.
          *
-         * Este método delega el guardado final al método genérico
-         * {@code saveGenericParticipantOlineMethod}.
-         *
          * @param createParticipantByAdminDTO DTO con la información del participante a
          *                                    crear
          * @return el participante creado y persistido en base de datos
          */
         public Participant createParticipantByAdmin(CreateParticipantByAdminDTO createParticipantByAdminDTO) {
                 // se construye un nuevo estado de registro para el participante
-                RegistrationStatus registrationStatus = RegistrationStatus.builder()
-                                .isApproved(false) // se marca como no aprobado por defecto
-                                // se indica si el pago fue en efectivo solo si no es invitado (invitado no
-                                // paga)
-                                .isCashPayment(createParticipantByAdminDTO.getIsGuest() ? null : true)
-                                // si el participante es invitado, no se asigna número de comprobante; de lo
-                                // contrario, si
-                                .voucherNumber(createParticipantByAdminDTO.getIsGuest() ? null
-                                                : createParticipantByAdminDTO.getVoucherNumber())
-                                .build();
-
+                RegistrationStatus registrationStatus = registrationStatusFactory.fromAdminInput(
+                                createParticipantByAdminDTO.getIsGuest(),
+                                createParticipantByAdminDTO.getVoucherNumber());
                 // ahora que ya esta configurado todo podemos mandar a guardar
                 Participant savedParticipant = saveGenericParticipant(createParticipantByAdminDTO,
                                 registrationStatus, createParticipantByAdminDTO.getIsGuest());
                 // madamos a aprovar el registro
                 registrationStatusService.approveRegistrationByParticipant(savedParticipant);
                 return savedParticipant;
+        }
+
+        /**
+         * Actualiza los datos de un participante desde el panel de administración.
+         * 
+         * Si se incluye un comprobante de pago o número de talonario, también se
+         * actualizan.
+         * 
+         * @param participantId ID del participante a actualizar
+         * @param dto           objeto con los nuevos datos
+         * @return el participante actualizado
+         * 
+         * @throws NotFoundException          si no se encuentra el participante, el
+         *                                    comprobante de pago o el estado de
+         *                                    registro
+         * @throws DuplicateResourceException si el correo, documento o número de
+         *                                    talonario ya están en uso
+         * @throws IllegalArgumentException   si el participante no cumple con las
+         *                                    condiciones para actualizar pago o
+         *                                    talonario
+         */
+        public Participant updateParticipantByAdmin(String participantId, UpdateParticipantByAdminDTO dto)
+                        throws NotFoundException {
+                Participant participant = getParticipantById(participantId);// trae el participante por id
+
+                participantValidationService.validateUniqueDocumentExcludingId(dto.getIdentificationDocument(),
+                                participantId, ParticipantErrorMessages.DUPLICATE_DOCUMENT.getMessage());
+
+                participantValidationService.validateUniqueEmailExcludingId(dto.getEmail(),
+                                participantId, ParticipantErrorMessages.DUPLICATE_EMAIL.getMessage());
+
+                participant.update(dto);// guarda la actualizacion de la info personal
+
+                if (dto.getPaymentProof() != null) { // actualia el payment si se envio
+                        paymentProofService.updatePaymentProof(participant.getPaymentProof(), dto.getPaymentProof());
+                }
+
+                if (dto.getVoucherNumber() != null) {// actualiza el talonario si se envio
+                        registrationStatusService.updateRegistrationStatus(participant.getRegistrationStatus().getId(),
+                                        dto.getVoucherNumber());
+                }
+
+                return participantRepository.save(participant);
         }
 
         /**
@@ -208,28 +231,18 @@ public class ParticipantService {
                 Participant participant = participantMapper.createParticipantDtoToParticipant(createParticipantDTO);
                 participant.setIsGuest(isGuest);
 
-                // verificar que no exista otro participante con el mismo email
-                if (participantRepository.existsByEmail(participant.getEmail())) {
-                        throw new DuplicateResourceException(
-                                        "No se puede completar el registro: el correo ingresado ya está asociado a otro participante.");
-                }
+                participantValidationService.validateUniqueEmail(participant.getEmail(),
+                                ParticipantErrorMessages.DUPLICATE_EMAIL.getMessage());
 
-                // verificar que no exista otro participante con el mismo doc de identificacion
-                if (participantRepository.existsByIdentificationDocument(participant.getIdentificationDocument())) {
-                        throw new DuplicateResourceException(
-                                        "No se puede completar el registro: el documento de identificación ya está asociado a otro participante.");
+                participantValidationService.validateUniqueDocument(participant.getIdentificationDocument(),
+                                ParticipantErrorMessages.DUPLICATE_DOCUMENT.getMessage());
 
-                }
+                participant = participantRepository.save(participant);// guarda para obtener un id
 
-                // guardamos el participante para obtener un id y podr asociar una constancia de
-                // pago
-                participant = participantRepository.save(participant);
-                // guardamos el estado del registro
                 registrationStatus = registrationStatusService
-                                .createRegistrationStatus(registrationStatus, participant);
+                                .createRegistrationStatus(registrationStatus, participant);// guarda RegistrationStatus
 
-                // le seteamos al participante su estado de registro
-                participant.setRegistrationStatus(registrationStatus);
+                participant.setRegistrationStatus(registrationStatus);/// relaciona Participant-RegistrationStatus
 
                 return participantRepository.save(participant);
         }
@@ -237,11 +250,6 @@ public class ParticipantService {
         /**
          * Asocia un usuario del sistema a un participante y persiste la relación en la
          * base de datos.
-         * 
-         * Este método asigna la instancia de {@link CompdesUser} al participante dado,
-         * guarda
-         * la entidad actualizada en la base de datos y retorna el participante
-         * resultante.
          * 
          * <strong>Nota:</strong> Este método forma parte de la lógica interna de la
          * aplicación y
@@ -263,9 +271,9 @@ public class ParticipantService {
         /**
          * Asigna un código QR disponible a un participante y persiste la relación.
          * 
-         * Este método obtiene un código QR no asignado mediante el servicio
-         * {@link QrCodeService}, establece la relación entre el participante y el
-         * código QR, y guarda los cambios en la base de datos.
+         * <strong>Nota:</strong> Este método forma parte de la lógica interna de la
+         * aplicación y
+         * no está diseñado para ser expuesto como un endpoint HTTP.
          * 
          * @param participant participante al que se asignará el código QR
          * @return el participante actualizado con el código QR asignado
@@ -287,12 +295,6 @@ public class ParticipantService {
         /**
          * Elimina un participante del sistema si aún no ha sido confirmado.
          * 
-         * Este método recupera al participante por su identificador y valida que su
-         * estado de registro
-         * no esté aprobado. Si el participante ya fue confirmado, lanza una excepción
-         * para evitar
-         * la eliminación de registros válidos y aprobados.
-         * 
          * @param id identificador del participante que se desea eliminar
          * @throws NotFoundException     si no se encuentra un participante con el ID
          *                               proporcionado
@@ -302,9 +304,9 @@ public class ParticipantService {
         public void deleteParticipant(String id) throws NotFoundException {
                 Participant participant = getParticipantById(id);
 
-                if (participant.getRegistrationStatus().getIsApproved()) {
+                if (participant.getRegistrationStatus().getIsApproved()) {// participante confirmado no puede borrarse
                         throw new IllegalStateException(
-                                        "No es posible realizar esta operación porque el participante ya fue confirmado previamente.");
+                                        ParticipantErrorMessages.PARTICIPANT_ALREADY_CONFIRMED.getMessage());
                 }
                 participantRepository.deleteById(id);
         }
