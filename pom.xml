@@ -150,6 +150,12 @@
 			<version>${com.google.zxing}</version>
 		</dependency>
 
+		<!--Migraciones-->
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-mysql</artifactId>
+		</dependency>
+
 	</dependencies>
 
 	<build>
@@ -193,6 +199,19 @@
 					</excludes>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.flywaydb</groupId>
+				<artifactId>flyway-maven-plugin</artifactId>
+				<version>11.7.2</version>
+				<configuration>
+					<url>jdbc:mysql://localhost:3306/compdes</url>
+					<user>compdes_user</user>
+					<password>compdes@app</password>
+					<baselineVersion>1</baselineVersion>
+					<baselineDescription>Primera migración en prod</baselineDescription>
+				</configuration>
+			</plugin>
+
 		</plugins>
 	</build>
 
