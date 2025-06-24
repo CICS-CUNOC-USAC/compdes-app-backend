@@ -89,6 +89,34 @@ public class RegistrationStatusService {
     }
 
     /**
+     * Actualiza el número de comprobante de un estado de registro existente.
+     * 
+     * Este método busca el estado de registro por su identificador y actualiza el
+     * campo {@code voucherNumber}, siempre que el pago sea en efectivo.
+     * Antes de realizar la actualización, valida que el nuevo número de comprobante
+     * no esté ya en uso por otro participante.
+     * 
+     * @param id            identificador del estado de registro a actualizar
+     * @param voucherNumber nuevo número de comprobante a asignar
+     * @return el estado de registro actualizado
+     * @throws NotFoundException          si no se encuentra un estado de registro
+     *                                    con el ID proporcionado
+     * @throws DuplicateResourceException si el número de comprobante ya está
+     *                                    registrado por otro participante
+     * @throws IllegalArgumentException   si el pago no fue en efectivo y no se
+     *                                    permite asignar número de comprobante
+     */
+    public RegistrationStatus updateRegistrationStatus(String id, String voucherNumber) throws NotFoundException {
+        RegistrationStatus registrationStatus = getRegistrationStatusById(id);// busca el registro por el id
+        // asgura que no exista otro participante con el mismo numero de voucher
+        if (voucherNumber != null && registrationStatusRepository.existsByVoucherNumberAndIdIsNot(voucherNumber, id)) {
+            throw new DuplicateResourceException("El número de comprobante ya está en uso por otro participante.");
+        }
+        registrationStatus.updateVoucherNumber(voucherNumber);// invoca la logica de update
+        return registrationStatusRepository.save(registrationStatus);
+    }
+
+    /**
      * Aprueba el estado de registro de un participante a partir de su
      * identificador.
      * 
@@ -159,5 +187,19 @@ public class RegistrationStatusService {
         return registrationStatusRepository.findByParticipant_Id(participantId).orElseThrow(
                 () -> new NotFoundException(
                         "No se encontró un estado de registro asociado al participante con ID: " + participantId));
+    }
+
+    /**
+     * Busca un estado de registro por su identificador.
+     * 
+     * @param id identificador único del estado de registro
+     * @return el estado de registro correspondiente al ID
+     * @throws NotFoundException si no existe un estado de registro con el ID
+     *                           proporcionado
+     */
+    public RegistrationStatus getRegistrationStatusById(String id) throws NotFoundException {
+        return registrationStatusRepository.findById(id).orElseThrow(
+                () -> new NotFoundException(
+                        "No se encontró un estado de registro con ID: " + id));
     }
 }

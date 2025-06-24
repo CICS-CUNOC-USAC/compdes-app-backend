@@ -2,9 +2,11 @@ package com.compdes.paymentProofs.services;
 
 import org.springframework.stereotype.Service;
 
+import com.compdes.common.exceptions.NotFoundException;
 import com.compdes.participants.models.entities.Participant;
 import com.compdes.paymentProofs.mappers.PaymentProofMapper;
 import com.compdes.paymentProofs.models.dto.request.CreatePaymentProofDTO;
+import com.compdes.paymentProofs.models.dto.request.UpdatePaymentProofByAdminDTO;
 import com.compdes.paymentProofs.models.entities.PaymentProof;
 import com.compdes.paymentProofs.repositories.PaymentProofRepository;
 
@@ -53,6 +55,34 @@ public class PaymentProofService {
         PaymentProof save = paymentProofRepository.save(paymentProof);
 
         return save;
+    }
+
+    /**
+     * Actualiza el enlace del comprobante de pago de un participante desde el panel
+     * de administración.
+     * 
+     * @param paymentProof el comprobante de pago existente asociado al participante
+     * @param dto          objeto que contiene el nuevo enlace del comprobante de
+     *                     pago
+     * @return el comprobante de pago actualizado
+     * @throws IllegalArgumentException si el comprobante de pago es {@code null}
+     *                                  (por ejemplo, si el participante no pagó con
+     *                                  tarjeta)
+     */
+    public PaymentProof updatePaymentProof(PaymentProof paymentProof, UpdatePaymentProofByAdminDTO dto)
+            throws NotFoundException {
+        if (paymentProof == null) {
+            throw new IllegalArgumentException(
+                    "Parece que este participante no realizó un pago con tarjeta en la app Recurrente, por lo tanto, no se le puede asignar un número de comprobante.");
+        }
+        paymentProof.setLink(dto.getLink());
+        return paymentProofRepository.save(paymentProof);
+    }
+
+    public PaymentProof getPaymentProofById(String id) throws NotFoundException {
+        return paymentProofRepository.findById(id)
+                .orElseThrow(
+                        () -> new NotFoundException("No se encontró un comprobante de pago con el ID proporcionado."));
     }
 
 }

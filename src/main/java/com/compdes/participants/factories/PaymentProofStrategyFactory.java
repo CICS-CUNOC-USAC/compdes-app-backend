@@ -1,8 +1,11 @@
-package com.compdes.participants.strategies.paymentproof;
+package com.compdes.participants.factories;
 
 import org.springframework.stereotype.Component;
 
 import com.compdes.participants.models.dto.internal.CreateParticipantInternalDTO;
+import com.compdes.participants.strategies.paymentproof.FormPaymentProofStrategy;
+import com.compdes.participants.strategies.paymentproof.ImagePaymentProofStrategy;
+import com.compdes.participants.strategies.paymentproof.PaymentProofStrategy;
 
 import lombok.RequiredArgsConstructor;
 
