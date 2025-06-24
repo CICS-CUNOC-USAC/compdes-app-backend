@@ -40,6 +40,29 @@ public interface ParticipantRepository
     public Boolean existsByIdentificationDocument(String identificationDocument);
 
     /**
+     * Verifica si existe un participante con el mismo documento de identificación,
+     * excluyendo un ID específico.
+     * 
+     * @param identificationDocument el documento de identificación a verificar
+     * @param id                     el ID del participante que debe ser excluido de
+     *                               la validación
+     * @return {@code true} si existe otro participante con el mismo documento,
+     *         {@code false} en caso contrario
+     */
+    public Boolean existsByIdentificationDocumentAndIdIsNot(String identificationDocument, String id);
+
+    /**
+     * Verifica si existe un participante con el mismo correo electrónico,
+     * excluyendo un ID específico.
+     * 
+     * @param email el correo electrónico a verificar
+     * @param id    el ID del participante que debe ser excluido de la validación
+     * @return {@code true} si existe otro participante con el mismo correo,
+     *         {@code false} en caso contrario
+     */
+    public Boolean existsByEmailAndIdIsNot(String email, String id);
+
+    /**
      * Busca un participante por su documento de identificación.
      * 
      * @param identificationDocument documento de identificación a buscar

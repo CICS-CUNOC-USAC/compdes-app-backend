@@ -6,6 +6,7 @@ import com.compdes.auth.users.models.entities.CompdesUser;
 import com.compdes.common.exceptions.QrCodeException;
 import com.compdes.common.exceptions.enums.QrCodeErrorEnum;
 import com.compdes.common.models.entities.Auditor;
+import com.compdes.participants.models.dto.request.UpdateParticipantByAdminDTO;
 import com.compdes.paymentProofs.models.entities.PaymentProof;
 import com.compdes.qrCodes.models.entities.QrCode;
 import com.compdes.registrationStatus.models.entities.RegistrationStatus;
@@ -120,6 +121,22 @@ public class Participant extends Auditor {
         this.registrationStatus = registrationStatus;
         this.paymentProofImage = paymentProofImage;
         this.isGuest = isGuest;
+    }
+
+    /**
+     * Actualiza los datos del participante con los valores proporcionados.
+     * 
+     * @param dto objeto con los datos actualizados del participante
+     */
+    public void update(UpdateParticipantByAdminDTO dto) {
+        // actualizacion de campos personales
+        setFirstName(dto.getFirstName());
+        setLastName(dto.getLastName());
+        setEmail(dto.getEmail());
+        setPhone(dto.getPhone());
+        setOrganisation(dto.getOrganisation());
+        setIdentificationDocument(dto.getIdentificationDocument());
+        setIsAuthor(dto.getIsAuthor());        
     }
 
     /**
