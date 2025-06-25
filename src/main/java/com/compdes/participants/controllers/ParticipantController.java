@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.compdes.common.exceptions.CustomRuntimeException;
+import com.compdes.common.exceptions.DuplicateResourceException;
 import com.compdes.common.exceptions.NotFoundException;
 import com.compdes.common.models.dto.response.ErrorDTO;
 import com.compdes.participants.mappers.CreateParticipantInternalDtoMapper;
@@ -197,6 +199,36 @@ public class ParticipantController {
         }
 
         /**
+         * Obtiene la información completa de un participante utilizando el ID de su
+         * código QR.
+         * 
+         * Este endpoint está restringido a usuarios con rol ADMIN y retorna un DTO con
+         * la información
+         * detallada del participante correspondiente.
+         * 
+         * @param qrId el identificador del código QR
+         * @return un DTO con la información administrativa del participante
+         * @throws NotFoundException si no se encuentra ningún participante con el
+         *                           código QR proporcionado
+         */
+        @Operation(summary = "Obtener participante por código QR", description = "Retorna la información completa de un participante utilizando el ID de su código QR. Requiere rol `ADMIN`.", security = @SecurityRequirement(name = "bearerAuth"), responses = {
+                        @ApiResponse(responseCode = "200", description = "Participante encontrado exitosamente"),
+                        @ApiResponse(responseCode = "404", description = "No se encontró un participante con el código QR proporcionado"),
+                        @ApiResponse(responseCode = "500", description = "Error interno inesperado")
+        })
+        @GetMapping("by-qr/{qrId}/admin")
+        @PreAuthorize("hasRole('ADMIN')")
+        @ResponseStatus(HttpStatus.OK)
+        public AdminParticipantProfileDTO getParticipantByQrCodeId(@PathVariable String qrId)
+                        throws NotFoundException {
+                Participant participant = participantService
+                                .getParticipantByQrCodeId(qrId);
+                AdminParticipantProfileDTO participantInfoDTO = participantMapper
+                                .participantToPrivateParticipantInfoDto(participant);
+                return participantInfoDTO;
+        }
+
+        /**
          * Registra un nuevo participante.
          *
          * Permite registrar tanto participantes autores como no autores desde el
@@ -263,6 +295,39 @@ public class ParticipantController {
                 participantService.createParticipantByAdmin(createParticipantByAdminDTO);
         }
 
+        /**
+         * Actualiza los datos de un participante desde el panel de administración.
+         * 
+         * Solo debe enviarse uno de los siguientes campos opcionales: `voucherNumber` o
+         * `paymentProof.link`.
+         * 
+         * <p>
+         * Si se proporciona `voucherNumber`, el participante debe haber indicado que
+         * realizará un pago en efectivo.
+         * Si se proporciona `paymentProof.link`, el participante debe haber pagado con
+         * tarjeta.
+         * Enviar ambos campos a la vez no está permitido y resultará en un error de
+         * validación.
+         * 
+         * <p>
+         * También se verifica que el correo electrónico y el documento de
+         * identificación no estén ya registrados
+         * por otro participante distinto al que se intenta actualizar.
+         * 
+         * <p>
+         * Solo los usuarios con rol `ADMIN` pueden ejecutar esta operación.
+         * 
+         * @param id  identificador único del participante a actualizar
+         * @param dto objeto con los nuevos datos a aplicar al participante
+         * @throws NotFoundException          si no se encuentra un participante con el
+         *                                    ID especificado
+         * @throws DuplicateResourceException si ya existe otro participante con el
+         *                                    mismo correo electrónico o documento de
+         *                                    identificación
+         * @throws CustomRuntimeException     si se violan las reglas de negocio
+         *                                    relacionadas con el tipo de pago y los
+         *                                    campos enviados
+         */
         @Operation(summary = "Actualizar participante", description = "Actualiza los datos de un participante desde el panel de administración. "
                         +
                         "Solo puede enviarse uno de los siguientes campos opcionales: 'voucherNumber' o 'paymentProof'. "
@@ -287,6 +352,22 @@ public class ParticipantController {
                 participantService.updateParticipantByAdmin(id, dto);
         }
 
+        /**
+         * Elimina un participante utilizando su identificador único.
+         * 
+         * Esta operación solo es válida si el participante aún no ha sido confirmado.
+         * Si el participante ya está confirmado, la operación es rechazada y se lanza
+         * una excepción.
+         * 
+         * <p>
+         * Solo los usuarios con el rol `ADMIN` pueden ejecutar esta acción.
+         * 
+         * @param id identificador único del participante a eliminar
+         * @throws NotFoundException     si no se encuentra un participante con el ID
+         *                               especificado
+         * @throws IllegalStateException si el participante ya ha sido confirmado y no
+         *                               puede ser eliminado
+         */
         @Operation(summary = "Eliminar participante", description = "Elimina un participante si aún no ha sido confirmado. "
                         + "En caso de que el participante ya esté confirmado, se rechaza la operación. Accesible para `ADMIN`", security = @SecurityRequirement(name = "bearerAuth"), responses = {
                                         @ApiResponse(responseCode = "204", description = "Participante eliminado exitosamente"),

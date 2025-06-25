@@ -4,7 +4,13 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- *
+ * DTO que representa el perfil completo de un participante.
+ * 
+ * <p>
+ * Este DTO está diseñado para ser expuesto únicamente a usuarios con rol
+ * de **PARTICIPANT** o **ADMIN**, ya que contiene información sensible. No debe
+ * ser utilizado en endpoints públicos o sin autenticación/autorización
+ * adecuada.
  *
  * @author Luis Monterroso
  * @version 1.0
@@ -27,7 +33,5 @@ public class ParticipantProfileDTO extends BaseParticipantInfoDTO {
         this.identificationDocument = identificationDocument;
         this.qrCodeLink = qrCodeLink;
     }
-
-   
 
 }
