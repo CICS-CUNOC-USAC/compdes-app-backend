@@ -26,7 +26,6 @@ import com.compdes.qrCodes.services.QrCodeService;
 import com.compdes.registrationStatus.factories.RegistrationStatusFactory;
 import com.compdes.registrationStatus.models.entities.RegistrationStatus;
 import com.compdes.registrationStatus.services.RegistrationStatusService;
-import com.compdes.storedFiles.services.StoredFileService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -55,7 +54,6 @@ public class ParticipantService {
         private final PaymentProofService paymentProofService;
         private final RegistrationStatusFactory registrationStatusFactory;
         private final ParticipantValidationService participantValidationService;
-        private final StoredFileService storedFileService;
         private final QrCodeService qrCodeService;
 
         /**
