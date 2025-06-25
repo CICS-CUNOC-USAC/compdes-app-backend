@@ -86,6 +86,19 @@ public class ParticipantService {
         }
 
         /**
+         * Obtiene un participante a partir del ID de su código QR.
+         * 
+         * @param id el identificador del código QR
+         * @return el participante asociado al código QR
+         * @throws NotFoundException si no se encuentra ningún participante con ese
+         *                           código QR
+         */
+        public Participant getParticipantByQrCodeId(String id) throws NotFoundException {
+                return participantRepository.findByQrCode_Id(id).orElseThrow(
+                                () -> new NotFoundException(ParticipantErrorMessages.NOT_FOUND_BY_QR.getMessage()));
+        }
+
+        /**
          * Obtiene un participante a partir del nombre de usuario.
          * 
          * @param username nombre de usuario del sistema COMPDES
