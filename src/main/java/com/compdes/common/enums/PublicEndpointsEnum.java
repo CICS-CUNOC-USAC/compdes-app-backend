@@ -54,7 +54,7 @@ public enum PublicEndpointsEnum {
     PARTICIPANT_CREATE(HttpMethod.POST, "/api/v1/participants"),
     PARTICIPANT_AUTHOR_CREATE(HttpMethod.POST, "/api/v1/participants/author"),
     PUBLIC_INSCRIPTION_BY_DOCUMENT(HttpMethod.GET, "/api/v1/participants/public-inscription/by-document/*"),
-    FINALIZE_PARTICIPANT_USER_CREATION(HttpMethod.POST, "/api/v1/users/finalize/*"),
+    FINALIZE_PARTICIPANT_USER_CREATION(HttpMethod.PATCH, "/api/v1/users/finalize/*"),
     // Rutas publicas de Activity
     ACTIVITY_GET_ALL(HttpMethod.GET, "/api/v1/activities/all"),
     SWAGGER_UI(null, "/swagger-ui/**"),
