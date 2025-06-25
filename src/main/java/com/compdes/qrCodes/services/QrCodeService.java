@@ -122,7 +122,7 @@ public class QrCodeService {
     public byte[] getQrImageByQrId(String qrId) throws NotFoundException {
         QrCode qrCode = getQrCodeById(qrId);
         validateQrCodeHasParticipant(qrCode);
-        return qrImageGenerator.generateQrCode(qrCode.getId());
+        return qrImageGenerator.generateQrCode(qrCode);
     }
 
     /**
@@ -137,8 +137,7 @@ public class QrCodeService {
      */
     public byte[] getQrImageByQrUsername(String username) throws NotFoundException {
         QrCode qrCode = getQrCodeByUsername(username);
-        validateQrCodeHasParticipant(qrCode);
-        return qrImageGenerator.generateQrCode(qrCode.getId());
+        return qrImageGenerator.generateQrCode(qrCode);
     }
 
     /**
