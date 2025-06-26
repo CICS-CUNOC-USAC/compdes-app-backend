@@ -1,8 +1,10 @@
 package com.compdes.moduleUni.controllers;
 
+import com.compdes.moduleUni.mappers.ModuleUniMapper;
 import com.compdes.moduleUni.models.dto.request.CreateModuleUniDTO;
 import com.compdes.moduleUni.models.dto.response.BasicResponseModuleUniDTO;
 import com.compdes.moduleUni.models.dto.response.ResponseModuleUniDTO;
+import com.compdes.moduleUni.models.entities.ModuleUni;
 import com.compdes.moduleUni.services.ModuleUniService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -36,6 +38,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ModuleUniController {
     private final ModuleUniService service;
+    private final ModuleUniMapper moduleUniMapper;
 
     /**
      * Registra un nuevo modulo para conferencias
@@ -55,15 +58,46 @@ public class ModuleUniController {
     }
 
     /**
-     * Obtienen todos los modulos disponibles
-     *
+     * Obtiene los módulos registrados en formato paginado.
+     * 
+     * Este método está destinado exclusivamente para usuarios con rol de
+     * administrador.
+     * 
+     * @param pageable objeto que contiene la información de paginación (número de
+     *                 página, tamaño, ordenamiento)
+     * @return una página con los módulos registrados
      */
-    @Operation(summary = "Obtiene todos los modulos disponibles, vista para administradores", description = "Obtiene todos los modulos registrados ")
-    @GetMapping("/all")
+
+    @Operation(summary = "Retorna los módulos registrados en formato paginado. Para `ADMIN`.", security = @SecurityRequirement(name = "bearerAuth"), responses = {
+            @ApiResponse(responseCode = "200", description = "Lista paginada de módulos obtenida correctamente"),
+            @ApiResponse(responseCode = "401", description = "Autenticación fallida: Token inválido o ausente"),
+            @ApiResponse(responseCode = "403", description = "Acceso denegado: No tiene permisos de administrador"),
+            @ApiResponse(responseCode = "500", description = "Ocurrió un error inesperado en el servidor")
+    })
+    @GetMapping("/paginated-modules")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN')")
     public Page<ResponseModuleUniDTO> getPaginatedModules(Pageable pageable) {
-        return service.getPaginatedModules(pageable);
+        Page<ModuleUni> pageModuleUni = service.getPaginatedModules(pageable);
+        return pageModuleUni.map(moduleUniMapper::moduleToResponseDto);
+    }
+
+    /**
+     * Obtienen todos los modulos disponibles
+     *
+     */
+    @Operation(summary = "Obtiene todos los módulos disponibles, vista para `ADMIN`", security = @SecurityRequirement(name = "bearerAuth"), responses = {
+            @ApiResponse(responseCode = "200", description = "Lista de módulos obtenida correctamente"),
+            @ApiResponse(responseCode = "401", description = "Autenticación fallida: Token inválido o ausente"),
+            @ApiResponse(responseCode = "403", description = "Acceso denegado: No tiene permisos de administrador"),
+            @ApiResponse(responseCode = "500", description = "Ocurrió un error inesperado en el servidor")
+    })
+    @GetMapping("/all")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<ResponseModuleUniDTO> getAllModules() {
+        List<ModuleUni> modules = service.getAllModules();
+        return moduleUniMapper.moduleToResponseDto(modules);
     }
 
     /**
@@ -76,7 +110,8 @@ public class ModuleUniController {
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('PARTICIPANT')")
     public List<BasicResponseModuleUniDTO> consultAll() {
-        return service.getAllForParticipants();
+        List<ModuleUni> modules = service.getAllModules();
+        return moduleUniMapper.moduleToBasicResponseDto(modules);
     }
 
 }
