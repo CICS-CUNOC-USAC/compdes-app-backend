@@ -80,4 +80,12 @@ public interface ParticipantRepository
      *         vacío si no existe
      */
     public Optional<Participant> findByCompdesUser_Username(String username);
+
+    /**
+     * Busca un participante por el ID del código QR asociado.
+     * 
+     * @param qrCodeId el identificador del código QR
+     * @return un Optional con el participante si existe, o vacío si no se encuentra
+     */
+    public Optional<Participant> findByQrCode_Id(String qrCodeId);
 }

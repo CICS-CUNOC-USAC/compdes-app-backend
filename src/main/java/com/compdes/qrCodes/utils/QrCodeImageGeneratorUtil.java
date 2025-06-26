@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.compdes.common.exceptions.QrCodeException;
 import com.compdes.common.exceptions.enums.QrCodeErrorEnum;
+import com.compdes.qrCodes.models.entities.QrCode;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
@@ -35,25 +36,26 @@ public class QrCodeImageGeneratorUtil {
      * y lo deroga la creaxion en una imagen PNG en forma de arreglo de bytes.
      * 
      * @param qrCodeId identificador único del participante que se codificará
-     *                      en el QR
+     *                 en el QR
      * @return arreglo de bytes que representa la imagen PNG del código QR generado
      * @throws QrCodeException si ocurre un error durante la generación o escritura
      *                         de la imagen
      */
-    public byte[] generateQrCode(String qrCodeId) {
+    public byte[] generateQrCode(QrCode qrCode) {
         QRCodeWriter qrCodeWriter = new QRCodeWriter();
         BitMatrix bitMatrix;
         try {
             // genera la matriz QR con el contenido del ID del participante
-            bitMatrix = qrCodeWriter.encode(qrCodeId, BarcodeFormat.QR_CODE, 200, 200);
+            bitMatrix = qrCodeWriter.encode(qrCode.getId(), BarcodeFormat.QR_CODE, 200, 200);
             return convertBitMatrixToPngByteArray(bitMatrix);
         } catch (WriterException e) {
             // registra el error si no se pudo generar el QR
-            log.error("Error al generar el código QR para el contenido '{}': {}", qrCodeId, e.getMessage(), e);
+            log.error("Error al generar el código QR para el contenido '{}': {}", qrCode.getId(), e.getMessage(), e);
             throw QrCodeErrorEnum.QR_GENERATION_FAILED.getQrCodeException();
         } catch (IOException e) {
             // registra el error si no se pudo escribir la imagen en el stream
-            log.error("Error al escribir la imagen QR en stream (PNG) para '{}': {}", qrCodeId, e.getMessage(), e);
+            log.error("Error al escribir la imagen QR en stream (PNG) para '{}': {}", qrCode.getId(), e.getMessage(),
+                    e);
             throw QrCodeErrorEnum.QR_IMAGE_ENCODING_FAILED.getQrCodeException();
         }
     }

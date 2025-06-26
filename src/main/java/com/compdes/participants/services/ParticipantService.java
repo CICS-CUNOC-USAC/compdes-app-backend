@@ -26,7 +26,6 @@ import com.compdes.qrCodes.services.QrCodeService;
 import com.compdes.registrationStatus.factories.RegistrationStatusFactory;
 import com.compdes.registrationStatus.models.entities.RegistrationStatus;
 import com.compdes.registrationStatus.services.RegistrationStatusService;
-import com.compdes.storedFiles.services.StoredFileService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -55,7 +54,6 @@ public class ParticipantService {
         private final PaymentProofService paymentProofService;
         private final RegistrationStatusFactory registrationStatusFactory;
         private final ParticipantValidationService participantValidationService;
-        private final StoredFileService storedFileService;
         private final QrCodeService qrCodeService;
 
         /**
@@ -83,6 +81,19 @@ public class ParticipantService {
                                 () -> new NotFoundException(
                                                 ParticipantErrorMessages.NOT_FOUND_BY_DOCUMENT.getMessage()));
 
+        }
+
+        /**
+         * Obtiene un participante a partir del ID de su código QR.
+         * 
+         * @param id el identificador del código QR
+         * @return el participante asociado al código QR
+         * @throws NotFoundException si no se encuentra ningún participante con ese
+         *                           código QR
+         */
+        public Participant getParticipantByQrCodeId(String id) throws NotFoundException {
+                return participantRepository.findByQrCode_Id(id).orElseThrow(
+                                () -> new NotFoundException(ParticipantErrorMessages.NOT_FOUND_BY_QR.getMessage()));
         }
 
         /**
