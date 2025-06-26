@@ -1,5 +1,12 @@
 package com.compdes.moduleUni.services;
 
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.compdes.common.exceptions.DuplicateResourceException;
 import com.compdes.moduleUni.mappers.ModuleUniMapper;
 import com.compdes.moduleUni.models.dto.request.CreateModuleUniDTO;
@@ -7,12 +14,9 @@ import com.compdes.moduleUni.models.dto.response.BasicResponseModuleUniDTO;
 import com.compdes.moduleUni.models.dto.response.ResponseModuleUniDTO;
 import com.compdes.moduleUni.models.entities.ModuleUni;
 import com.compdes.moduleUni.repositories.ModuleUniRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+
 /**
  * Servicio encargado de gestionar la creación y persistencia de modulos
  * del sistema.
@@ -36,28 +40,43 @@ public class ModuleUniService {
 
     /**
      * Crea un salon
-     * */
+     */
     public ModuleUni createModule(CreateModuleUniDTO createModuleUniDTO) {
         ModuleUni module = moduleUniMapper.createModuleDtoToModule(createModuleUniDTO);
-        if(moduleUniRepository.existsByName(createModuleUniDTO.getName())){
+        if (moduleUniRepository.existsByName(createModuleUniDTO.getName())) {
             throw new DuplicateResourceException(
-            "No se puede completar el registro: el modulo ya esta registrado");
+                    "No se puede completar el registro: el modulo ya esta registrado");
         }
         return moduleUniRepository.save(module);
     }
 
     /**
+     * Obtiene una lista paginada de todos los módulos universitarios.
+     * 
+     * @param pageable objeto que contiene la información de paginación y
+     *                 ordenamiento
+     * @return una página de objetos {@link ResponseModuleUniDTO} con los módulos
+     *         encontrados
+     */
+    public Page<ResponseModuleUniDTO> getPaginatedModules(Pageable pageable) {
+        Page<ModuleUni> iterable = moduleUniRepository.findAll(pageable);
+        return iterable.map(moduleUniMapper::moduleToResponseDto);
+    }
+
+    /**
      * Retorna todos los modulos
-     * */
-    public List<ResponseModuleUniDTO> getAllModules(){
+     * 
+     * @return Lista que contiene los modulos disponibles
+     */
+    public List<ResponseModuleUniDTO> getAllModules() {
         List<ModuleUni> iterable = moduleUniRepository.findAll();
         return moduleUniMapper.moduleToResponseDto(iterable);
     }
 
     /**
      * Retorna todos los modulos con informacion basica
-     * */
-    public List<BasicResponseModuleUniDTO> getAllForParticipants(){
+     */
+    public List<BasicResponseModuleUniDTO> getAllForParticipants() {
         List<ModuleUni> iterable = moduleUniRepository.findAll();
         return moduleUniMapper.moduleToBasicResponseDto(iterable);
     }
