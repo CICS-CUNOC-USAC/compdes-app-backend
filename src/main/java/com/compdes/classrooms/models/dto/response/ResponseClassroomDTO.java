@@ -19,4 +19,5 @@ public class ResponseClassroomDTO {
     private String name;
     private String id;
     private ResponseModuleUniDTO moduleUni;
+    private Integer capacity;
 }

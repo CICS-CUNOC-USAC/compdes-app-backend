@@ -19,4 +19,5 @@ public class ReservationDTO {
     @NotBlank(message = "Debe de seleccionar un taller valido")
     @Size(min = 36, max = 36, message = "identificador de taller invalido")
     private String activityId;
+
 }

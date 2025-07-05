@@ -24,4 +24,6 @@ public class CreateClassroomDTO {
     @NotBlank(message = "Debe de seleccionar un modulo asociado al salon")
     @Size(min = 36, max = 36, message = "identificador de salon invalido")
     private String moduleId;
+
+    private Integer capacity;
 }

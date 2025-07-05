@@ -67,6 +67,17 @@ public enum ErrorCodeMessageEnum {
         NO_AUTHOR_REGISTRATION_STATUS_INCOMPLETE("STP-002",
                         "El campo 'isCashPayment' no puede ser nulo al crear un estado de registro de un participant4 no autor."),
 
+        //-------------------------------------------------------- errores de validacion de talleres
+        NO_WORKSHOP_EXCEPTION("W-001",
+                "No se puede reservar cupo a una actividad que no sea un taller"),
+        NO_SPACE_EXCEPTION("W-002",
+                "El salon donde se impartira el taller no tiene espacio, no se puede asignar"),
+        INVALID_SCHEDULE_EXCEPTION("W-003",
+                "Ya se ha reservado un taller a en este rango de tiempo"),
+
+        //--------------------------------------------------------- Eerrores comunes
+        INVALID_DATE_RANGE("Com-001",
+                "Los rangos de fecha son invalidos")
         ;
 
         private final String code;
