@@ -2,7 +2,10 @@ package com.compdes.reservations.repositories;
 
 import com.compdes.reservations.models.entities.Reservation;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 /**
@@ -15,6 +18,37 @@ import java.util.Optional;
 public interface ReservationRepository extends JpaRepository<Reservation, String> {
     long countByActivityId(String activityId);
 
-    Optional<Reservation> findByCompdesUserIdAndActivityId(String compdesUserId, String activityId);
+    Optional<Reservation> findByParticipantIdAndActivityId(String participantId, String activityId);
+
+    @Query("""
+    SELECT COUNT(*) FROM Reservation r
+    WHERE r.participant.id = :participantId
+      AND (
+          r.activity.initScheduledDate < :end
+          AND r.activity.endScheduledDate > :start
+      )
+    """)
+    Long countOverlappingReservations(
+            @Param("participantId") String participantId,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+    );
+
+    @Query("""
+    SELECT COUNT(*) FROM Reservation r
+    WHERE r.participant.id = :participantId
+      AND (
+          :now BETWEEN :fifteenBefore AND r.activity.endScheduledDate
+      )
+    """)
+    Long countRegistrationsInWindow(
+            @Param("participantId") String participantId,
+            @Param("now") LocalDateTime now,
+            @Param("fifteenBefore") LocalDateTime fifteenBefore
+    );
+
+
+
+
 
 }

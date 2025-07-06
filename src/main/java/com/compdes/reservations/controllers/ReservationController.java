@@ -6,7 +6,6 @@ import com.compdes.reservations.models.dto.request.ReservationDTO;
 import com.compdes.reservations.services.ReservationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -46,8 +45,6 @@ public class ReservationController {
     @PreAuthorize("hasRole('PARTICIPANT')")
     public void registerReservation(@RequestBody @Valid ReservationDTO reservationDTO)
             throws NotFoundException {
-
-
         reservationService.createReservation(reservationDTO);
     }
 
@@ -78,7 +75,7 @@ public class ReservationController {
             @ApiResponse(responseCode = "400", description = "Datos inválidos o incompletos"),
             @ApiResponse(responseCode = "409", description = "Ya se tiene un registro de asistencia")
     })
-    @PostMapping("/register")
+    @PostMapping("/registerAssistant")
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ADMIN')")
     public void registerAssistance(@RequestBody @Valid AssistanceToReservationDTO assistanceToReservationDTO)

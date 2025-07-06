@@ -4,20 +4,22 @@ import com.compdes.activity.enums.ActivityType;
 import com.compdes.activity.models.entities.Activity;
 import com.compdes.activity.repositories.ActivityRepository;
 import com.compdes.auth.users.models.entities.CompdesUser;
+import com.compdes.auth.users.services.CompdesUserService;
 import com.compdes.common.exceptions.CustomRuntimeException;
 import com.compdes.common.exceptions.NotFoundException;
 import com.compdes.common.exceptions.enums.ErrorCodeMessageEnum;
+import com.compdes.participants.models.entities.Participant;
+import com.compdes.participants.services.ParticipantService;
 import com.compdes.reservations.mappers.ReservationMapper;
 import com.compdes.reservations.models.dto.request.AssistanceToReservationDTO;
 import com.compdes.reservations.models.dto.request.ReservationDTO;
 import com.compdes.reservations.models.entities.Reservation;
 import com.compdes.reservations.repositories.ReservationRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 /**
  * Servicio encargado de gestionar la creación y persistencia de reservaciones
@@ -43,6 +45,9 @@ public class ReservationService {
 
     private final ActivityRepository activityRepository;
 
+    private final ParticipantService participantService;
+    private final CompdesUserService compdesUserService;
+
     /**
      * Registra una reservacion para un taller
      */
@@ -51,15 +56,22 @@ public class ReservationService {
                 .orElseThrow(() -> new NotFoundException("Taller no encontrado"));
         validateActivityToReserve(activity);
 
-        //TODO obtener los datos del usuario logueado
-        //TODO y validar si no se translapa con otra asignacion
+        CompdesUser user = compdesUserService.getUserByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
 
-        //JwtTokenInspector jwtTokenInspector = new JwtTokenInspector();
-        CompdesUser user = new CompdesUser();
-        user.setId(""); //todo TERMINAR
-
-        Reservation reservation = new Reservation(user, activity);
+        validateOverlappingReservation(activity, user.getParticipant());
+        Reservation reservation = new Reservation(user.getParticipant(), activity);
         return reservationRepository.save(reservation);
+    }
+
+    private void validateOverlappingReservation(Activity activity, Participant participant){
+        if(reservationRepository.countOverlappingReservations(
+                participant.getId(), activity.getInitScheduledDate(), activity.getEndScheduledDate()) > 0
+        ){
+            throw new CustomRuntimeException(
+                    ErrorCodeMessageEnum.INVALID_SCHEDULE_EXCEPTION.getCode(),
+                    ErrorCodeMessageEnum.INVALID_SCHEDULE_EXCEPTION.getMessage()
+            );
+        }
     }
 
     private void validateActivityToReserve(Activity activity){
@@ -86,23 +98,41 @@ public class ReservationService {
 
     /**
      *  Registra una asistencia a un taller
+     *  a partir de un qr
      * */
-    public void registerAssistanceToReservation(AssistanceToReservationDTO assistanceToReservationDTO){
+    public Reservation registerAssistanceToReservation(AssistanceToReservationDTO assistanceToReservationDTO)
+            throws NotFoundException {
+        Participant participant  = participantService.getParticipantByQrCodeId(assistanceToReservationDTO.getQrId());
+        Activity activity = activityRepository.findById(assistanceToReservationDTO.getActivityId())
+                .orElseThrow(() -> new NotFoundException("Taller no encontrado"));
+        Reservation reservation =  reservationRepository.findByParticipantIdAndActivityId(participant.getId(), activity.getId())
+                .orElseThrow(() -> new NotFoundException("Reservacion para el taller no encontrada"));
 
+        //verificar que las marcas de tiempo para registrar asistencia este bien
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime fifteenBefore = now.minusMinutes(15);
+        Long count = reservationRepository.countRegistrationsInWindow(participant.getId(), now, fifteenBefore);
+        boolean canRegister = count > 0;
+        if(canRegister){
+            throw new CustomRuntimeException(
+                    ErrorCodeMessageEnum.INVALID_DATE_RANGE.getCode(),
+                    "El taller ya pasó de la hora programada, no se puede registrar asistencia"
+            );
+        }
+        reservation.setAttendedDateTime(LocalDateTime.now());
+        return reservationRepository.save(reservation);
     }
 
     /**
      * Cancela una reservación a un taller
      * */
-    public Reservation cancelReservation(ReservationDTO reservationDTO) throws NotFoundException {
+    public void cancelReservation(ReservationDTO reservationDTO) throws NotFoundException {
         Activity activity = activityRepository.findById(reservationDTO.getActivityId())
                 .orElseThrow(() -> new NotFoundException("Taller no encontrado"));
 
-        Optional<Reservation> reservationOp = reservationRepository
-                .findByCompdesUserIdAndActivityId("compdesUserID", activity.getId()); //TODO find id
-        if(reservationOp.isEmpty()){
-            throw new NotFoundException("Reservacion no encontrada")
-        }
+        CompdesUser user = compdesUserService.getUserByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+        Reservation reservation = reservationRepository.findByParticipantIdAndActivityId(user.getParticipant().getId(), activity.getId())
+                .orElseThrow(() -> new NotFoundException("Reservacion no encontrada"));
 
         if(LocalDateTime.now().isAfter(activity.getInitScheduledDate())){
             throw new CustomRuntimeException(
@@ -110,10 +140,7 @@ public class ReservationService {
                     "El taller ya se impartió o se está impartiendo, ya no se puede cancelar la reservacion"
             );
         }
-
-        Reservation reservation = reservationOp.get();
-        reservation.setAttendedDateTime(LocalDateTime.now());
-        return reservationRepository.save(reservation);
+        reservationRepository.delete(reservation);
     }
 
 

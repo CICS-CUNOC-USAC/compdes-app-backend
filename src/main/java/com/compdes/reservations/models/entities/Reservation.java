@@ -4,6 +4,7 @@ import com.compdes.activity.models.entities.Activity;
 import com.compdes.auth.users.models.entities.CompdesUser;
 import com.compdes.common.models.entities.Auditor;
 import com.compdes.moduleUni.models.entities.ModuleUni;
+import com.compdes.participants.models.entities.Participant;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -32,11 +33,11 @@ public class Reservation extends Auditor{
 
     @ManyToOne
     @JoinColumn(nullable = false)
-    CompdesUser compdesUser;
+    private Participant participant;
 
     @ManyToOne
     @JoinColumn(nullable = false)
-    Activity activity;
+    private Activity activity;
 
     @Column(nullable = true)
     private LocalDateTime attendedDateTime;
@@ -46,8 +47,8 @@ public class Reservation extends Auditor{
      * primera vez.
      *
      */
-    public Reservation(CompdesUser compdesUser, Activity activity) {
-        this.compdesUser = compdesUser;
+    public Reservation(Participant participant, Activity activity) {
+        this.participant = participant;
         this.activity = activity;
     }
 
