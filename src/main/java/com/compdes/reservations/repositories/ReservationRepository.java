@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Repositorio para operaciones CRUD sobre la entidad {@link Reservation}.
@@ -19,6 +19,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, String
     long countByActivityId(String activityId);
 
     Optional<Reservation> findByParticipantIdAndActivityId(String participantId, String activityId);
+
+    List<Reservation> findByParticipantId(String participantId);
 
     @Query("""
     SELECT COUNT(*) FROM Reservation r

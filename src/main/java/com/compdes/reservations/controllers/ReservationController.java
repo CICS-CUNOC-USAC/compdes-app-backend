@@ -3,6 +3,7 @@ package com.compdes.reservations.controllers;
 import com.compdes.common.exceptions.NotFoundException;
 import com.compdes.reservations.models.dto.request.AssistanceToReservationDTO;
 import com.compdes.reservations.models.dto.request.ReservationDTO;
+import com.compdes.reservations.models.dto.response.ReservationResponseDTO;
 import com.compdes.reservations.services.ReservationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -11,6 +12,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * Controlador REST para la gestión de reservaciones a talleres.
@@ -81,6 +84,20 @@ public class ReservationController {
     public void registerAssistance(@RequestBody @Valid AssistanceToReservationDTO assistanceToReservationDTO)
             throws NotFoundException {
         reservationService.registerAssistanceToReservation(assistanceToReservationDTO);
+    }
+
+    /**
+     * Obtener todas las reservaciones a un taller
+     * */
+    @Operation(
+            summary = "Obtiene todos las reservaciones de un usuario",
+            description = "Obtiene todos las reservaciones registrados para una actividad"
+    )
+    @GetMapping("/all")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('PARTICIPANT')")
+    public List<ReservationResponseDTO> getAll() throws NotFoundException {
+        return reservationService.getAll();
     }
 
 }

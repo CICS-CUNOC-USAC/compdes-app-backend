@@ -13,6 +13,7 @@ import com.compdes.participants.services.ParticipantService;
 import com.compdes.reservations.mappers.ReservationMapper;
 import com.compdes.reservations.models.dto.request.AssistanceToReservationDTO;
 import com.compdes.reservations.models.dto.request.ReservationDTO;
+import com.compdes.reservations.models.dto.response.ReservationResponseDTO;
 import com.compdes.reservations.models.entities.Reservation;
 import com.compdes.reservations.repositories.ReservationRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
+import java.util.*;
 
 /**
  * Servicio encargado de gestionar la creación y persistencia de reservaciones
@@ -141,6 +143,15 @@ public class ReservationService {
             );
         }
         reservationRepository.delete(reservation);
+    }
+
+    /**
+     * Obtener todas las reservaciones de un participante
+     */
+    public List<ReservationResponseDTO> getAll() throws NotFoundException {
+        CompdesUser user = compdesUserService.getUserByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+        List<Reservation> reservations = reservationRepository.findByParticipantId(user.getParticipant().getId());
+        return reservationMapper.reservationToDTO(reservations);
     }
 
 

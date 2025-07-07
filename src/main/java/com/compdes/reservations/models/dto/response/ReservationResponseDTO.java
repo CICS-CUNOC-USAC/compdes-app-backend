@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
  * @since 2025-06-03
  */
 @Value
-public class ReservationsResponseDTO {
-    private ActivityDTO activityDTO;
+public class ReservationResponseDTO {
+    private ActivityDTO activity;
     private LocalDateTime attendedDatetime;
 }
