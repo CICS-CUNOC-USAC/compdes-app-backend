@@ -19,5 +19,5 @@ import java.time.LocalDateTime;
 @Value
 public class ReservationResponseDTO {
     private ActivityDTO activity;
-    private LocalDateTime attendedDatetime;
+    private LocalDateTime attendedDateTime;
 }

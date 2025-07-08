@@ -5,9 +5,9 @@ import com.compdes.activity.models.entities.Activity;
 import com.compdes.activity.repositories.ActivityRepository;
 import com.compdes.auth.users.models.entities.CompdesUser;
 import com.compdes.auth.users.services.CompdesUserService;
-import com.compdes.common.exceptions.CustomRuntimeException;
+import com.compdes.common.exceptions.DuplicateResourceException;
 import com.compdes.common.exceptions.NotFoundException;
-import com.compdes.common.exceptions.enums.ErrorCodeMessageEnum;
+import com.compdes.common.exceptions.enums.ReservationErrorsEnum;
 import com.compdes.participants.models.entities.Participant;
 import com.compdes.participants.services.ParticipantService;
 import com.compdes.reservations.mappers.ReservationMapper;
@@ -53,7 +53,8 @@ public class ReservationService {
     /**
      * Registra una reservacion para un taller
      */
-    public Reservation createReservation(ReservationDTO reservationDTO) throws NotFoundException {
+    public Reservation createReservation(ReservationDTO reservationDTO)
+            throws NotFoundException {
         Activity activity = activityRepository.findById(reservationDTO.getActivityId())
                 .orElseThrow(() -> new NotFoundException("Taller no encontrado"));
         validateActivityToReserve(activity);
@@ -65,35 +66,24 @@ public class ReservationService {
         return reservationRepository.save(reservation);
     }
 
-    private void validateOverlappingReservation(Activity activity, Participant participant){
+    private void validateOverlappingReservation(Activity activity, Participant participant)
+    {
         if(reservationRepository.countOverlappingReservations(
                 participant.getId(), activity.getInitScheduledDate(), activity.getEndScheduledDate()) > 0
         ){
-            throw new CustomRuntimeException(
-                    ErrorCodeMessageEnum.INVALID_SCHEDULE_EXCEPTION.getCode(),
-                    ErrorCodeMessageEnum.INVALID_SCHEDULE_EXCEPTION.getMessage()
-            );
+            throw ReservationErrorsEnum.INVALID_SCHEDULE_EXCEPTION.getException();
         }
     }
 
-    private void validateActivityToReserve(Activity activity){
+    private void validateActivityToReserve(Activity activity) throws IllegalArgumentException {
         if(activity.getType() != ActivityType.WORKSHOP){
-            throw new CustomRuntimeException(
-                    ErrorCodeMessageEnum.NO_WORKSHOP_EXCEPTION.getCode(),
-                    ErrorCodeMessageEnum.NO_WORKSHOP_EXCEPTION.getMessage()
-            );
+            throw ReservationErrorsEnum.NO_WORKSHOP_EXCEPTION.getException();
         }
         if(LocalDateTime.now().isAfter(activity.getInitScheduledDate())){
-            throw new CustomRuntimeException(
-                    ErrorCodeMessageEnum.INVALID_DATE_RANGE.getCode(),
-                    "El taller ya se impartió o se está impartiendo, ya no se puede reservar"
-            );
+            throw new IllegalArgumentException("El taller ya se impartió o se está impartiendo, ya no se puede reservar");
         }
         if(reservationRepository.countByActivityId(activity.getId()) >= activity.getClassroom().getCapacity()){
-            throw new CustomRuntimeException(
-                    ErrorCodeMessageEnum.NO_SPACE_EXCEPTION.getCode(),
-                    ErrorCodeMessageEnum.NO_SPACE_EXCEPTION.getMessage()
-            );
+            throw ReservationErrorsEnum.NO_SPACE_EXCEPTION.getException();
         }
     }
 
@@ -110,17 +100,18 @@ public class ReservationService {
         Reservation reservation =  reservationRepository.findByParticipantIdAndActivityId(participant.getId(), activity.getId())
                 .orElseThrow(() -> new NotFoundException("Reservacion para el taller no encontrada"));
 
+        if(reservation.getAttendedDateTime() != null){
+            throw new DuplicateResourceException("Ya se registro la asistencia del participante");
+        }
         //verificar que las marcas de tiempo para registrar asistencia este bien
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime fifteenBefore = now.minusMinutes(15);
-        Long count = reservationRepository.countRegistrationsInWindow(participant.getId(), now, fifteenBefore);
-        boolean canRegister = count > 0;
-        if(canRegister){
-            throw new CustomRuntimeException(
-                    ErrorCodeMessageEnum.INVALID_DATE_RANGE.getCode(),
-                    "El taller ya pasó de la hora programada, no se puede registrar asistencia"
-            );
+        LocalDateTime earliestAllowed = activity.getInitScheduledDate().minusMinutes(20);
+        LocalDateTime latestAllowed = activity.getEndScheduledDate();
+
+        if (now.isBefore(earliestAllowed) || now.isAfter(latestAllowed)) {
+            throw ReservationErrorsEnum.CANNOT_ASSIG.getException();
         }
+
         reservation.setAttendedDateTime(LocalDateTime.now());
         return reservationRepository.save(reservation);
     }
@@ -128,7 +119,8 @@ public class ReservationService {
     /**
      * Cancela una reservación a un taller
      * */
-    public void cancelReservation(ReservationDTO reservationDTO) throws NotFoundException {
+    public void cancelReservation(ReservationDTO reservationDTO)
+            throws NotFoundException {
         Activity activity = activityRepository.findById(reservationDTO.getActivityId())
                 .orElseThrow(() -> new NotFoundException("Taller no encontrado"));
 
@@ -137,10 +129,7 @@ public class ReservationService {
                 .orElseThrow(() -> new NotFoundException("Reservacion no encontrada"));
 
         if(LocalDateTime.now().isAfter(activity.getInitScheduledDate())){
-            throw new CustomRuntimeException(
-                    ErrorCodeMessageEnum.INVALID_DATE_RANGE.getCode(),
-                    "El taller ya se impartió o se está impartiendo, ya no se puede cancelar la reservacion"
-            );
+            throw ReservationErrorsEnum.CANNOT_CANCEL.getException();
         }
         reservationRepository.delete(reservation);
     }

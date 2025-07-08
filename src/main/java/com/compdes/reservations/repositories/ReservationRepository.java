@@ -36,21 +36,4 @@ public interface ReservationRepository extends JpaRepository<Reservation, String
             @Param("end") LocalDateTime end
     );
 
-    @Query("""
-    SELECT COUNT(*) FROM Reservation r
-    WHERE r.participant.id = :participantId
-      AND (
-          :now BETWEEN :fifteenBefore AND r.activity.endScheduledDate
-      )
-    """)
-    Long countRegistrationsInWindow(
-            @Param("participantId") String participantId,
-            @Param("now") LocalDateTime now,
-            @Param("fifteenBefore") LocalDateTime fifteenBefore
-    );
-
-
-
-
-
 }

@@ -63,7 +63,8 @@ public class ReservationController {
     @PostMapping("/cancel")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('PARTICIPANT')")
-    public void cancelReservation(@RequestBody @Valid ReservationDTO reservationDTO) throws NotFoundException {
+    public void cancelReservation(@RequestBody @Valid ReservationDTO reservationDTO)
+            throws NotFoundException {
         reservationService.cancelReservation(reservationDTO);
     }
 
