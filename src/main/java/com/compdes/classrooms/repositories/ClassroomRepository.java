@@ -6,10 +6,18 @@ import com.compdes.moduleUni.models.entities.ModuleUni;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.compdes.participants.models.entities.Participant;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
+/**
+ * Repositorio para operaciones CRUD sobre la entidad {@link Classroom}.
+ *
+ * @author Yennifer de Leon
+ * @version 1.0
+ * @since 2025-06-30
+ */
 public interface ClassroomRepository extends JpaRepository<Classroom, String> {
 
     @Query("SELECT c FROM Classroom c WHERE c.id NOT IN (" +

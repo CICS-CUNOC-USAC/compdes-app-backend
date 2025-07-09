@@ -65,10 +65,7 @@ public enum ErrorCodeMessageEnum {
                         "El 'isApproved' no puede ser nulo al crear un estado de registro."),
 
         NO_AUTHOR_REGISTRATION_STATUS_INCOMPLETE("STP-002",
-                        "El campo 'isCashPayment' no puede ser nulo al crear un estado de registro de un participant4 no autor."),
-
-        ;
-
+                        "El campo 'isCashPayment' no puede ser nulo al crear un estado de registro de un participant4 no autor.");
         private final String code;
         private final String message;
 

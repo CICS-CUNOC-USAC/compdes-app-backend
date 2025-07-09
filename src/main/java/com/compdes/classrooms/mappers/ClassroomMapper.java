@@ -13,7 +13,7 @@ import java.util.List;
 /**
  *
  *
- * @author Luis Monterroso
+ * @author Yennifer de Leon
  * @version 1.0
  * @since 2025-05-30
  */
