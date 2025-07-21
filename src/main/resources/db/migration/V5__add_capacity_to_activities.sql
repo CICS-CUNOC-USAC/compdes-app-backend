@@ -1,0 +1,1 @@
+ALTER TABLE `activity` ADD COLUMN `capacity` INT NOT NULL DEFAULT 30;

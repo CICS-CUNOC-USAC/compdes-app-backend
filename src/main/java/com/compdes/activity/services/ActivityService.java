@@ -3,6 +3,7 @@ package com.compdes.activity.services;
 import com.compdes.activity.mappers.ActivityMapper;
 import com.compdes.activity.models.dto.request.CreateActivityDTO;
 import com.compdes.activity.models.dto.request.UpdateActivityDTO;
+import com.compdes.activity.models.dto.request.UpdateCapacityActivityDTO;
 import com.compdes.activity.models.entities.Activity;
 import com.compdes.activity.repositories.ActivityRepository;
 import com.compdes.classrooms.models.entities.Classroom;
@@ -112,5 +113,16 @@ public class ActivityService {
     public Activity getActivityById(String id) throws NotFoundException {
         return activityRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Actividad no encontrada por medio del ID: " + id));
+    }
+
+    public Activity updateCapacityActivity(String id, UpdateCapacityActivityDTO updateCapacityActivityDTO)
+            throws NotFoundException {
+        Activity activity = activityRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Actividad no encontrada por medio del ID: " + id));
+        if (updateCapacityActivityDTO.getCapacity() < 0) {
+            throw new IllegalStateException("La capacidad debe ser un numero positivo");
+        }
+        activity.setCapacity(updateCapacityActivityDTO.getCapacity());
+        return activityRepository.save(activity);
     }
 }
