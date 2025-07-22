@@ -71,7 +71,7 @@ public class SecurityConfig {
                 configuration.setAllowedOrigins(List.of(appProperties.getFrontendHost()));
 
                 // decimos que operaciones http estan permitidos
-                configuration.setAllowedMethods(List.of("GET", "POST", "PATCH", "DELETE"));
+                configuration.setAllowedMethods(List.of("GET", "POST", "PATCH", "DELETE", "PUT"));
 
                 // decimos que headers estan permitidos
                 configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
