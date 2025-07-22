@@ -2,6 +2,7 @@ package com.compdes.classrooms.controllers;
 
 import com.compdes.classrooms.models.dto.request.AvailableClassroomsDTO;
 import com.compdes.classrooms.models.dto.request.CreateClassroomDTO;
+import com.compdes.classrooms.models.dto.request.EditClassroomDTO;
 import com.compdes.classrooms.models.dto.response.ResponseClassroomDTO;
 import com.compdes.classrooms.services.ClassroomService;
 import com.compdes.common.exceptions.NotFoundException;
@@ -75,6 +76,20 @@ public class ClassroomController {
     public List<ResponseClassroomDTO> getAvailableClassrooms(
             @RequestBody @Valid AvailableClassroomsDTO availableClassroomsDTO) {
         return classroomService.getAvailableClassrooms(availableClassroomsDTO);
+    }
+
+    /**
+     * Edita un salon
+     * */
+    @Operation(summary = "Editar  un salon", responses = {
+            @ApiResponse(responseCode = "200", description = "Salon editado exitosamente"),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos")
+    })
+    @PatchMapping("/edit")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ADMIN')")
+    public void edit(@RequestBody @Valid EditClassroomDTO editClassroomDTO) throws NotFoundException {
+        classroomService.editClassroom(editClassroomDTO);
     }
 
 }

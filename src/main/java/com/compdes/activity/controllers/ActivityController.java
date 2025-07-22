@@ -1,8 +1,7 @@
 package com.compdes.activity.controllers;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import com.compdes.activity.models.dto.request.UpdateCapacityActivityDTO;
+import org.springframework.web.bind.annotation.*;
 
 import com.compdes.activity.mappers.ActivityMapper;
 import com.compdes.activity.models.dto.request.CreateActivityDTO;
@@ -20,12 +19,6 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("/api/v1/activities")
@@ -88,6 +81,20 @@ public class ActivityController {
     @PreAuthorize("hasRole('ADMIN')")
     public void deleteActivity(@PathVariable String id) throws NotFoundException {
         activityService.deleteActivity(id);
+    }
+
+    @Operation(summary = "Actualiza la capacidad de una actividad por medio de su ID", responses = {
+            @ApiResponse(responseCode = "200", description = "Actividad actualizada exitosamente"),
+            @ApiResponse(responseCode = "403", description = "Acceso denegado: requiere rol ADMIN"),
+            @ApiResponse(responseCode = "404", description = "Actividad no encontrada"),
+    })
+    @PatchMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ADMIN')")
+    public void updateActivityCapacity(@PathVariable String id,
+                                      @RequestBody @Valid UpdateCapacityActivityDTO updateCapacityActivityDTO)
+            throws NotFoundException {
+        activityService.updateCapacityActivity(id, updateCapacityActivityDTO);
     }
 
 }

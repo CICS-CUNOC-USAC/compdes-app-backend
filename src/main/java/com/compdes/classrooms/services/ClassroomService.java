@@ -3,6 +3,7 @@ package com.compdes.classrooms.services;
 import com.compdes.classrooms.mappers.ClassroomMapper;
 import com.compdes.classrooms.models.dto.request.AvailableClassroomsDTO;
 import com.compdes.classrooms.models.dto.request.CreateClassroomDTO;
+import com.compdes.classrooms.models.dto.request.EditClassroomDTO;
 import com.compdes.classrooms.models.dto.response.ResponseClassroomDTO;
 import com.compdes.classrooms.models.entities.Classroom;
 import com.compdes.classrooms.repositories.ClassroomRepository;
@@ -103,4 +104,42 @@ public class ClassroomService {
                 .collect(Collectors.toList());
     }
 
-}
+    /**
+     * Edita un salon
+     *
+     */
+    public Classroom editClassroom(EditClassroomDTO editClassroomDTO) throws NotFoundException {
+        Classroom classroom = classroomRepository.findById(editClassroomDTO.getClassroomId())
+                .orElseThrow(() -> new NotFoundException("Salón no encontrado"));
+        //cambiar nombre
+        if (editClassroomDTO.getName() != null && !editClassroomDTO.getName().isBlank()) {
+            boolean nameChanged = !editClassroomDTO.getName().equals(classroom.getName());
+            if (nameChanged) {
+                if (classroomRepository.existsByName(editClassroomDTO.getName()) &&
+                        classroomRepository.existsByModuleUni(classroom.getModuleUni())) {
+                    throw new DuplicateResourceException("El nombre del salón ya está registrado en este módulo");
+                }
+                classroom.setName(editClassroomDTO.getName());
+            }
+        }
+        //editar modulo
+        if (editClassroomDTO.getModuleId() != null && !editClassroomDTO.getModuleId().equals(classroom.getModuleUni().getId())) {
+            ModuleUni newModule = moduleUniRepository.findById(editClassroomDTO.getModuleId())
+                    .orElseThrow(() -> new NotFoundException("Módulo no encontrado"));
+            if (classroomRepository.existsByName(classroom.getName()) &&
+                    classroomRepository.existsByModuleUni(newModule)) {
+                throw new DuplicateResourceException("Ya existe un salón con este nombre en el módulo seleccionado");
+            }
+
+            classroom.setModuleUni(newModule);
+        }
+
+        //editar capacidad
+        if (editClassroomDTO.getCapacity() != null && editClassroomDTO.getCapacity() > 0) {
+            classroom.setCapacity(editClassroomDTO.getCapacity());
+        }
+
+        return classroomRepository.save(classroom);
+    }
+
+ }

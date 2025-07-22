@@ -13,6 +13,7 @@ import com.compdes.participants.services.ParticipantService;
 import com.compdes.reservations.mappers.ReservationMapper;
 import com.compdes.reservations.models.dto.request.AssistanceToReservationDTO;
 import com.compdes.reservations.models.dto.request.ReservationDTO;
+import com.compdes.reservations.models.dto.response.ReservationParticipantsDTO;
 import com.compdes.reservations.models.dto.response.ReservationResponseDTO;
 import com.compdes.reservations.models.entities.Reservation;
 import com.compdes.reservations.repositories.ReservationRepository;
@@ -141,6 +142,16 @@ public class ReservationService {
         CompdesUser user = compdesUserService.getUserByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
         List<Reservation> reservations = reservationRepository.findByParticipantId(user.getParticipant().getId());
         return reservationMapper.reservationToDTO(reservations);
+    }
+
+    public List<ReservationParticipantsDTO> getAll(String workshopId) throws NotFoundException{
+        Activity activity = activityRepository.findById(workshopId)
+                .orElseThrow(() -> new NotFoundException("Taller no encontrado"));
+        if(activity.getType() != ActivityType.WORKSHOP){
+            throw ReservationErrorsEnum.NO_WORKSHOP_EXCEPTION.getException();
+        }
+        List<Reservation> reservations = reservationRepository.findByActivityId(workshopId);
+        return reservationMapper.reservationToParticipantsDTO(reservations);
     }
 
 

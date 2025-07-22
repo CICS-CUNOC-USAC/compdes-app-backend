@@ -16,4 +16,5 @@ public class ActivityDTO {
     private LocalDateTime initScheduledDate;
     private LocalDateTime endScheduledDate;
     private ResponseClassroomDTO classroom;
+    private Integer capacity;
 }
