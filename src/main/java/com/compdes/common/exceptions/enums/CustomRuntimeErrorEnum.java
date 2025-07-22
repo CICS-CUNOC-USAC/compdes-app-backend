@@ -29,7 +29,10 @@ public enum CustomRuntimeErrorEnum {
         NO_AUTHOR_REGISTRATION_STATUS_INCOMPLETE(
                         new CustomRuntimeException(
                                         ErrorCodeMessageEnum.NO_AUTHOR_REGISTRATION_STATUS_INCOMPLETE.getCode(),
-                                        ErrorCodeMessageEnum.NO_AUTHOR_REGISTRATION_STATUS_INCOMPLETE.getMessage()));
+                                        ErrorCodeMessageEnum.NO_AUTHOR_REGISTRATION_STATUS_INCOMPLETE.getMessage())),
+        EMAIL_REPORT_GENERATION_FAILED(
+                        new CustomRuntimeException(ErrorCodeMessageEnum.EMAIL_REPORT_GENERATION_FAILED.getCode(),
+                                        ErrorCodeMessageEnum.EMAIL_REPORT_GENERATION_FAILED.getMessage()));
 
         private final CustomRuntimeException customRuntimeException;
 }
