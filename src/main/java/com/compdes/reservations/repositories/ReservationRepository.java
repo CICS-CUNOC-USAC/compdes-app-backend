@@ -22,6 +22,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, String
 
     List<Reservation> findByParticipantId(String participantId);
 
+    List<Reservation> findByActivityId(String activityId);
+
     @Query("""
     SELECT COUNT(*) FROM Reservation r
     WHERE r.participant.id = :participantId
