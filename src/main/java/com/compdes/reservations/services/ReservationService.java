@@ -154,5 +154,24 @@ public class ReservationService {
         return reservationMapper.reservationToParticipantsDTO(reservations);
     }
 
+    /**
+     * Cuenta todos los asignados a un taller
+     */
+    public long countParticipantsToWorkshop(String workshopId) throws NotFoundException {
+        Activity activity = activityRepository.findById(workshopId)
+                .orElseThrow(() -> new NotFoundException("Taller no encontrado"));
+        if(activity.getType() != ActivityType.WORKSHOP){
+            throw ReservationErrorsEnum.NO_WORKSHOP_EXCEPTION.getException();
+        }
+        return reservationRepository.countByActivityId(workshopId);
+    }
+
+    /**
+     * Verifica si un participante esta en un taller especifico
+     * */
+    public boolean isAssigned(String participantId, String workshopId){
+        Optional<Reservation> reservationOp = reservationRepository.findByParticipantIdAndActivityId(participantId, workshopId);
+        return reservationOp.isPresent();
+    }
 
 }
