@@ -43,7 +43,7 @@ public class ClassroomService {
     /**
      * Crea un nuevo salón de clases para conferencias.
      * @param createClassroomDTO
-     * @return
+     * @return Classroom
      * @throws NotFoundException
      */
     public Classroom createClassroom(CreateClassroomDTO createClassroomDTO) throws NotFoundException {
@@ -51,6 +51,9 @@ public class ClassroomService {
                 .orElseThrow(() -> new NotFoundException("Módulo no encontrado"));
 
         Classroom classroom = new Classroom(createClassroomDTO.getName(), module);
+        if(createClassroomDTO.getCapacity() != null && createClassroomDTO.getCapacity() > 0){
+            classroom.setCapacity(createClassroomDTO.getCapacity());
+        }
         if (classroomRepository.existsByName(classroom.getName())
                 && classroomRepository.existsByModuleUni(classroom.getModuleUni())) {
             throw new DuplicateResourceException(

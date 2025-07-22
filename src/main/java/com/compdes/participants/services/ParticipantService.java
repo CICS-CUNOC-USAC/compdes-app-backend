@@ -1,5 +1,7 @@
 package com.compdes.participants.services;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -57,7 +59,8 @@ public class ParticipantService {
         private final QrCodeService qrCodeService;
 
         /**
-         * Obtiene la lista de todos los participantes registrados en el sistema.
+         * Obtiene la lista de paginada y filtrada con los participantes registrados en
+         * el sistema.
          *
          * @return lista de participantes
          */
@@ -65,6 +68,17 @@ public class ParticipantService {
                 Specification<Participant> spec = Specification.allOf(
                                 ParticipantSpecification.filterBy(filters));
                 return participantRepository.findAll(spec, pageable);
+        }
+
+        /**
+         * Obtiene la lista filtrada de los participantes registrados en el sistema.
+         * 
+         * @return Lista con todos los participantes en la db
+         */
+        public List<Participant> getAllParticipants(ParticipantFilterDTO filters) {
+                Specification<Participant> spec = Specification.allOf(
+                                ParticipantSpecification.filterBy(filters));
+                return participantRepository.findAll(spec);
         }
 
         /**

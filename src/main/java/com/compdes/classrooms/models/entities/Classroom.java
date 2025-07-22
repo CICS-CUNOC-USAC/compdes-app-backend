@@ -33,6 +33,9 @@ public class Classroom extends Auditor {
     @JoinColumn(nullable = false)
     private ModuleUni moduleUni;
 
+    @Column(nullable = false)
+    private Integer capacity;
+
     /**
      * Constructor utilizado para crear y persistir un nuevo salon por
      * primera vez.
@@ -43,6 +46,7 @@ public class Classroom extends Auditor {
     public Classroom(String name, ModuleUni moduleUni) {
         this.name = name;
         this.moduleUni = moduleUni;
+        this.capacity = 30;
     }
 
 }
