@@ -1,0 +1,1 @@
+UPDATE participant set identification_document = REPLACE(identification_document, ' ', '') WHERE identification_document IS NOT NULL;
