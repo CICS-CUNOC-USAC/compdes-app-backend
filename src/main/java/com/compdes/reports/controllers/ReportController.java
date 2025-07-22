@@ -2,7 +2,9 @@ package com.compdes.reports.controllers;
 
 import java.util.List;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,11 +12,13 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.compdes.reports.models.dto.response.UniversityAttendanceReportDTO;
+import com.compdes.reports.services.ApprovedParticipantsEmailReportService;
 import com.compdes.reports.services.UniversityAttendanceReportService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import org.springframework.http.MediaType;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -31,6 +35,7 @@ import lombok.RequiredArgsConstructor;
 public class ReportController {
 
     private final UniversityAttendanceReportService universityAttendanceReportService;
+    private final ApprovedParticipantsEmailReportService approvedParticipantsEmailReportService;
 
     /**
      * Retorna el reporte de asistencia de participantes agrupado por universidad.
@@ -47,6 +52,32 @@ public class ReportController {
     @ResponseStatus(HttpStatus.OK)
     public List<UniversityAttendanceReportDTO> getAttendanceReportByUniversity() {
         return universityAttendanceReportService.getAttendanceReportByUniversity();
+    }
+
+    /**
+     * Genera un archivo con los correos electrónicos de participantes aprobados,
+     * agrupados por universidad.
+     * 
+     * Este método es accesible únicamente para usuarios con rol ADMIN y retorna un
+     * archivo de texto plano descargable con los correos electrónicos aprobados por
+     * universidad.
+     * 
+     * @return archivo .txt con los correos electrónicos de participantes aprobados
+     */
+    @Operation(summary = "Reporte de correos aprobados por universidad", description = "Genera un archivo .txt con los correos electrónicos de los participantes cuya inscripción ha sido aprobada, agrupados por universidad. Disponible solo para usuarios con rol ADMIN.", security = @SecurityRequirement(name = "bearerAuth"), responses = {
+            @ApiResponse(responseCode = "200", description = "Archivo generado correctamente"),
+            @ApiResponse(responseCode = "500", description = "Ocurrió un error inesperado al generar el archivo")
+    })
+    @GetMapping("/get-approved-participants-email")
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<byte[]> getApprovedParticipantsEmail() {
+        byte[] fileContent = approvedParticipantsEmailReportService.generateReport();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=approved-emails.txt")
+                .contentType(MediaType.TEXT_PLAIN)
+                .body(fileContent);
     }
 
 }
