@@ -3,8 +3,10 @@ package com.compdes.reservations.controllers;
 import com.compdes.common.exceptions.NotFoundException;
 import com.compdes.reservations.models.dto.request.AssistanceToReservationDTO;
 import com.compdes.reservations.models.dto.request.ReservationDTO;
+import com.compdes.reservations.models.dto.response.CountParticipantsDTO;
 import com.compdes.reservations.models.dto.response.ReservationParticipantsDTO;
 import com.compdes.reservations.models.dto.response.ReservationResponseDTO;
+import com.compdes.reservations.models.dto.response.ValidateAssistanceDTO;
 import com.compdes.reservations.services.ReservationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -103,7 +105,7 @@ public class ReservationController {
     }
 
     /**
-     * Obtener las reservaciones a un taller especifico
+     * Obtener las reservaciones a un taller especifico para un admin
      * */
     @Operation(
             summary = "Obtiene todos las reservaciones a un taller especifico",
@@ -115,6 +117,34 @@ public class ReservationController {
     public List<ReservationParticipantsDTO> getAllParticipants(@PathVariable String workshopId)
             throws NotFoundException {
         return reservationService.getAll(workshopId);
+    }
+
+    /**
+     * Contar cuantos participantes estan inscritos a un taller especifico
+     * */
+    @Operation(
+            summary = "Cuenta todos las reservaciones a un taller especifico",
+            description = "Cuenta y devuelve todos las reservaciones registradas para un taller"
+    )
+    @GetMapping("/countParticipants/{workshopId}")
+    @ResponseStatus(HttpStatus.OK)
+    public CountParticipantsDTO countParticipants(@PathVariable String workshopId) throws NotFoundException {
+        return new CountParticipantsDTO(reservationService.countParticipantsToWorkshop(workshopId));
+    }
+
+
+    /**
+     * Conocer si un participante definido está asignado a un taller especifico
+     * */
+    @Operation(
+            summary = "Cuenta todos las reservaciones a un taller especifico",
+            description = "Cuenta y devuelve todos las reservaciones registradas para un taller"
+    )
+    @GetMapping("/isAssigned/{participantId}/{workshopId}")
+    @ResponseStatus(HttpStatus.OK)
+    public ValidateAssistanceDTO isAssigned(@PathVariable String participantId, @PathVariable String workshopId)
+            throws NotFoundException {
+        return new ValidateAssistanceDTO(reservationService.isAssigned(participantId, workshopId));
     }
 
 }

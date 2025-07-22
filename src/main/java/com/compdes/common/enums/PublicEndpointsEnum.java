@@ -58,7 +58,11 @@ public enum PublicEndpointsEnum {
     // Rutas publicas de Activity
     ACTIVITY_GET_ALL(HttpMethod.GET, "/api/v1/activities/all"),
     SWAGGER_UI(null, "/swagger-ui/**"),
-    API_DOCS(null, "/v3/api-docs/**");
+    API_DOCS(null, "/v3/api-docs/**"),
+    //rutas publicas de reservation
+    RESERVATION_COUNT_PARTICIPANTS(HttpMethod.GET, "/api/v1/reservations/countParticipants/*"),
+    RESERVATION_VERIFY_ASSISTANT(HttpMethod.GET, "/api/v1/reservations/isAssigned/**")
+    ;
 
     private final HttpMethod method;
     private final String path;
