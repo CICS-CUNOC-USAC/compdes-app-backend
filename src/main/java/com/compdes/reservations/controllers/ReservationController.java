@@ -3,6 +3,7 @@ package com.compdes.reservations.controllers;
 import com.compdes.common.exceptions.NotFoundException;
 import com.compdes.reservations.models.dto.request.AssistanceToReservationDTO;
 import com.compdes.reservations.models.dto.request.ReservationDTO;
+import com.compdes.reservations.models.dto.response.ReservationParticipantsDTO;
 import com.compdes.reservations.models.dto.response.ReservationResponseDTO;
 import com.compdes.reservations.services.ReservationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -92,13 +93,28 @@ public class ReservationController {
      * */
     @Operation(
             summary = "Obtiene todos las reservaciones de un usuario",
-            description = "Obtiene todos las reservaciones registrados para una actividad"
+            description = "Obtiene todos las reservaciones registradas para una actividad"
     )
     @GetMapping("/all")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('PARTICIPANT')")
     public List<ReservationResponseDTO> getAll() throws NotFoundException {
         return reservationService.getAll();
+    }
+
+    /**
+     * Obtener las reservaciones a un taller especifico
+     * */
+    @Operation(
+            summary = "Obtiene todos las reservaciones a un taller especifico",
+            description = "Obtiene todos las reservaciones registradas para un taller"
+    )
+    @GetMapping("/allParticipants/{workshopId}")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<ReservationParticipantsDTO> getAllParticipants(@PathVariable String workshopId)
+            throws NotFoundException {
+        return reservationService.getAll(workshopId);
     }
 
 }

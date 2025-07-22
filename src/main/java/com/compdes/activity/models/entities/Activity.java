@@ -34,4 +34,6 @@ public class Activity extends Auditor {
     @ManyToOne
     @JoinColumn(nullable = false)
     private Classroom classroom;
+
+    private int capacity;
 }
