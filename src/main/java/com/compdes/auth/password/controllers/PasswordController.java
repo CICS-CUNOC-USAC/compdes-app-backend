@@ -3,6 +3,7 @@ package com.compdes.auth.password.controllers;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -10,14 +11,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.compdes.auth.password.models.dto.request.ChangePasswordDTO;
 import com.compdes.auth.password.services.PasswordService;
 import com.compdes.common.exceptions.NotFoundException;
-import com.compdes.common.models.dto.response.ErrorDTO;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -46,7 +44,8 @@ public class PasswordController {
     @PatchMapping("/{participantId}")
     @ResponseStatus(value = HttpStatus.OK)
     public void changePasswordUser(
-            @RequestBody ChangePasswordDTO newPassword, @PathVariable String participantId) throws NotFoundException {
+            @RequestBody @Valid ChangePasswordDTO newPassword, @PathVariable String participantId)
+            throws NotFoundException {
         passwordService.changePasswordUser(newPassword, participantId);
     }
 
