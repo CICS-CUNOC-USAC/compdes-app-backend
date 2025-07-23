@@ -1,5 +1,6 @@
 package com.compdes.qrCodes.repositories;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,6 +22,7 @@ import com.compdes.qrCodes.models.entities.QrCode;
  */
 @Repository
 public interface QrCodeRepository extends JpaRepository<QrCode, String> {
+    public List<QrCode> findAllByOrderByNumberCodeAsc();
 
     /**
      * Obtiene el último código QR generado, basado en el valor más alto de
@@ -45,7 +47,7 @@ public interface QrCodeRepository extends JpaRepository<QrCode, String> {
      *         existe,
      *         o vacío si no se encuentra ninguno.
      */
-    public Optional<QrCode> findFirstByParticipantIsNullOrderByNumberCodeDesc();
+    public Optional<QrCode> findFirstByParticipantIsNullOrderByNumberCodeAsc();
 
     /**
      * Busca un código QR asociado a un participante cuyo usuario tenga el nombre

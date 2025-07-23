@@ -136,7 +136,7 @@ public class Participant extends Auditor {
         setPhone(dto.getPhone());
         setOrganisation(dto.getOrganisation());
         setIdentificationDocument(dto.getIdentificationDocument());
-        setIsAuthor(dto.getIsAuthor());        
+        setIsAuthor(dto.getIsAuthor());
     }
 
     /**
@@ -188,6 +188,10 @@ public class Participant extends Auditor {
         if (this.qrCode != null) {
             throw QrCodeErrorEnum.PARTICIPANT_ALREADY_HAS_QR.getQrCodeException();
         }
+        this.qrCode = qrCode;
+    }
+
+    public void setQrCodeWithoutExeption(QrCode qrCode) {
         this.qrCode = qrCode;
     }
 
