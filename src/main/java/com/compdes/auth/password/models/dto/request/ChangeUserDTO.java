@@ -12,7 +12,7 @@ import lombok.Value;
  * @since 2025-07-22
  */
 @Value
-public class ChangePasswordDTO {
+public class ChangeUserDTO {
 
     @NotBlank(message = "La contraseña no puede estar vacía")
     @Size(min = 8, max = 100, message = "La contraseña debe tener al menos 8 caracteres")
