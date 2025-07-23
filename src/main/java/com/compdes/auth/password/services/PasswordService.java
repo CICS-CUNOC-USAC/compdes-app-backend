@@ -51,8 +51,12 @@ public class PasswordService {
         String encodedPassword = passwordEncoder.encode(passwordDTO.getNewPassword());
         // setea la password por medio del participante
         participant.getCompdesUser().setPassword(encodedPassword);
-        // resetea el nombre de usuario del participante
-        participant.getCompdesUser().setUsername(participant.getEmail());
+
+        // resetea el nombre de usuario del participante si no esta presente
+        if (participant.getCompdesUser().getUsername() == null) {
+            participant.getCompdesUser().setUsername(participant.getEmail());
+        }
+
         participantService.saveParticipant(participant);
 
     }
