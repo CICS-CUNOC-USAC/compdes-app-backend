@@ -4,7 +4,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.compdes.auth.password.models.dto.request.ChangePasswordDTO;
+import com.compdes.auth.password.models.dto.request.ChangeUserDTO;
 import com.compdes.common.exceptions.NotFoundException;
 import com.compdes.common.exceptions.enums.ErrorCodeMessageEnum;
 import com.compdes.participants.models.entities.Participant;
@@ -38,7 +38,7 @@ public class PasswordService {
      *                               dado
      * @throws IllegalStateException si el participante no tiene un usuario asociado
      */
-    public void changePasswordUser(ChangePasswordDTO passwordDTO, String participantId) throws NotFoundException {
+    public void resetCompdesUser(ChangeUserDTO passwordDTO, String participantId) throws NotFoundException {
         // trae al participante por su id
         Participant participant = participantService.getParticipantById(participantId);
 
@@ -51,6 +51,8 @@ public class PasswordService {
         String encodedPassword = passwordEncoder.encode(passwordDTO.getNewPassword());
         // setea la password por medio del participante
         participant.getCompdesUser().setPassword(encodedPassword);
+        // resetea el nombre de usuario del participante
+        participant.getCompdesUser().setUsername(participant.getEmail());
         participantService.saveParticipant(participant);
 
     }

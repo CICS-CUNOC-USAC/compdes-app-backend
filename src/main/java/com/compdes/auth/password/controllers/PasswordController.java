@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.compdes.auth.password.models.dto.request.ChangePasswordDTO;
+import com.compdes.auth.password.models.dto.request.ChangeUserDTO;
 import com.compdes.auth.password.services.PasswordService;
 import com.compdes.common.exceptions.NotFoundException;
 
@@ -44,9 +44,9 @@ public class PasswordController {
     @PatchMapping("/{participantId}")
     @ResponseStatus(value = HttpStatus.OK)
     public void changePasswordUser(
-            @RequestBody @Valid ChangePasswordDTO newPassword, @PathVariable String participantId)
+            @RequestBody @Valid ChangeUserDTO newPassword, @PathVariable String participantId)
             throws NotFoundException {
-        passwordService.changePasswordUser(newPassword, participantId);
+        passwordService.resetCompdesUser(newPassword, participantId);
     }
 
 }
