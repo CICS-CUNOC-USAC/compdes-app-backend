@@ -68,7 +68,11 @@ public enum ErrorCodeMessageEnum {
                         "El campo 'isCashPayment' no puede ser nulo al crear un estado de registro de un participant4 no autor."),
         EMAIL_REPORT_GENERATION_FAILED("STP-003",
                         "Ocurrió un error al generar el reporte de correos electrónicos de participantes aprobados."),
-                        ;
+        // errores por cambios de contrasenia
+        PARTICIPANT_WITHOUT_USER("PAS-001",
+                        "El participante seleccionado no tiene un usuario asociado. "
+                                        + "No es posible cambiar la contraseña sin una cuenta vinculada."),
+        ;
 
         private final String code;
         private final String message;
