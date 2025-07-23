@@ -61,6 +61,10 @@ public class ParticipantService {
         private final ParticipantValidationService participantValidationService;
         private final QrCodeService qrCodeService;
 
+        public Participant saveParticipant(Participant participant) {
+                return participantRepository.save(participant);
+        }
+
         /**
          * Obtiene la lista de paginada y filtrada con los participantes registrados en
          * el sistema.
