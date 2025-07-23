@@ -30,6 +30,8 @@ import com.compdes.registrationStatus.factories.RegistrationStatusFactory;
 import com.compdes.registrationStatus.models.entities.RegistrationStatus;
 import com.compdes.registrationStatus.services.RegistrationStatusService;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -338,6 +340,8 @@ public class ParticipantService {
         }
 
         private final QrCodeRepository qrCodeRepository;
+        @PersistenceContext
+        EntityManager entityManager;
 
         public void reassignQrsToApprovedParticipants() {
                 // 1. Obtener participantes aprobados
@@ -358,6 +362,8 @@ public class ParticipantService {
 
                 participantRepository.saveAll(participants);
                 qrCodeRepository.saveAll(qrCodes);
+
+                entityManager.flush();
 
                 // 5. Asignar los nuevos QRs
                 for (int i = 0; i < participants.size(); i++) {
