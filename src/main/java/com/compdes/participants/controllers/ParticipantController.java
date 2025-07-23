@@ -380,4 +380,10 @@ public class ParticipantController {
         public void deleteParticipant(@PathVariable String id) throws NotFoundException {
                 participantService.deleteParticipant(id);
         }
+
+        @PatchMapping("/reassignQrs")
+        @PreAuthorize("hasRole('ADMIN')")
+        public void reassignQrsToApprovedParticipants() {
+                participantService.reassignQrsToApprovedParticipants();
+        }
 }
