@@ -1,5 +1,6 @@
 package com.compdes.participants.repositories;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,6 +19,8 @@ import com.compdes.participants.models.entities.Participant;
 @Repository
 public interface ParticipantRepository
         extends JpaRepository<Participant, String>, JpaSpecificationExecutor<Participant> {
+
+    public List<Participant> findByRegistrationStatus_IsApprovedOrderByCreatedAtAsc(Boolean isApproved);
 
     /**
      * Verifica si existe un participante con el correo electrónico especificado.
