@@ -68,6 +68,7 @@ public class ActivityService {
      * @throws NotFoundException
      */
     public Activity updateActivity(String id, UpdateActivityDTO updateActivityDTO) throws NotFoundException {
+        
         Activity existingActivity = activityRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Actividad no encontrada por medio del ID: " + id));
         // Verificamos que la hora de inicio sea menos que la hora de fin
@@ -84,11 +85,14 @@ public class ActivityService {
                     "Ya existe una actividad programada en este horario para el aula especificada."
                             + " Por favor, verifica las fechas y horarios de la actividad.");
         }
+
+        Classroom classroom = classroomService.getClassroomById(updateActivityDTO.getClassroomId());
         existingActivity.setName(updateActivityDTO.getName());
         existingActivity.setDescription(updateActivityDTO.getDescription());
         existingActivity.setType(updateActivityDTO.getType());
         existingActivity.setInitScheduledDate(updateActivityDTO.getInitScheduledDate());
         existingActivity.setEndScheduledDate(updateActivityDTO.getEndScheduledDate());
+        existingActivity.setClassroom(classroom);
 
         return activityRepository.save(existingActivity);
     }
