@@ -84,4 +84,9 @@ public class QrCode extends Auditor {
         }
         this.participant = participant;
     }
+
+    public void setParticipantWithoutExeption(Participant participant) {
+
+        this.participant = participant;
+    }
 }
