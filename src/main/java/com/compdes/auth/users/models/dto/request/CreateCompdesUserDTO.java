@@ -26,7 +26,7 @@ public class CreateCompdesUserDTO {
     private String username;
 
     @NotBlank(message = "La contraseña no puede estar vacía")
-    @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres")
+    @Size(min = 8, max = 100, message = "La contraseña debe tener al menos 8 caracteres")
     String password;
 
     public CreateCompdesUserDTO(
