@@ -24,14 +24,17 @@ public class ParticipantProfileDTO extends BaseParticipantInfoDTO {
     private String phone;
     private String identificationDocument;
     private String qrCodeLink;
+    private Integer qrCodeNumber;
 
     public ParticipantProfileDTO(String firstName, String lastName, String organisation, Boolean isAuthor,
-            Boolean isGuest, String email, String phone, String identificationDocument, String qrCodeLink) {
+            Boolean isGuest, String email, String phone, String identificationDocument, String qrCodeLink,
+            Integer qrCodeNumber) {
         super(firstName, lastName, organisation, isAuthor, isGuest);
         this.email = email;
         this.phone = phone;
         this.identificationDocument = identificationDocument;
         this.qrCodeLink = qrCodeLink;
+        this.qrCodeNumber = qrCodeNumber;
     }
 
 }

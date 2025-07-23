@@ -39,8 +39,9 @@ public class AdminParticipantProfileDTO extends ParticipantProfileDTO {
     public AdminParticipantProfileDTO(String firstName, String lastName, String organisation, Boolean isAuthor,
             Boolean isGuest, String email, String phone, String identificationDocument, String qrCodeLink, String id,
             PrivateRegistrationStatusInfoDTO registrationStatus, Boolean isTransferPayment, Boolean isCardPayment,
-            String cardPaymentProofLink, String transferPaymentProofLink, String createdAt) {
-        super(firstName, lastName, organisation, isAuthor, isGuest, email, phone, identificationDocument, qrCodeLink);
+            String cardPaymentProofLink, String transferPaymentProofLink, String createdAt, Integer qrCodeNumber) {
+        super(firstName, lastName, organisation, isAuthor, isGuest, email, phone, identificationDocument, qrCodeLink,
+                qrCodeNumber);
         this.id = id;
         this.registrationStatus = registrationStatus;
         this.isTransferPayment = isTransferPayment;
