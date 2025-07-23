@@ -105,13 +105,13 @@ public class ReservationService {
             throw new DuplicateResourceException("Ya se registro la asistencia del participante");
         }
         //verificar que las marcas de tiempo para registrar asistencia este bien
-        LocalDateTime now = LocalDateTime.now();
+        /*LocalDateTime now = LocalDateTime.now();
         LocalDateTime earliestAllowed = activity.getInitScheduledDate().minusMinutes(20);
         LocalDateTime latestAllowed = activity.getEndScheduledDate();
 
         if (now.isBefore(earliestAllowed) || now.isAfter(latestAllowed)) {
             throw ReservationErrorsEnum.CANNOT_ASSIG.getException();
-        }
+        }*/
 
         reservation.setAttendedDateTime(LocalDateTime.now());
         return reservationRepository.save(reservation);
@@ -129,9 +129,9 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findByParticipantIdAndActivityId(user.getParticipant().getId(), activity.getId())
                 .orElseThrow(() -> new NotFoundException("Reservacion no encontrada"));
 
-        if(LocalDateTime.now().isAfter(activity.getInitScheduledDate())){
+        /*if(LocalDateTime.now().isAfter(activity.getInitScheduledDate())){
             throw ReservationErrorsEnum.CANNOT_CANCEL.getException();
-        }
+        }*/
         reservationRepository.delete(reservation);
     }
 
