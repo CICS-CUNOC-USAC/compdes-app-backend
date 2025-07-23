@@ -121,6 +121,11 @@ public abstract class ParticipantMapper {
                                                                 + QrCodeController.BASE_PATH
                                                                 + QrCodeController.BASE_GET_QR_IMAGE_BY_ID_FOR_PARTICIPANT
                                                 : null);
+                // genera el numero de qr asignado al participante, si ya fue asignado
+                dto.setQrCodeNumber((participant.getQrCode() != null)
+                                ? participant.getQrCode().getNumberCode()
+                                : null);
+
         }
 
         /**
@@ -146,6 +151,10 @@ public abstract class ParticipantMapper {
                                                 + QrCodeController.BASE_GET_QR_IMAGE_BY_ID_FOR_ADMIN
                                                 + "/"
                                                 + participant.getQrCode().getId()
+                                : null);
+                // genera el numero de qr asignado al participante, si ya fue asignado
+                dto.setQrCodeNumber((participant.getQrCode() != null)
+                                ? participant.getQrCode().getNumberCode()
                                 : null);
 
                 // enlace absoluto al comprobante de tarjeta, si existe
