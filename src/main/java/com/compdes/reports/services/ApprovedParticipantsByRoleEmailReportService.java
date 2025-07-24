@@ -13,17 +13,15 @@ import com.compdes.reports.utils.ParticipantEmailTxtExporter;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Servicio encargado de generar un reporte en formato texto (.txt)
- * que contiene los correos electrónicos de los participantes aprobados.
+ *
  *
  * @author Luis Monterroso
  * @version 1.0
- * @since 2025-07-22
+ * @since 2025-07-24
  */
 @Service
 @RequiredArgsConstructor
-public class ApprovedParticipantsEmailReportService {
-
+public class ApprovedParticipantsByRoleEmailReportService {
     private final ParticipantService participantService;
     private final ParticipantEmailTxtExporter exporter;
 
@@ -36,12 +34,16 @@ public class ApprovedParticipantsEmailReportService {
      * @throws CustomRuntimeException si ocurre un error durante la generación del
      *                                archivo.
      */
-    public byte[] generateReport() {
-        // busca solamente los participantes aprovados
+    public byte[] generateReport(Boolean isAuthor) {
+        // busca solamente los participantes aprovados, sehgun sean autores o no
         List<Participant> approvedParticipants = participantService.getAllParticipants(
-                new ParticipantFilterDTO(null, null, null, null, null, null, null, null, null, null, null, true, null));
+                new ParticipantFilterDTO(null, null, null, null, null,
+                        null, isAuthor, null, null,
+                        null, null, true, null));
 
-        // Escribe los correos en un archivo de texto (en memoria)
-        return exporter.writeEmailsToTxt(approvedParticipants, "Parcticipante");
+        String participantType = isAuthor ? "Autor" : "Participante";
+
+        // Escribe en memmoria los correos en un archivo de texto
+        return exporter.writeEmailsToTxt(approvedParticipants, participantType);
     }
 }
