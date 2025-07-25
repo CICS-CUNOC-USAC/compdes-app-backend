@@ -2,6 +2,8 @@ package com.compdes.reports.controllers;
 
 import java.util.List;
 
+import com.compdes.reports.models.dto.response.ActivityAttendanceReportDTO;
+import com.compdes.reports.services.ActivityAttendanceReportService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -39,6 +41,7 @@ public class ReportController {
     private final UniversityAttendanceReportService universityAttendanceReportService;
     private final ApprovedParticipantsEmailReportService approvedParticipantsEmailReportService;
     private final ApprovedParticipantsByRoleEmailReportService approvedParticipantsByRoleEmailReportService;
+    private final ActivityAttendanceReportService activityAttendanceReportService;
 
     @GetMapping("/approved-participants-by-role-email/{isAuthor}")
     public ResponseEntity<byte[]> getApprovedParticipantsByRoleEmailReport(
@@ -67,6 +70,26 @@ public class ReportController {
     public List<UniversityAttendanceReportDTO> getAttendanceReportByUniversity() {
         return universityAttendanceReportService.getAttendanceReportByUniversity();
     }
+
+
+    /**
+     * Retorna el reporte de asistencia de participantes agrupado por universidad.
+     *
+     */
+    @Operation(summary = "Reporte de asistencia por actividad",
+            description = "Genera un reporte agrupado por actividad, incluyendo la cantidad total de participantes registrados, Retorna los perfiles completos de los participantes por actividad. Disponible para `ADMIN`",
+            security = @SecurityRequirement(name = "bearerAuth"), responses = {
+            @ApiResponse(responseCode = "200", description = "Reporte generado correctamente"),
+            @ApiResponse(responseCode = "500", description = "Ocurrió un error inesperado al generar el reporte")
+    })
+    @GetMapping("/attendance-report-by-activity")
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseStatus(HttpStatus.OK)
+    public List<ActivityAttendanceReportDTO> getAttendanceReportByActivity() {
+        return activityAttendanceReportService.getAttendanceReportByActivity();
+    }
+
+
 
     /**
      * Genera un archivo con los correos electrónicos de participantes aprobados,
