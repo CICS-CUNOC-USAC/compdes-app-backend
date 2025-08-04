@@ -1,9 +1,7 @@
 package com.compdes.qrCodes.services;
 
-import java.util.List;
 import java.util.Optional;
 
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,7 +10,6 @@ import com.compdes.common.exceptions.QrCodeException;
 import com.compdes.common.exceptions.enums.QrCodeErrorEnum;
 import com.compdes.participants.models.entities.Participant;
 import com.compdes.participants.repositories.ParticipantRepository;
-import com.compdes.participants.services.ParticipantService;
 import com.compdes.qrCodes.models.entities.QrCode;
 import com.compdes.qrCodes.repositories.QrCodeRepository;
 import com.compdes.qrCodes.utils.QrCodeImageGeneratorUtil;

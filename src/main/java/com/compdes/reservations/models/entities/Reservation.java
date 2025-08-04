@@ -1,17 +1,20 @@
 package com.compdes.reservations.models.entities;
 
+import java.time.LocalDateTime;
+
+import org.hibernate.annotations.DynamicUpdate;
+
 import com.compdes.activity.models.entities.Activity;
-import com.compdes.auth.users.models.entities.CompdesUser;
 import com.compdes.common.models.entities.Auditor;
-import com.compdes.moduleUni.models.entities.ModuleUni;
 import com.compdes.participants.models.entities.Participant;
-import jakarta.persistence.*;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.DynamicUpdate;
-
-import java.time.LocalDateTime;
 
 /**
  * Representa una reservacion de un taller registrado en el sistema.

@@ -1,11 +1,10 @@
 package com.compdes.reservations.models.dto.response;
 
-import com.compdes.auth.users.models.dto.response.CompdesUserDTO;
-import com.compdes.participants.models.dto.response.AdminParticipantProfileDTO;
-import com.compdes.participants.models.dto.response.ParticipantProfileDTO;
-import lombok.Value;
-
 import java.time.LocalDateTime;
+
+import com.compdes.participants.models.dto.response.AdminParticipantProfileDTO;
+
+import lombok.Value;
 
 /**
  * DTO utilizado para mandar los datos necesarios para la visualización de

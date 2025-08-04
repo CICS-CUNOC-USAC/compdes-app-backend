@@ -1,5 +1,10 @@
 package com.compdes.attendance.services;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
 import com.compdes.activity.models.entities.Activity;
 import com.compdes.activity.services.ActivityService;
 import com.compdes.attendance.mappers.AttendanceMapper;
@@ -9,12 +14,9 @@ import com.compdes.attendance.repositories.AttendanceRepository;
 import com.compdes.common.exceptions.NotFoundException;
 import com.compdes.participants.models.entities.Participant;
 import com.compdes.participants.services.ParticipantService;
+
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @Transactional(rollbackOn = Exception.class)
