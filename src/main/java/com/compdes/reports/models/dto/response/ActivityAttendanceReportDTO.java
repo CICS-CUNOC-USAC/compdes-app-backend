@@ -1,11 +1,11 @@
 package com.compdes.reports.models.dto.response;
 
-import com.compdes.activity.models.dto.response.ActivityDTO;
-import com.compdes.attendance.models.dto.response.AttendaceDTO;
-import com.compdes.participants.models.dto.response.AdminParticipantProfileDTO;
-import lombok.Value;
-
 import java.util.List;
+
+import com.compdes.activity.models.dto.response.ActivityDTO;
+import com.compdes.participants.models.dto.response.AdminParticipantProfileDTO;
+
+import lombok.Value;
 
 /**
  * Representa un reporte de asistencia de participantes agrupados por
