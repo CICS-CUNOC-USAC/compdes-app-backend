@@ -1,15 +1,13 @@
 package com.compdes.classrooms.repositories;
 
-import com.compdes.classrooms.models.entities.Classroom;
-import com.compdes.moduleUni.models.entities.ModuleUni;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.compdes.participants.models.entities.Participant;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
+
+import com.compdes.classrooms.models.entities.Classroom;
+import com.compdes.moduleUni.models.entities.ModuleUni;
 
 /**
  * Repositorio para operaciones CRUD sobre la entidad {@link Classroom}.

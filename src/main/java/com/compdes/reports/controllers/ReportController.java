@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.compdes.reports.models.dto.response.UniversityAttendanceReportDTO;
 import com.compdes.reports.services.ApprovedParticipantsByRoleEmailReportService;
 import com.compdes.reports.services.ApprovedParticipantsEmailReportService;
+import com.compdes.reports.services.CunocAttendanceReportService;
 import com.compdes.reports.services.UniversityAttendanceReportService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,83 +39,92 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ReportController {
 
-    private final UniversityAttendanceReportService universityAttendanceReportService;
-    private final ApprovedParticipantsEmailReportService approvedParticipantsEmailReportService;
-    private final ApprovedParticipantsByRoleEmailReportService approvedParticipantsByRoleEmailReportService;
-    private final ActivityAttendanceReportService activityAttendanceReportService;
+        private final UniversityAttendanceReportService universityAttendanceReportService;
+        private final ApprovedParticipantsEmailReportService approvedParticipantsEmailReportService;
+        private final ApprovedParticipantsByRoleEmailReportService approvedParticipantsByRoleEmailReportService;
+        private final ActivityAttendanceReportService activityAttendanceReportService;
+        private final CunocAttendanceReportService cunocAttendanceReportService;
 
-    @GetMapping("/approved-participants-by-role-email/{isAuthor}")
-    public ResponseEntity<byte[]> getApprovedParticipantsByRoleEmailReport(
-            @PathVariable Boolean isAuthor) {
-        byte[] fileContent = approvedParticipantsByRoleEmailReportService.generateReport(isAuthor);
+        @GetMapping("/approved-participants-by-role-email/{isAuthor}")
+        @PreAuthorize("hasRole('ADMIN')")
+        public ResponseEntity<byte[]> getApprovedParticipantsByRoleEmailReport(
+                        @PathVariable Boolean isAuthor) {
+                byte[] fileContent = approvedParticipantsByRoleEmailReportService.generateReport(isAuthor);
 
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=approved-emails.txt")
-                .contentType(MediaType.TEXT_PLAIN)
-                .body(fileContent);
-    }
+                return ResponseEntity.ok()
+                                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=approved-emails.txt")
+                                .contentType(MediaType.TEXT_PLAIN)
+                                .body(fileContent);
+        }
 
-    /**
-     * Retorna el reporte de asistencia de participantes agrupado por universidad.
-     * 
-     * @return lista de objetos {@link UniversityAttendanceReportDTO} representando
-     *         las estadísticas de inscripción por universidad
-     */
-    @Operation(summary = "Reporte de asistencia por universidad", description = "Genera un reporte agrupado por universidad, incluyendo la cantidad total de participantes registrados, el número de inscripciones aprobadas y las pendientes. Retorna los perfiles completos de los participantes por universidad. Disponible para `ADMIN`", security = @SecurityRequirement(name = "bearerAuth"), responses = {
-            @ApiResponse(responseCode = "200", description = "Reporte generado correctamente"),
-            @ApiResponse(responseCode = "500", description = "Ocurrió un error inesperado al generar el reporte")
-    })
-    @GetMapping("/attendance-report-by-university")
-    @PreAuthorize("hasRole('ADMIN')")
-    @ResponseStatus(HttpStatus.OK)
-    public List<UniversityAttendanceReportDTO> getAttendanceReportByUniversity() {
-        return universityAttendanceReportService.getAttendanceReportByUniversity();
-    }
+        @GetMapping("/cunoc-attendance-report")
+        @PreAuthorize("hasRole('ADMIN')")
+        public ResponseEntity<byte[]> getCunocAttendanceReport() {
+                byte[] fileContent = cunocAttendanceReportService.generateReport();
 
+                return ResponseEntity.ok()
+                                .header(HttpHeaders.CONTENT_DISPOSITION,
+                                                "attachment; filename=cunoc-attendance-emails.txt")
+                                .contentType(MediaType.TEXT_PLAIN)
+                                .body(fileContent);
+        }
 
-    /**
-     * Retorna el reporte de asistencia de participantes agrupado por universidad.
-     *
-     */
-    @Operation(summary = "Reporte de asistencia por actividad",
-            description = "Genera un reporte agrupado por actividad, incluyendo la cantidad total de participantes registrados, Retorna los perfiles completos de los participantes por actividad. Disponible para `ADMIN`",
-            security = @SecurityRequirement(name = "bearerAuth"), responses = {
-            @ApiResponse(responseCode = "200", description = "Reporte generado correctamente"),
-            @ApiResponse(responseCode = "500", description = "Ocurrió un error inesperado al generar el reporte")
-    })
-    @GetMapping("/attendance-report-by-activity")
-    @PreAuthorize("hasRole('ADMIN')")
-    @ResponseStatus(HttpStatus.OK)
-    public List<ActivityAttendanceReportDTO> getAttendanceReportByActivity() {
-        return activityAttendanceReportService.getAttendanceReportByActivity();
-    }
+        /**
+         * Retorna el reporte de asistencia de participantes agrupado por universidad.
+         * 
+         * @return lista de objetos {@link UniversityAttendanceReportDTO} representando
+         *         las estadísticas de inscripción por universidad
+         */
+        @Operation(summary = "Reporte de asistencia por universidad", description = "Genera un reporte agrupado por universidad, incluyendo la cantidad total de participantes registrados, el número de inscripciones aprobadas y las pendientes. Retorna los perfiles completos de los participantes por universidad. Disponible para `ADMIN`", security = @SecurityRequirement(name = "bearerAuth"), responses = {
+                        @ApiResponse(responseCode = "200", description = "Reporte generado correctamente"),
+                        @ApiResponse(responseCode = "500", description = "Ocurrió un error inesperado al generar el reporte")
+        })
+        @GetMapping("/attendance-report-by-university")
+        @PreAuthorize("hasRole('ADMIN')")
+        @ResponseStatus(HttpStatus.OK)
+        public List<UniversityAttendanceReportDTO> getAttendanceReportByUniversity() {
+                return universityAttendanceReportService.getAttendanceReportByUniversity();
+        }
 
+        /**
+         * Retorna el reporte de asistencia de participantes agrupado por universidad.
+         *
+         */
+        @Operation(summary = "Reporte de asistencia por actividad", description = "Genera un reporte agrupado por actividad, incluyendo la cantidad total de participantes registrados, Retorna los perfiles completos de los participantes por actividad. Disponible para `ADMIN`", security = @SecurityRequirement(name = "bearerAuth"), responses = {
+                        @ApiResponse(responseCode = "200", description = "Reporte generado correctamente"),
+                        @ApiResponse(responseCode = "500", description = "Ocurrió un error inesperado al generar el reporte")
+        })
+        @GetMapping("/attendance-report-by-activity")
+        @PreAuthorize("hasRole('ADMIN')")
+        @ResponseStatus(HttpStatus.OK)
+        public List<ActivityAttendanceReportDTO> getAttendanceReportByActivity() {
+                return activityAttendanceReportService.getAttendanceReportByActivity();
+        }
 
+        /**
+         * Genera un archivo con los correos electrónicos de participantes aprobados,
+         * agrupados por universidad.
+         * 
+         * Este método es accesible únicamente para usuarios con rol ADMIN y retorna un
+         * archivo de texto plano descargable con los correos electrónicos aprobados por
+         * universidad.
+         * 
+         * @return archivo .txt con los correos electrónicos de participantes aprobados
+         */
+        @Operation(summary = "Reporte de correos aprobados por universidad", description = "Genera un archivo .txt con los correos electrónicos de los participantes cuya inscripción ha sido aprobada, agrupados por universidad. Disponible solo para usuarios con rol ADMIN.", security = @SecurityRequirement(name = "bearerAuth"), responses = {
+                        @ApiResponse(responseCode = "200", description = "Archivo generado correctamente"),
+                        @ApiResponse(responseCode = "500", description = "Ocurrió un error inesperado al generar el archivo")
+        })
+        @GetMapping("/get-approved-participants-email")
+        @PreAuthorize("hasRole('ADMIN')")
+        @ResponseStatus(HttpStatus.OK)
+        public ResponseEntity<byte[]> getApprovedParticipantsEmail() {
+                byte[] fileContent = approvedParticipantsEmailReportService.generateReport();
 
-    /**
-     * Genera un archivo con los correos electrónicos de participantes aprobados,
-     * agrupados por universidad.
-     * 
-     * Este método es accesible únicamente para usuarios con rol ADMIN y retorna un
-     * archivo de texto plano descargable con los correos electrónicos aprobados por
-     * universidad.
-     * 
-     * @return archivo .txt con los correos electrónicos de participantes aprobados
-     */
-    @Operation(summary = "Reporte de correos aprobados por universidad", description = "Genera un archivo .txt con los correos electrónicos de los participantes cuya inscripción ha sido aprobada, agrupados por universidad. Disponible solo para usuarios con rol ADMIN.", security = @SecurityRequirement(name = "bearerAuth"), responses = {
-            @ApiResponse(responseCode = "200", description = "Archivo generado correctamente"),
-            @ApiResponse(responseCode = "500", description = "Ocurrió un error inesperado al generar el archivo")
-    })
-    @GetMapping("/get-approved-participants-email")
-    @PreAuthorize("hasRole('ADMIN')")
-    @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<byte[]> getApprovedParticipantsEmail() {
-        byte[] fileContent = approvedParticipantsEmailReportService.generateReport();
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=approved-emails.txt")
-                .contentType(MediaType.TEXT_PLAIN)
-                .body(fileContent);
-    }
+                return ResponseEntity.ok()
+                                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=approved-emails.txt")
+                                .contentType(MediaType.TEXT_PLAIN)
+                                .body(fileContent);
+        }
 
 }

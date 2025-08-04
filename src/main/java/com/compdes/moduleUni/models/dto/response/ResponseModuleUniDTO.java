@@ -1,6 +1,5 @@
 package com.compdes.moduleUni.models.dto.response;
 
-import lombok.AllArgsConstructor;
 import lombok.Value;
 
 /**
