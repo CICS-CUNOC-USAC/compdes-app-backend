@@ -1,4 +1,4 @@
-package com.compdes.reports.services;
+package com.compdes.reports.txt.services;
 
 import java.util.List;
 import java.util.Map;
@@ -14,7 +14,7 @@ import com.compdes.attendance.models.entities.Attendance;
 import com.compdes.attendance.services.AttendanceService;
 import com.compdes.participants.mappers.ParticipantMapper;
 import com.compdes.participants.models.dto.response.AdminParticipantProfileDTO;
-import com.compdes.reports.models.dto.response.ActivityAttendanceReportDTO;
+import com.compdes.reports.txt.models.dto.response.ActivityAttendanceReportDTO;
 
 import lombok.RequiredArgsConstructor;
 
