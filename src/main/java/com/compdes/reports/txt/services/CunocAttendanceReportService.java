@@ -1,4 +1,4 @@
-package com.compdes.reports.services;
+package com.compdes.reports.txt.services;
 
 import java.util.List;
 
@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import com.compdes.participants.models.dto.request.ParticipantFilterDTO;
 import com.compdes.participants.models.entities.Participant;
 import com.compdes.participants.services.ParticipantService;
-import com.compdes.reports.utils.ParticipantEmailTxtExporter;
+import com.compdes.reports.txt.utils.ParticipantEmailTxtExporter;
 
 import lombok.RequiredArgsConstructor;
 

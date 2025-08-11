@@ -1,4 +1,4 @@
-package com.compdes.reports.utils;
+package com.compdes.reports.txt.utils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;

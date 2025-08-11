@@ -32,7 +32,10 @@ public enum CustomRuntimeErrorEnum {
                                         ErrorCodeMessageEnum.NO_AUTHOR_REGISTRATION_STATUS_INCOMPLETE.getMessage())),
         EMAIL_REPORT_GENERATION_FAILED(
                         new CustomRuntimeException(ErrorCodeMessageEnum.EMAIL_REPORT_GENERATION_FAILED.getCode(),
-                                        ErrorCodeMessageEnum.EMAIL_REPORT_GENERATION_FAILED.getMessage()));
+                                        ErrorCodeMessageEnum.EMAIL_REPORT_GENERATION_FAILED.getMessage())),
+        CSV_WRITE_FAILED(
+                        new CustomRuntimeException(ErrorCodeMessageEnum.CSV_WRITE_FAILED.getCode(),
+                                        ErrorCodeMessageEnum.CSV_WRITE_FAILED.getMessage()));
 
         private final CustomRuntimeException customRuntimeException;
 }
