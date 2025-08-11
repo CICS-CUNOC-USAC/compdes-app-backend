@@ -1,4 +1,4 @@
-package com.compdes.reports.services;
+package com.compdes.reports.txt.services;
 
 import java.util.Comparator;
 import java.util.List;
@@ -11,7 +11,7 @@ import com.compdes.participants.mappers.ParticipantMapper;
 import com.compdes.participants.models.dto.response.AdminParticipantProfileDTO;
 import com.compdes.participants.models.entities.Participant;
 import com.compdes.participants.services.ParticipantService;
-import com.compdes.reports.models.dto.response.UniversityAttendanceReportDTO;
+import com.compdes.reports.txt.models.dto.response.UniversityAttendanceReportDTO;
 
 import lombok.RequiredArgsConstructor;
 

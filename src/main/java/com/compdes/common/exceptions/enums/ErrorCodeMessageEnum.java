@@ -59,6 +59,10 @@ public enum ErrorCodeMessageEnum {
 
         QR_GENERATION_FAILED("QR-004", "Ocurrió un error al generar el código QR."),
         QR_IMAGE_ENCODING_FAILED("QR-005", "No se pudo codificar la imagen del código QR en formato PNG."),
+
+        // ----Errores por CSV
+        CSV_WRITE_FAILED("CSV-001",
+                        "No se pudo generar el archivo CSV en memoria (posible fallo en el almacenamiento temporal del archivo)"),
         // ------------------------------------------------------ errores por mala
         // programacion
         REGISTRATION_STATUS_INCOMPLETE("STP-001",
@@ -72,7 +76,7 @@ public enum ErrorCodeMessageEnum {
         PARTICIPANT_WITHOUT_USER("PAS-001",
                         "El participante seleccionado no tiene un usuario asociado. "
                                         + "No es posible cambiar la contraseña sin una cuenta vinculada."),
-        ;
+                                        ;
 
         private final String code;
         private final String message;

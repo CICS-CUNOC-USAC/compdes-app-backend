@@ -1,9 +1,7 @@
-package com.compdes.reports.controllers;
+package com.compdes.reports.controller;
 
 import java.util.List;
 
-import com.compdes.reports.models.dto.response.ActivityAttendanceReportDTO;
-import com.compdes.reports.services.ActivityAttendanceReportService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -15,11 +13,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.compdes.reports.models.dto.response.UniversityAttendanceReportDTO;
-import com.compdes.reports.services.ApprovedParticipantsByRoleEmailReportService;
-import com.compdes.reports.services.ApprovedParticipantsEmailReportService;
-import com.compdes.reports.services.CunocAttendanceReportService;
-import com.compdes.reports.services.UniversityAttendanceReportService;
+import com.compdes.reports.csv.service.ParticipantsByInstitutionCSVReportService;
+import com.compdes.reports.csv.service.ParticipantsPerActivityCSVReportService;
+import com.compdes.reports.csv.service.PresentationsAndWorkshopsCSVReportService;
+import com.compdes.reports.csv.service.TotalParticipantsCSVReportService;
+import com.compdes.reports.txt.models.dto.response.ActivityAttendanceReportDTO;
+import com.compdes.reports.txt.models.dto.response.UniversityAttendanceReportDTO;
+import com.compdes.reports.txt.services.ActivityAttendanceReportService;
+import com.compdes.reports.txt.services.ApprovedParticipantsByRoleEmailReportService;
+import com.compdes.reports.txt.services.ApprovedParticipantsEmailReportService;
+import com.compdes.reports.txt.services.CunocAttendanceReportService;
+import com.compdes.reports.txt.services.UniversityAttendanceReportService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -44,6 +48,76 @@ public class ReportController {
         private final ApprovedParticipantsByRoleEmailReportService approvedParticipantsByRoleEmailReportService;
         private final ActivityAttendanceReportService activityAttendanceReportService;
         private final CunocAttendanceReportService cunocAttendanceReportService;
+        private final TotalParticipantsCSVReportService csvReportService;
+        private final ParticipantsByInstitutionCSVReportService participantsByInstitutionCSVReportService;
+        private final PresentationsAndWorkshopsCSVReportService presentationsAndWorkshopsCSVReportService;
+
+        private final ParticipantsPerActivityCSVReportService participantsPerActivityCSVReportService;
+
+        @GetMapping("/participants-per-activity-csv")
+        @PreAuthorize("hasRole('ADMIN')")
+        @Operation(summary = "Reporte CSV: Participantes por actividad", description = "Genera y retorna un archivo CSV con el total de participantes distintos por cada actividad. Requiere rol ADMIN.", security = @SecurityRequirement(name = "bearerAuth"), responses = {
+                        @ApiResponse(responseCode = "200", description = "CSV generado correctamente"),
+                        @ApiResponse(responseCode = "403", description = "Acceso denegado (se requiere rol `ADMIN`)"),
+                        @ApiResponse(responseCode = "500", description = "Error interno inesperado")
+        })
+        public ResponseEntity<byte[]> getParticipantsPerActivityCSV() {
+                byte[] fileContent = participantsPerActivityCSVReportService.exportParticipantsPerActivity();
+                return ResponseEntity.ok()
+                                .header(HttpHeaders.CONTENT_DISPOSITION,
+                                                "attachment; filename=participants-per-activity.csv")
+                                .contentType(MediaType.parseMediaType("text/csv"))
+                                .body(fileContent);
+        }
+
+        @Operation(summary = "Reporte CSV: Participantes por institución", description = "Genera y retorna un archivo CSV con la distribución de participantes aprobados agrupados por institución. Requiere rol ADMIN.", security = @SecurityRequirement(name = "bearerAuth"), responses = {
+                        @ApiResponse(responseCode = "200", description = "CSV generado correctamente"),
+                        @ApiResponse(responseCode = "403", description = "Acceso denegado (se requiere rol `ADMIN`)"),
+                        @ApiResponse(responseCode = "500", description = "Error interno inesperado")
+        })
+        @GetMapping("/presentations-and-workshops-csv")
+        @PreAuthorize("hasRole('ADMIN')")
+        public ResponseEntity<byte[]> getPresentationsAndWorkshopsCSVReport() {
+                byte[] fileContent = presentationsAndWorkshopsCSVReportService
+                                .exportPresentationsAndWorkshops();
+                return ResponseEntity.ok()
+                                .header(HttpHeaders.CONTENT_DISPOSITION,
+                                                "attachment; filename=PresentationsAndWorkshops.csv")
+                                .contentType(MediaType.parseMediaType("text/csv"))
+                                .body(fileContent);
+        }
+
+        @Operation(summary = "Reporte CSV: Participantes por institución", description = "Genera y retorna un archivo CSV con la distribución de participantes aprobados agrupados por institución. Requiere rol ADMIN.", security = @SecurityRequirement(name = "bearerAuth"), responses = {
+                        @ApiResponse(responseCode = "200", description = "CSV generado correctamente"),
+                        @ApiResponse(responseCode = "403", description = "Acceso denegado (se requiere rol `ADMIN`)"),
+                        @ApiResponse(responseCode = "500", description = "Error interno inesperado")
+        })
+        @GetMapping("/participants-by-institution-csv")
+        @PreAuthorize("hasRole('ADMIN')")
+        public ResponseEntity<byte[]> getParticipantsByInstitutionCSVReport() {
+                byte[] fileContent = participantsByInstitutionCSVReportService
+                                .exportParticipantsByInstitutionCSVReport();
+                return ResponseEntity.ok()
+                                .header(HttpHeaders.CONTENT_DISPOSITION,
+                                                "attachment; filename=ParticipantsByInstitution.csv")
+                                .contentType(MediaType.parseMediaType("text/csv"))
+                                .body(fileContent);
+        }
+
+        @Operation(summary = "Reporte CSV: Total de participantes aprobados", description = "Genera y retorna un archivo CSV con el total de participantes aprobados. Requiere rol ADMIN.", security = @SecurityRequirement(name = "bearerAuth"), responses = {
+                        @ApiResponse(responseCode = "200", description = "CSV generado correctamente"),
+                        @ApiResponse(responseCode = "403", description = "Acceso denegado (se requiere rol `ADMIN`)"),
+                        @ApiResponse(responseCode = "500", description = "Error interno inesperado")
+        })
+        @GetMapping("/total-participants-csv")
+        @PreAuthorize("hasRole('ADMIN')")
+        public ResponseEntity<byte[]> getTotalParticipantsCSVReport() {
+                byte[] fileContent = csvReportService.exportTotalParticipantsCSVReport();
+                return ResponseEntity.ok()
+                                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=TotalParticipants.csv")
+                                .contentType(MediaType.parseMediaType("text/csv"))
+                                .body(fileContent);
+        }
 
         @GetMapping("/approved-participants-by-role-email/{isAuthor}")
         @PreAuthorize("hasRole('ADMIN')")
